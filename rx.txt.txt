@@ -1,0 +1,65 @@
+# 修改评估方法
+    def evaluate_model_improved(model_manager, data_loader, preprocessor, output_names):
+        """改进的评估方法"""
+        model_manager.model.eval()
+        predictions = []
+        targets = []
+        
+        with torch.no_grad():
+            for batch_X, batch_y in data_loader:
+                output = model_manager.model(batch_X)
+                predictions.append(output.numpy())
+                targets.append(batch_y.numpy())
+        
+        predictions = np.vstack(predictions)
+        targets = np.vstack(targets)
+        
+        # 使用预处理器的逆变换
+        predictions_original = preprocessor.inverse_transform_y(predictions)
+        targets_original = preprocessor.inverse_transform_y(targets)
+        
+        # 计算指标
+        metrics_summary = {}
+        for i, name in enumerate(output_names):
+            pred = predictions_original[:, i]
+            true = targets_original[:, i]
+            
+            mse = mean_squared_error(true, pred)
+            mae = mean_absolute_error(true, pred)
+            r2 = r2_score(true, pred)
+            
+            # 计算相对误差百分比（使用绝对值和一个小常数避免除零）
+            relative_errors = np.abs((pred - true) / (np.abs(true) + 1e-12)) * 100
+            mean_relative_error = np.mean(relative_errors)
+            median_relative_error = np.median(relative_errors)
+            
+            metrics_summary[name] = {
+                'mse': mse,
+                'mae': mae, 
+                'r2': r2,
+                'mean_relative_error': mean_relative_error,
+                'median_relative_error': median_relative_error
+            }
+            
+            print(f"{name}: MSE={mse:.2e}, MAE={mae:.2e}, R²={r2:.4f}, "
+                  f"平均相对误差={mean_relative_error:.2f}%, 中位数相对误差={median_relative_error:.2f}%")
+        
+        return predictions_original, targets_original, metrics_summary
+    
+    # 训练和评估
+    model_manager = ModelManager(model)
+    model_manager.setup_training()
+    
+    # 训练模型
+    train_losses, val_losses = model_manager.train_model(
+        train_loader, val_loader,
+        epochs=TRAIN_CONFIG['epochs'],
+        resume=TRAIN_CONFIG['resume_training'],
+        print_every=20,
+        save_every=50
+    )
+    
+    # 使用改进的评估方法
+    predictions, targets, metrics_summary = evaluate_model_improved(
+        model_manager, test_loader, preprocessor, DATA_CONFIG['output_targets']
+    )
