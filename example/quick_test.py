@@ -20,10 +20,15 @@ def quick_test_fixed():
         # 显示数据范围信息
         print("\n数据范围信息:")
         X_original = preprocessor.X_scaler.inverse_transform(X[:1])  # 反归一化一个样本来看原始范围
+        y_original = preprocessor.inverse_transform_y(y[:1])
         print("输入特征原始范围示例:")
-        for i, feature in enumerate(DATA_CONFIG['input_features']):
-            print(f"  {feature}: [{X[:, i].min():.2f}, {X[:, i].max():.2f}] (标准化后)")
-            print(f"            [{X_original[0, i]:.2f}] (原始值示例)")
+        # for i, feature in enumerate(DATA_CONFIG['input_features']):
+        #     print(f"  {feature}: [{X[:, i].min():.2f}, {X[:, i].max():.2f}] (标准化后)")
+        #     print(f"            [{X_original[0, i]:.2f}] (原始值示例)")
+        print("输出目标原始范围示例:")
+        for i, output_name in enumerate(DATA_CONFIG['output_targets']):
+            print(f"  {output_name}: [{y[:, i].min():.2f}, {y[:, i].max():.2f}] (标准化后)")
+            print(f"            [{y_original[0, i]:.2f}] (原始值示例)")
     except Exception as e:
         print(f"❌ 加载数据预处理器失败: {e}")
         return
@@ -31,7 +36,7 @@ def quick_test_fixed():
     # 2. 创建或加载模型
     try:
         # 尝试加载训练好的模型
-        checkpoint = torch.load("models/inductor_model_advanced_final.pth")
+        checkpoint = torch.load("checkpoints/inductor_checkpoints/checkpoint_epoch_499.pth")
         model = InductorNet()
         model.load_state_dict(checkpoint['model_state_dict'])
         print("✅ 已加载训练好的模型")
@@ -46,9 +51,9 @@ def quick_test_fixed():
     # 3. 创建测试输入（使用原始尺度参数）
     test_inputs_original = [
         # [Line_Width, Turns, Line_space, Y_Dimension, X_Dimension, freq] - 原始尺度
-        [8.0, 2.0, 3.0, 150.0, 150.0, 5.0],   # 典型参数
-        [5.0, 2.0, 3.0, 100.0, 100.0, 2.0],   # 小电感
-        [12.0, 3.0, 3.0, 200.0, 200.0, 10.0], # 大电感
+        [8.0, 2.0, 150.0, 150.0, 5.0],   # 典型参数
+        [5.0, 2.0, 100.0, 100.0, 2.0],   # 小电感
+        [12.0, 3.0,200.0, 200.0, 10.0], # 大电感
     ]
     
     print(f"\n测试输入参数 (原始尺度):")
@@ -87,7 +92,7 @@ def quick_test_fixed():
         
         # 将输出反归一化到原始尺度
         try:
-            output_original = preprocessor.y_scaler.inverse_transform(
+            output_original = preprocessor.inverse_transform_y(
                 output_normalized.numpy()
             )
             
@@ -109,8 +114,8 @@ def quick_test_fixed():
     original_target = y[sample_idx:sample_idx+1]
     
     # 反归一化查看原始值
-    input_original_verify = preprocessor.X_scaler.inverse_transform(original_sample)
-    target_original_verify = preprocessor.y_scaler.inverse_transform(original_target)
+    input_original_verify = preprocessor.inverse_transform_y(original_sample)
+    target_original_verify = preprocessor.inverse_transform_y(original_target)
     
     print("验证样本 (索引 0):")
     print("输入原始值:")
@@ -127,7 +132,7 @@ def quick_test_fixed():
     
     with torch.no_grad():
         prediction_normalized = model(input_tensor_verify)
-        prediction_original = preprocessor.y_scaler.inverse_transform(
+        prediction_original = preprocessor.inverse_transform_y(
             prediction_normalized.numpy()
         )
     
@@ -157,11 +162,11 @@ def test_normalization_process():
         
         # 反归一化
         X_denorm = preprocessor.X_scaler.inverse_transform(original_X)
-        y_denorm = preprocessor.y_scaler.inverse_transform(original_y)
+        y_denorm = preprocessor.inverse_transform_y(original_y)
         
         # 重新归一化
         X_renorm = preprocessor.X_scaler.transform(X_denorm)
-        y_renorm = preprocessor.y_scaler.transform(y_denorm)
+        y_renorm = preprocessor.inverse_transform_y(y_denorm)
         
         # 检查是否一致
         X_diff = np.abs(original_X - X_renorm).max()

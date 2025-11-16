@@ -1,7 +1,7 @@
 # data_loader/data_preprocessor.py
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, PowerTransformer
 from sklearn.model_selection import train_test_split
 from config import DATA_CONFIG
 
@@ -11,13 +11,14 @@ class DataPreprocessor:
         self.output_targets = DATA_CONFIG['output_targets']
         self.X_scaler = None
         self.y_scaler = None
+        self.y_scalers = {}
         self.removed_feature_indices = []
     
     def load_and_preprocess_data(self, file_path):
         """
-        加载和预处理电感数据
+        改进的标准化预处理：对表现差的目标使用RobustScaler
         """
-        # 读取CSV文件
+        # 读取和清洗数据
         df = pd.read_csv(file_path)
         print("原始列名:", df.columns.tolist())
         print("数据形状:", df.shape)
@@ -27,13 +28,13 @@ class DataPreprocessor:
         for col in self.input_features + self.output_targets:
             print(f"{col}: 数据类型={df[col].dtype}, 示例={df[col].iloc[:3].tolist()}")
         
-        # 专门处理频率列 - 移除"GHz"单位并转换为数值
+        # 专门处理频率列
         if df['freq'].dtype == 'object':
             df['freq'] = df['freq'].str.replace('GHz', '', regex=False).str.strip()
             df['freq'] = pd.to_numeric(df['freq'], errors='coerce')
             print(f"频率列转换后，缺失值数量: {df['freq'].isna().sum()}")
         
-        # 处理其他列，确保它们都是数值类型
+        # 处理其他列
         for col in self.input_features + self.output_targets:
             if df[col].dtype == 'object':
                 df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -44,38 +45,128 @@ class DataPreprocessor:
         print("数据清洗后:")
         for col in self.input_features + self.output_targets:
             print(f"{col}: 数据类型={df[col].dtype}, 示例={df[col].iloc[:3].tolist()}")
-        # # 移除Line_space特征
-        # if 'Line_space' in self.input_features:
-        #     line_space_idx = self.input_features.index('Line_space')
-        #     self.removed_feature_indices.append(line_space_idx)
-        #     # 创建新的特征列表，不包含Line_space
-        #     self.input_features_used = [feat for feat in self.input_features if feat != 'Line_space']
-        #     print(f"移除恒定特征: Line_space")
-        #     print(f"使用的输入特征: {self.input_features_used}")
-        # else:
-        #     self.input_features_used = self.input_features.copy()
-        X = df[self.input_features].values
+        
+        # 移除Line_space特征
+        if 'Line_space' in self.input_features:
+            line_space_idx = self.input_features.index('Line_space')
+            self.removed_feature_indices.append(line_space_idx)
+            self.input_features_used = [feat for feat in self.input_features if feat != 'Line_space']
+            print(f"移除恒定特征: Line_space")
+            print(f"使用的输入特征: {self.input_features_used}")
+        else:
+            self.input_features_used = self.input_features.copy()
+        
+        # 提取特征和目标
+        X = df[self.input_features_used].values
         y = df[self.output_targets].values
-        
-        # 数据标准化
+        # 数据完整性检查
+        print("\n=== 原始数据统计 ===")
+        for i, target in enumerate(self.output_targets):
+            target_col = y[:, i]
+            print(f"{target}: 范围[{target_col.min():.6e}, {target_col.max():.6e}], "
+                  f"均值:{target_col.mean():.6e}, 标准差:{target_col.std():.6e}")
+        # 输入特征标准化
         self.X_scaler = StandardScaler()
-        self.y_scaler = StandardScaler()
-        
         X_normalized = self.X_scaler.fit_transform(X)
-        y_normalized = self.y_scaler.fit_transform(y)
-        # 打印处理后的特征范围
-        print("\n=== 标准化后的特征范围 ===")
-        for i, feature in enumerate(self.input_features):#self.input_features_used
-            print(f"  {feature}: [{X_normalized[:, i].min():.2f}, {X_normalized[:, i].max():.2f}]")
+        # 对输出目标分别处理
+        y_normalized = np.zeros_like(y)
+        
+        # 对Ldiff和Leff使用StandardScaler（表现好）
+        for i, target in enumerate(self.output_targets):
+            if target in ['Ldiff', 'Leff']:
+                scaler = StandardScaler()
+                y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
+                self.y_scalers[target] = ('standard', scaler)
+            
+            # 对Qdiff和Q使用Yeo-Johnson变换（处理负值）
+            elif target in ['Qdiff', 'Q']:
+                scaler = PowerTransformer(method='yeo-johnson', standardize=True)
+                y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
+                self.y_scalers[target] = ('yeo-johnson', scaler)
+            
+            # 对Reff使用对数变换 + 标准化（处理大范围正值）
+            elif target == 'Reff':
+                # 确保所有值为正
+                reff_data = np.maximum(y[:, i], 1e-12)  # 避免0或负值
+                # 对数变换
+                log_reff = np.log10(reff_data)
+                # 标准化
+                scaler = StandardScaler()
+                y_normalized[:, i] = scaler.fit_transform(log_reff.reshape(-1, 1)).flatten()
+                self.y_scalers[target] = ('log+standard', scaler, reff_data.min(), reff_data.max())
+        
+        # 打印处理后的统计
+        print("\n=== 改进预处理后的目标范围 ===")
+        for i, target in enumerate(self.output_targets):
+            col = y_normalized[:, i]
+            transform_type = self.y_scalers[target][0]
+            print(f"  {target} ({transform_type}): [{col.min():.2f}, {col.max():.2f}], "
+                  f"均值:{col.mean():.3f}, 标准差:{col.std():.3f}")
+        
         return X_normalized, y_normalized
+        # # 修复：对所有输出目标使用统一的StandardScaler
+        # self.y_scaler = StandardScaler()
+        # y_normalized = self.y_scaler.fit_transform(y)
+        
+        # # 打印处理后的数据范围
+        # print("\n=== 标准化后的特征范围 ===")
+        # for i, feature in enumerate(self.input_features_used):
+        #     print(f"  {feature}: [{X_normalized[:, i].min():.2f}, {X_normalized[:, i].max():.2f}]")
+        
+        # print("\n=== 标准化后的目标范围 ===")
+        # for i, target in enumerate(self.output_targets):
+        #     col = y_normalized[:, i]
+        #     print(f"  {target}: [{col.min():.2f}, {col.max():.2f}], "
+        #           f"均值:{col.mean():.3f}, 标准差:{col.std():.3f}")
+        
+        # return X_normalized, y_normalized
     
-    # def split_data(self, X, y):
-    #     """划分训练集和测试集"""
-    #     return train_test_split(
-    #         X, y, 
-    #         test_size=DATA_CONFIG['test_size'], 
-    #         random_state=DATA_CONFIG['random_state']
-    #     )
+    # def inverse_transform_y(self, y_normalized):
+    #     """
+    #     将标准化后的预测值转换回原始尺度
+    #     """
+    #     if self.y_scaler is None:
+    #         raise ValueError("必须先调用load_and_preprocess_data方法")
+        
+    #     return self.y_scaler.inverse_transform(y_normalized)
+    def inverse_transform_y(self, y_normalized):
+        y_original = np.zeros_like(y_normalized)
+        
+        for i, target in enumerate(self.output_targets):
+            if target in self.y_scalers:
+                transform_type, scaler = self.y_scalers[target][0], self.y_scalers[target][1]
+                target_data = y_normalized[:, i].reshape(-1, 1)
+                
+                if transform_type == 'log+standard':
+                    # 反标准化 -> 反对数
+                    log_data = scaler.inverse_transform(target_data)
+                    original_data = 10 ** log_data
+                elif transform_type == 'yeo-johnson':
+                    original_data = scaler.inverse_transform(target_data)
+                else:  # standard
+                    original_data = scaler.inverse_transform(target_data)
+                
+                y_original[:, i] = original_data.flatten()
+        
+        return y_original
+    def preprocess_new_data(self, X_new):
+        """
+        对新数据进行相同的预处理
+        """
+        if self.X_scaler is None:
+            raise ValueError("必须先调用load_and_preprocess_data方法")
+        
+        # 移除Line_space特征
+        if self.removed_feature_indices:
+            X_processed = np.delete(X_new, self.removed_feature_indices, axis=1)
+        else:
+            X_processed = X_new.copy()
+        
+        # 标准化
+        X_normalized = self.X_scaler.transform(X_processed)
+        
+        return X_normalized
+    
     def split_data(self, X, y, val_size=0.2, test_size=0.1, random_state=42):
         """
         划分训练集、验证集和测试集
@@ -119,21 +210,21 @@ class DataPreprocessor:
         
         return X_train, X_val, X_test, y_train, y_val, y_test
     
-    def preprocess_new_data(self, X_new):
-        """
-        对新数据进行相同的预处理
-        X_new: 新数据，形状为(n_samples, n_features)，特征顺序应与原始input_features一致
-        """
-        if self.X_scaler is None:
-            raise ValueError("必须先调用load_and_preprocess_data方法训练预处理器")
+    # def preprocess_new_data(self, X_new):
+    #     """
+    #     对新数据进行相同的预处理
+    #     X_new: 新数据，形状为(n_samples, n_features)，特征顺序应与原始input_features一致
+    #     """
+    #     if self.X_scaler is None:
+    #         raise ValueError("必须先调用load_and_preprocess_data方法训练预处理器")
         
-        # 移除Line_space特征
-        if self.removed_feature_indices:
-            X_processed = np.delete(X_new, self.removed_feature_indices, axis=1)
-        else:
-            X_processed = X_new.copy()
+    #     # 移除Line_space特征
+    #     if self.removed_feature_indices:
+    #         X_processed = np.delete(X_new, self.removed_feature_indices, axis=1)
+    #     else:
+    #         X_processed = X_new.copy()
         
-        # 标准化
-        X_normalized = self.X_scaler.transform(X_processed)
+    #     # 标准化
+    #     X_normalized = self.X_scaler.transform(X_processed)
         
-        return X_normalized
+    #     return X_normalized

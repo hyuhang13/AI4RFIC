@@ -4,6 +4,8 @@ import numpy as np
 import random
 from torch.utils.data import DataLoader
 import os
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 from config import TRAIN_CONFIG, DATA_CONFIG, DEVICE
 from data_preprocessor import DataPreprocessor
@@ -75,9 +77,63 @@ def train_neural_network(model_type='advanced', create_report=True):
     print("\n在测试集上评估模型性能...")
     
     predictions, targets, metrics_summary = model_manager.evaluate_model(
-        test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets']
+        preprocessor,test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets']
+    )
+    # 4. 进行三种精度评估
+    print("\n=== 进行三种精度评估 ===")
+    
+    # 4.1 训练集精度评估
+    print("1. 评估训练集精度...")
+    train_predictions, train_targets, train_metrics = model_manager.evaluate_model(
+        preprocessor,train_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "训练集"
     )
     
+    # 4.2 测试集精度评估
+    print("2. 评估测试集精度...")
+    test_predictions, test_targets, test_metrics = model_manager.evaluate_model(
+        preprocessor,test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "测试集"
+    )
+    
+    # 4.3 单个样本精度评估（使用修正后的方法）
+    print("3. 评估单个样本精度...")
+    
+    # 使用测试集中的一个样本
+    sample_idx = 0
+    sample_input_original = preprocessor.X_scaler.inverse_transform([X_test[sample_idx]])[0]
+    sample_target_normalized = y_test[sample_idx]
+    
+    # 使用修正后的单个样本评估函数
+    sample_prediction_original, sample_target_original = model_manager.evaluate_single_sample_corrected(
+        preprocessor.X_scaler, 
+        preprocessor.y_scalers,  # 注意：这里传递的是y_scalers字典，不是y_scaler对象
+        sample_input_original,
+        sample_target_normalized,  # 传递归一化的真实值
+        DATA_CONFIG['output_targets']
+    )
+    
+    # 计算单个样本误差
+    single_sample_metrics = {}
+    for i, output_name in enumerate(DATA_CONFIG['output_targets']):
+        true_val = sample_target_original[i]
+        pred_val = sample_prediction_original[i]
+        error_pct = abs(pred_val - true_val) / abs(true_val) * 100 if abs(true_val) > 1e-12 else float('inf')
+        single_sample_metrics[output_name] = (true_val, pred_val, error_pct)
+    
+    # 打印单个样本的详细信息
+    print("\n单个样本详细信息:")
+    print("输入参数 (原始尺度):")
+    for j, feature in enumerate(['Line_Width', 'Turns','Y_Dimension', 'X_Dimension', 'freq']):  # 注意使用input_features_used
+        print(f"  {feature}: {sample_input_original[j]:.6f}")
+    
+    print("\n预测结果对比:")
+    for output_name, (true_val, pred_val, error_pct) in single_sample_metrics.items():
+        print(f"  {output_name}:")
+        print(f"    真实值: {true_val:.6e}")
+        print(f"    预测值: {pred_val:.6e}")
+        print(f"    误差: {error_pct:.2f}%")
+    
+    # 5. 打印精度总结
+    model_manager.create_precision_summary(train_metrics, test_metrics, single_sample_metrics)
     # 5. 创建可视化报告
     if create_report:
         print("\n生成训练报告和性能可视化...")
@@ -88,6 +144,7 @@ def train_neural_network(model_type='advanced', create_report=True):
         os.makedirs('reports', exist_ok=True)
         
         visualizer.create_comprehensive_report(
+            preprocessor = preprocessor,
             model=model,
             train_loader=train_loader,
             val_loader=test_loader,  # 使用测试集作为验证集进行可视化
@@ -159,13 +216,6 @@ if __name__ == "__main__":
     if mode == "1":
         # 仅训练神经网络
         model, X_scaler, y_scaler, metrics = train_neural_network(model_type_name, create_report=True)
-        
-        # 打印性能总结
-        print("\n" + "="*80)
-        print("最终性能总结")
-        print("="*80)
-        for output_name, metric_dict in metrics.items():
-            print(f"{output_name}: R²={metric_dict['R²']:.4f}, MAPE={metric_dict['MAPE']:.2f}%")
     
     elif mode == "2":
         # 仅运行遗传算法（需要已训练好的模型）

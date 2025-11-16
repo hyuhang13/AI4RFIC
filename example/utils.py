@@ -120,7 +120,7 @@ class TrainingVisualizer:
         
         return ax
     
-    def plot_prediction_vs_actual(self, model, data_loader, y_scaler, output_names, axes=None):
+    def plot_prediction_vs_actual(self,preprocessor, model, data_loader, y_scaler, output_names, axes=None):
         """绘制预测值 vs 真实值散点图"""
         device = next(model.parameters()).device
         model.eval()
@@ -140,8 +140,10 @@ class TrainingVisualizer:
         all_targets = np.vstack(all_targets)
         
         # 反标准化
-        predictions_original = y_scaler.inverse_transform(all_predictions)
-        targets_original = y_scaler.inverse_transform(all_targets)
+        predictions_original = preprocessor.inverse_transform_y(all_predictions)
+        targets_original = preprocessor.inverse_transform_y(all_targets)
+        # predictions_original = y_scaler.inverse_transform(all_predictions)
+        # targets_original = y_scaler.inverse_transform(all_targets)
         if axes is None:
             fig, axes = plt.subplots(2, 3, figsize=(15, 10))
             fig.suptitle('Predicted vs Actual Values', fontsize=16)
@@ -248,7 +250,7 @@ class TrainingVisualizer:
         for i in range(len(output_names), len(axes.flatten())):
             axes.flatten()[i].set_visible(False)
     
-    def create_comprehensive_report(self, model, train_loader, val_loader, y_scaler, 
+    def create_comprehensive_report(self, preprocessor,model, train_loader, val_loader, y_scaler, 
                                   output_names, train_losses, val_losses, save_path=None):
         """创建综合训练报告"""
         fig, axes = self.setup_plots()
@@ -258,6 +260,7 @@ class TrainingVisualizer:
         
         # 2. 验证集预测 vs 真实值
         predictions, targets = self.plot_prediction_vs_actual(
+            preprocessor,
             model, val_loader, y_scaler, output_names, 
             axes=[axes[0, 1], axes[0, 2], axes[1, 0], axes[1, 1], axes[1, 2]]
         )

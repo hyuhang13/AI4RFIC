@@ -5,7 +5,7 @@ import torch
 TRAIN_CONFIG = {
     'batch_size': 1024,
     'learning_rate': 0.001,
-    'epochs': 1000,
+    'epochs': 500,
     'weight_decay': 0.001,
     'checkpoint_dir': 'checkpoints/inductor_checkpoints',
     'resume_training': True
@@ -13,16 +13,16 @@ TRAIN_CONFIG = {
 
 # 模型配置
 MODEL_CONFIG = {
-    'input_size': 6,
+    'input_size': 5,
     'output_size': 5,
     'hidden_dims': [128, 256, 128, 64],
-    'dropout_rates': [0.3,0.3,0.2,0.1],   #每层采用不同的池化率
+    'dropout_rates': [0.4,0.3,0.2,0.1],   #每层采用不同的池化率
     'use_batchnorm': True  # 使用BatchNorm
 }
 
 # 数据配置
 DATA_CONFIG = {
-    'input_features': ['Line_Width', 'Turns', 'Line_space', 'Y_Dimension', 'X_Dimension', 'freq'],
+    'input_features': ['Line_Width', 'Turns', 'Line_space', 'Y_Dimension', 'X_Dimension', 'freq'],#
     'output_targets': ['Ldiff', 'Qdiff', 'Leff', 'Q', 'Reff'],
     'test_size': 0.2,
     'random_state': 42

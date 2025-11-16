@@ -1,65 +1,55 @@
-# 修改评估方法
-    def evaluate_model_improved(model_manager, data_loader, preprocessor, output_names):
-        """改进的评估方法"""
-        model_manager.model.eval()
-        predictions = []
-        targets = []
-        
-        with torch.no_grad():
-            for batch_X, batch_y in data_loader:
-                output = model_manager.model(batch_X)
-                predictions.append(output.numpy())
-                targets.append(batch_y.numpy())
-        
-        predictions = np.vstack(predictions)
-        targets = np.vstack(targets)
-        
-        # 使用预处理器的逆变换
-        predictions_original = preprocessor.inverse_transform_y(predictions)
-        targets_original = preprocessor.inverse_transform_y(targets)
-        
-        # 计算指标
-        metrics_summary = {}
-        for i, name in enumerate(output_names):
-            pred = predictions_original[:, i]
-            true = targets_original[:, i]
-            
-            mse = mean_squared_error(true, pred)
-            mae = mean_absolute_error(true, pred)
-            r2 = r2_score(true, pred)
-            
-            # 计算相对误差百分比（使用绝对值和一个小常数避免除零）
-            relative_errors = np.abs((pred - true) / (np.abs(true) + 1e-12)) * 100
-            mean_relative_error = np.mean(relative_errors)
-            median_relative_error = np.median(relative_errors)
-            
-            metrics_summary[name] = {
-                'mse': mse,
-                'mae': mae, 
-                'r2': r2,
-                'mean_relative_error': mean_relative_error,
-                'median_relative_error': median_relative_error
-            }
-            
-            print(f"{name}: MSE={mse:.2e}, MAE={mae:.2e}, R²={r2:.4f}, "
-                  f"平均相对误差={mean_relative_error:.2f}%, 中位数相对误差={median_relative_error:.2f}%")
-        
-        return predictions_original, targets_original, metrics_summary
+# 4. 进行三种精度评估
+    print("\n=== 进行三种精度评估 ===")
     
-    # 训练和评估
-    model_manager = ModelManager(model)
-    model_manager.setup_training()
-    
-    # 训练模型
-    train_losses, val_losses = model_manager.train_model(
-        train_loader, val_loader,
-        epochs=TRAIN_CONFIG['epochs'],
-        resume=TRAIN_CONFIG['resume_training'],
-        print_every=20,
-        save_every=50
+    # 4.1 训练集精度评估
+    print("1. 评估训练集精度...")
+    train_predictions, train_targets, train_metrics = model_manager.evaluate_dataset(
+        train_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "训练集"
     )
     
-    # 使用改进的评估方法
-    predictions, targets, metrics_summary = evaluate_model_improved(
-        model_manager, test_loader, preprocessor, DATA_CONFIG['output_targets']
+    # 4.2 测试集精度评估
+    print("2. 评估测试集精度...")
+    test_predictions, test_targets, test_metrics = model_manager.evaluate_dataset(
+        test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "测试集"
     )
+    
+    # 4.3 单个样本精度评估（使用修正后的方法）
+    print("3. 评估单个样本精度...")
+    
+    # 使用测试集中的一个样本
+    sample_idx = 0
+    sample_input_original = preprocessor.X_scaler.inverse_transform([X_test[sample_idx]])[0]
+    sample_target_normalized = y_test[sample_idx]
+    
+    # 使用修正后的单个样本评估函数
+    sample_prediction_original, sample_target_original = model_manager.evaluate_single_sample_corrected(
+        preprocessor.X_scaler, 
+        preprocessor.y_scalers,  # 注意：这里传递的是y_scalers字典，不是y_scaler对象
+        sample_input_original,
+        sample_target_normalized,  # 传递归一化的真实值
+        DATA_CONFIG['output_targets']
+    )
+    
+    # 计算单个样本误差
+    single_sample_metrics = {}
+    for i, output_name in enumerate(DATA_CONFIG['output_targets']):
+        true_val = sample_target_original[i]
+        pred_val = sample_prediction_original[i]
+        error_pct = abs(pred_val - true_val) / abs(true_val) * 100 if abs(true_val) > 1e-12 else float('inf')
+        single_sample_metrics[output_name] = (true_val, pred_val, error_pct)
+    
+    # 打印单个样本的详细信息
+    print("\n单个样本详细信息:")
+    print("输入参数 (原始尺度):")
+    for j, feature in enumerate(DATA_CONFIG['input_features_used']):  # 注意使用input_features_used
+        print(f"  {feature}: {sample_input_original[j]:.6f}")
+    
+    print("\n预测结果对比:")
+    for output_name, (true_val, pred_val, error_pct) in single_sample_metrics.items():
+        print(f"  {output_name}:")
+        print(f"    真实值: {true_val:.6e}")
+        print(f"    预测值: {pred_val:.6e}")
+        print(f"    误差: {error_pct:.2f}%")
+    
+    # 5. 打印精度总结
+    model_manager.create_precision_summary(train_metrics, test_metrics, single_sample_metrics)

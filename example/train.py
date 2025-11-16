@@ -53,9 +53,7 @@ class ModelManager:
         """训练一个epoch"""
         self.model.train()
         train_loss = 0
-        # for name, param in self.model.named_parameters():
-        #     print("##############################")
-        #     print(f"  {name}: {param.shape}")
+
         for X_batch, y_batch in train_loader:
             X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
             
@@ -173,7 +171,7 @@ class ModelManager:
         
         return train_losses, val_losses
     
-    def evaluate_model(self, data_loader, y_scaler, output_names):
+    def evaluate_model(self,preprocessor, data_loader, y_scaler, output_names,dataset_name="dataset@"):
         """评估模型性能"""
         device = next(self.model.parameters()).device
         self.model.eval()
@@ -193,9 +191,13 @@ class ModelManager:
         all_targets = np.vstack(all_targets)
         
         # 反标准化
-        predictions_original = y_scaler.inverse_transform(all_predictions)
-        targets_original = y_scaler.inverse_transform(all_targets)
+        predictions_original = preprocessor.inverse_transform_y(all_predictions)
+        targets_original = preprocessor.inverse_transform_y(all_targets)
+        # predictions_original = y_scaler.inverse_transform(all_predictions)
+        # targets_original = y_scaler.inverse_transform(all_targets)
+        metrics = self._calculate_comprehensive_metrics(predictions_original, targets_original, output_names, dataset_name)
         
+        return predictions_original, targets_original, metrics
         # 计算每个输出指标的评估指标
         from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
         
@@ -229,7 +231,127 @@ class ModelManager:
             print()
         
         return predictions_original, targets_original, metrics_summary
+    def _calculate_comprehensive_metrics(self, predictions, targets, output_names, dataset_name):
+        """计算全面的评估指标"""
+        from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+        
+        metrics = {
+            'dataset': dataset_name,
+            'overall': {},
+            'per_output': {}
+        }
+        
+        # 整体指标
+        metrics['overall']['R2'] = r2_score(targets, predictions)
+        metrics['overall']['MAE'] = mean_absolute_error(targets, predictions)
+        metrics['overall']['RMSE'] = np.sqrt(mean_squared_error(targets, predictions))
+        metrics['overall']['MSE'] = mean_squared_error(targets, predictions)
+        
+        # 每个输出的指标
+        for i, output_name in enumerate(output_names):
+            pred_i = predictions[:, i]
+            target_i = targets[:, i]
+            
+            metrics['per_output'][output_name] = {
+                'R2': r2_score(target_i, pred_i),
+                'MAE': mean_absolute_error(target_i, pred_i),
+                'RMSE': np.sqrt(mean_squared_error(target_i, pred_i)),
+                'MSE': mean_squared_error(target_i, pred_i),
+                'Mean_Relative_Error': np.mean(np.abs((pred_i - target_i) / (np.abs(target_i) + 1e-12))) * 100
+            }
+        
+        return metrics
     
+    def evaluate_single_sample_corrected(self, X_scaler, y_scalers, input_features, true_values=None, output_names=None):
+        """修正后的单个样本评估函数 - 正确处理不同的逆变换"""
+        self.model.eval()
+        
+        # 使用您的归一化方法处理输入
+        input_normalized = X_scaler.transform([input_features])
+        input_tensor = torch.FloatTensor(input_normalized).to(self.device)
+        
+        with torch.no_grad():
+            prediction_normalized = self.model(input_tensor)
+        
+        # 将预测结果转换为numpy数组
+        prediction_normalized_np = prediction_normalized.cpu().numpy()
+        
+        # 使用您的逆变换方法处理输出
+        prediction_original = self._inverse_transform_y_single(y_scalers, prediction_normalized_np, output_names)
+        
+        # 如果有真实值，也进行逆变换
+        if true_values is not None:
+            true_values_normalized = np.array([true_values])  # 转换为2D数组
+            true_values_original = self._inverse_transform_y_single(y_scalers, true_values_normalized, output_names)
+            true_values_original = true_values_original[0]  # 转换回1D数组
+        else:
+            true_values_original = None
+        
+        return prediction_original[0], true_values_original
+    
+    def _inverse_transform_y_single(self, y_scalers, y_normalized, output_names):
+        """单个样本的y逆变换 - 处理不同的变换方法"""
+        y_original = np.zeros_like(y_normalized)
+        
+        for i, target in enumerate(output_names):
+            if target in y_scalers:
+                transform_info = y_scalers[target]
+                transform_type = transform_info[0]
+                scaler = transform_info[1]
+                target_data = y_normalized[:, i].reshape(-1, 1)
+                
+                if transform_type == 'log+standard':
+                    # 逆标准化 -> 逆对数
+                    log_data = scaler.inverse_transform(target_data)
+                    original_data = 10 ** log_data
+                elif transform_type == 'yeo-johnson':
+                    original_data = scaler.inverse_transform(target_data)
+                else:  # standard
+                    original_data = scaler.inverse_transform(target_data)
+                
+                y_original[:, i] = original_data.flatten()
+        
+        return y_original
+    
+    def create_precision_summary(self, train_metrics, test_metrics, single_sample_metrics=None):
+        """创建精度总结报告"""
+        print("\n" + "="*80)
+        print("神经网络模型精度评估总结")
+        print("="*80)
+        
+        # 训练集指标
+        print(f"\n📊 {train_metrics['dataset']}评估结果:")
+        print(f"整体指标 - R²: {train_metrics['overall']['R2']:.6f}, "
+              f"MAE: {train_metrics['overall']['MAE']:.6f}, "
+              f"RMSE: {train_metrics['overall']['RMSE']:.6f}")
+        
+        for output_name, metrics in train_metrics['per_output'].items():
+            print(f"  {output_name}: R²={metrics['R2']:.4f}, "
+                  f"MAE={metrics['MAE']:.2e}, "
+                  f"相对误差={metrics['Mean_Relative_Error']:.2f}%")
+        
+        # 测试集指标
+        print(f"\n📊 {test_metrics['dataset']}评估结果:")
+        print(f"整体指标 - R²: {test_metrics['overall']['R2']:.6f}, "
+              f"MAE: {test_metrics['overall']['MAE']:.6f}, "
+              f"RMSE: {test_metrics['overall']['RMSE']:.6f}")
+        
+        for output_name, metrics in test_metrics['per_output'].items():
+            print(f"  {output_name}: R²={metrics['R2']:.4f}, "
+                  f"MAE={metrics['MAE']:.2e}, "
+                  f"相对误差={metrics['Mean_Relative_Error']:.2f}%")
+        
+        # 单个样本预测结果
+        if single_sample_metrics:
+            print(f"\n🎯 单个样本预测结果:")
+            for output_name, (true_val, pred_val, error_pct) in single_sample_metrics.items():
+                print(f"  {output_name}: 真实值={true_val:.6e}, "
+                      f"预测值={pred_val:.6e}, 误差={error_pct:.2f}%")
+        
+        # 性能对比
+        print(f"\n📈 性能对比:")
+        print(f"训练集 vs 测试集 R²差异: {train_metrics['overall']['R2'] - test_metrics['overall']['R2']:.6f}")
+        print(f"训练集 vs 测试集 MAE比率: {test_metrics['overall']['MAE']/train_metrics['overall']['MAE']:.4f}")
     def save_final_model(self, filepath, X_scaler, y_scaler, train_losses, val_losses):
         """保存最终模型"""
         torch.save({
