@@ -98,10 +98,14 @@ def train_neural_network(model_type='advanced', create_report=True):
     print("3. 评估单个样本精度...")
     
     # 使用测试集中的一个样本
-    sample_idx = 0
+    sample_idx = 109
     sample_input_original = preprocessor.X_scaler.inverse_transform([X_test[sample_idx]])[0]
     sample_target_normalized = y_test[sample_idx]
-    
+    for i in range(sample_idx,sample_idx+20):
+        print(X_test[sample_idx+i])
+        print("******************************************")
+        print(sample_idx+i)
+        print(y_test[sample_idx+i])
     # 使用修正后的单个样本评估函数
     sample_prediction_original, sample_target_original = model_manager.evaluate_single_sample_corrected(
         preprocessor.X_scaler, 
@@ -147,7 +151,7 @@ def train_neural_network(model_type='advanced', create_report=True):
             preprocessor = preprocessor,
             model=model,
             train_loader=train_loader,
-            val_loader=test_loader,  # 使用测试集作为验证集进行可视化
+            val_loader=val_loader,  # 使用测试集作为验证集进行可视化
             y_scaler=preprocessor.y_scaler,
             output_names=DATA_CONFIG['output_targets'],
             train_losses=train_losses,

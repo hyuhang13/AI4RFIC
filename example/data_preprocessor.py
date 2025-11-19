@@ -1,7 +1,7 @@
 # data_loader/data_preprocessor.py
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, PowerTransformer
+from sklearn.preprocessing import StandardScaler, PowerTransformer, QuantileTransformer
 from sklearn.model_selection import train_test_split
 from config import DATA_CONFIG
 
@@ -13,7 +13,7 @@ class DataPreprocessor:
         self.y_scaler = None
         self.y_scalers = {}
         self.removed_feature_indices = []
-    
+        self.scale_factor = 1e9
     def load_and_preprocess_data(self, file_path):
         """
         改进的标准化预处理：对表现差的目标使用RobustScaler
@@ -73,17 +73,33 @@ class DataPreprocessor:
         
         # 对Ldiff和Leff使用StandardScaler（表现好）
         for i, target in enumerate(self.output_targets):
-            if target in ['Ldiff', 'Leff']:
-                scaler = StandardScaler()
-                y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
-                self.y_scalers[target] = ('standard', scaler)
+            # if target in ['Ldiff', 'Leff']:
+            #     scaler = StandardScaler()
+            #     y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
+            #     self.y_scalers[target] = ('standard', scaler)
             
             # 对Qdiff和Q使用Yeo-Johnson变换（处理负值）
+            if target in ['Ldiff', 'Leff']:
+                scaler = QuantileTransformer(
+                n_quantiles=min(1000, len(y)),
+                output_distribution='normal',  # 
+                random_state=42
+                )
+                y_expanded = y[:, i] * self.scale_factor
+                y_normalized[:, i] = scaler.fit_transform(y_expanded.reshape(-1, 1)).flatten()
+                # y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
+                self.y_scalers[target] = ('multi+quantile', scaler)
             elif target in ['Qdiff', 'Q']:
-                scaler = PowerTransformer(method='yeo-johnson', standardize=True)
+                # scaler = PowerTransformer(method='yeo-johnson', standardize=True)
+                # y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
+                # self.y_scalers[target] = ('yeo-johnson', scaler)
+                scaler = QuantileTransformer(
+                n_quantiles=min(1000, len(y)),
+                output_distribution='normal',  # 
+                random_state=42
+                )
                 y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
-                self.y_scalers[target] = ('yeo-johnson', scaler)
-            
+                self.y_scalers[target] = ('quantile', scaler)
             # 对Reff使用对数变换 + 标准化（处理大范围正值）
             elif target == 'Reff':
                 # 确保所有值为正
@@ -104,31 +120,7 @@ class DataPreprocessor:
                   f"均值:{col.mean():.3f}, 标准差:{col.std():.3f}")
         
         return X_normalized, y_normalized
-        # # 修复：对所有输出目标使用统一的StandardScaler
-        # self.y_scaler = StandardScaler()
-        # y_normalized = self.y_scaler.fit_transform(y)
-        
-        # # 打印处理后的数据范围
-        # print("\n=== 标准化后的特征范围 ===")
-        # for i, feature in enumerate(self.input_features_used):
-        #     print(f"  {feature}: [{X_normalized[:, i].min():.2f}, {X_normalized[:, i].max():.2f}]")
-        
-        # print("\n=== 标准化后的目标范围 ===")
-        # for i, target in enumerate(self.output_targets):
-        #     col = y_normalized[:, i]
-        #     print(f"  {target}: [{col.min():.2f}, {col.max():.2f}], "
-        #           f"均值:{col.mean():.3f}, 标准差:{col.std():.3f}")
-        
-        # return X_normalized, y_normalized
     
-    # def inverse_transform_y(self, y_normalized):
-    #     """
-    #     将标准化后的预测值转换回原始尺度
-    #     """
-    #     if self.y_scaler is None:
-    #         raise ValueError("必须先调用load_and_preprocess_data方法")
-        
-    #     return self.y_scaler.inverse_transform(y_normalized)
     def inverse_transform_y(self, y_normalized):
         y_original = np.zeros_like(y_normalized)
         
@@ -141,8 +133,9 @@ class DataPreprocessor:
                     # 反标准化 -> 反对数
                     log_data = scaler.inverse_transform(target_data)
                     original_data = 10 ** log_data
-                elif transform_type == 'yeo-johnson':
+                elif transform_type == 'multi+quantile':
                     original_data = scaler.inverse_transform(target_data)
+                    original_data  = original_data /self.scale_factor
                 else:  # standard
                     original_data = scaler.inverse_transform(target_data)
                 

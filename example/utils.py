@@ -17,10 +17,9 @@ def save_checkpoint(model, optimizer, epoch, train_losses, val_losses, filepath)
     state_dict = model.state_dict()
     
     print("=== five items ===")
-    # for i, (name, param) in enumerate(state_dict.items()):
-    #     print(f"{name}: {param.shape}")
-    for name, param in model.named_parameters():
-        print(f"  {name}: {param.shape}")
+
+    # for name, param in model.named_parameters():
+    #     print(f"  {name}: {param.shape}")
     # BatchNormÌØ¶¨¼ì²é
     bn_keys = [key for key in state_dict.keys() if 'batchnorm' in key.lower() or 'bn' in key.lower()]
     print(f"BatchNorm²: {len(bn_keys)}")
@@ -40,13 +39,13 @@ def save_checkpoint(model, optimizer, epoch, train_losses, val_losses, filepath)
     torch.save(checkpoint, filepath)
     print(f"检查点已保存: {filepath} (Epoch {epoch})")
     print(filepath)
-    # Á¢¼´¼ÓÔØ»ØÀ´ÑéÖ¤Ä£ÐÍ×´Ì¬
+
     loaded_checkpoint = torch.load(filepath, map_location='cpu', weights_only=True)
     saved_state = loaded_checkpoint['model_state_dict']
     print("has been saved")
-    # Ê¹ÓÃÄúÌáµ½µÄ·½Ê½´òÓ¡
-    for name, tensor in saved_state.items():
-        print(f"  {name}: {tensor.shape}")
+
+    # for name, tensor in saved_state.items():
+    #     print(f"  {name}: {tensor.shape}")
 
 def find_latest_checkpoint(checkpoint_dir='checkpoints'):
     """查找最新的检查点文件"""

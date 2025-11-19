@@ -15,7 +15,7 @@ class GeneticAlgorithm:
         self.param_ranges = {
             'Line_Width': (2, 10),
             'Turns': (1, 3),
-            'Line_space': (3, 3),
+            # 'Line_space': (3, 3),
             'Y_Dimension': (100, 200),
             'X_Dimension': (100, 200),
             'freq': (2, 20)
@@ -42,8 +42,13 @@ class GeneticAlgorithm:
         with torch.no_grad():
             individual_normalized = self.X_scaler.transform([individual])
             individual_tensor = torch.FloatTensor(individual_normalized)
+            device = next(self.model.parameters()).device
+            individual_tensor = individual_tensor.to(device)
+            
             prediction_normalized = self.model(individual_tensor)
-            prediction = self.y_scaler.inverse_transform(prediction_normalized.numpy())
+        
+            prediction_cpu = prediction_normalized.cpu()
+            prediction = self.y_scaler.inverse_transform(prediction_cpu.numpy())
             return prediction[0]
     
     def fitness_function(self, individual, target_freq, target_Leff, target_Q=None):

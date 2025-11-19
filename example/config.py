@@ -1,15 +1,7 @@
 # config.py
 import torch
 
-# 训练配置
-TRAIN_CONFIG = {
-    'batch_size': 1024,
-    'learning_rate': 0.001,
-    'epochs': 500,
-    'weight_decay': 0.001,
-    'checkpoint_dir': 'checkpoints/inductor_checkpoints',
-    'resume_training': True
-}
+
 
 # 模型配置
 MODEL_CONFIG = {
@@ -22,7 +14,7 @@ MODEL_CONFIG = {
 
 # 数据配置
 DATA_CONFIG = {
-    'input_features': ['Line_Width', 'Turns', 'Line_space', 'Y_Dimension', 'X_Dimension', 'freq'],#
+    'input_features': ['Line_Width', 'Turns', 'Y_Dimension', 'X_Dimension', 'freq'],#'Line_space', 
     'output_targets': ['Ldiff', 'Qdiff', 'Leff', 'Q', 'Reff'],
     'test_size': 0.2,
     'random_state': 42
@@ -36,6 +28,15 @@ GA_CONFIG = {
     'elite_size': 5,
     'tournament_size': 256
 }
+# 训练配置
+TRAIN_CONFIG = {
+    'batch_size': 1024,
+    'learning_rate': 0.001,
+    'epochs': 800,
+    'weight_decay': 0.001,
+    'checkpoint_dir': 'checkpoints/inductor_checkpoints',
+    'resume_training': True
+}
 # 优化器配置
 OPTIMIZER_CONFIG = {
     'type': 'AdamW',  # 使用AdamW优化器
@@ -47,7 +48,7 @@ OPTIMIZER_CONFIG = {
 SCHEDULER_CONFIG = {
     'type': 'ReduceLROnPlateau',
     'patience': 10,
-    'factor': 0.5
+    'factor': 0.95
 }
 # 设备配置
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

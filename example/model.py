@@ -21,7 +21,7 @@ class InductorNet(nn.Module):
         init_method='kaiming'
         # 使用更合理的网络结构
         hidden_dims = hidden_dims or [256, 512, 256, 128, 64]
-        dropout_rates = dropout_rates or [0.4, 0.4, 0.3, 0.2, 0.1]
+        dropout_rates = dropout_rates or [0.4, 0.4, 0.2, 0.2, 0.1]
         
         self.input_size = input_size
         self.output_size = output_size

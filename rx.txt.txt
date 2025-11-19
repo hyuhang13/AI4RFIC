@@ -1,55 +1,55 @@
-# 4. 进行三种精度评估
-    print("\n=== 进行三种精度评估 ===")
+def setup_training(self, learning_rate=None, weight_decay=None, output_weights=None):
+    """设置训练组件 - 支持加权损失"""
+    learning_rate = learning_rate or OPTIMIZER_CONFIG['lr']
+    weight_decay = weight_decay or OPTIMIZER_CONFIG['weight_decay']
     
-    # 4.1 训练集精度评估
-    print("1. 评估训练集精度...")
-    train_predictions, train_targets, train_metrics = model_manager.evaluate_dataset(
-        train_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "训练集"
+    # 设置输出权重（根据物理量重要性调整）
+    if output_weights is None:
+        # 默认权重，可根据实际情况调整
+        # [电感权重, 品质因数权重, 电阻权重]
+        output_weights = [1.0, 1.0, 1.0]
+    
+    # 使用加权MSE损失
+    self.criterion = WeightedMSELoss(weights=output_weights)
+    
+    # 优化器保持不变
+    self.optimizer = optim.AdamW(
+        self.model.parameters(), 
+        lr=learning_rate, 
+        weight_decay=weight_decay
     )
     
-    # 4.2 测试集精度评估
-    print("2. 评估测试集精度...")
-    test_predictions, test_targets, test_metrics = model_manager.evaluate_dataset(
-        test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "测试集"
+    # 学习率调度器
+    self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        self.optimizer, 
+        patience=SCHEDULER_CONFIG['patience'], 
+        factor=SCHEDULER_CONFIG['factor'],
+        verbose=True
     )
     
-    # 4.3 单个样本精度评估（使用修正后的方法）
-    print("3. 评估单个样本精度...")
+    self.model = self.model.to(self.device)
     
-    # 使用测试集中的一个样本
-    sample_idx = 0
-    sample_input_original = preprocessor.X_scaler.inverse_transform([X_test[sample_idx]])[0]
-    sample_target_normalized = y_test[sample_idx]
+    print(f"优化器: {type(self.optimizer).__name__}")
+    print(f"损失函数: 加权MSE (权重: {output_weights})")
+    print(f"学习率: {learning_rate}")
+
+class WeightedMSELoss(nn.Module):
+    """加权MSE损失函数"""
+    def __init__(self, weights=None):
+        super().__init__()
+        if weights is not None:
+            self.weights = torch.tensor(weights, dtype=torch.float32)
+        else:
+            self.weights = None
     
-    # 使用修正后的单个样本评估函数
-    sample_prediction_original, sample_target_original = model_manager.evaluate_single_sample_corrected(
-        preprocessor.X_scaler, 
-        preprocessor.y_scalers,  # 注意：这里传递的是y_scalers字典，不是y_scaler对象
-        sample_input_original,
-        sample_target_normalized,  # 传递归一化的真实值
-        DATA_CONFIG['output_targets']
-    )
-    
-    # 计算单个样本误差
-    single_sample_metrics = {}
-    for i, output_name in enumerate(DATA_CONFIG['output_targets']):
-        true_val = sample_target_original[i]
-        pred_val = sample_prediction_original[i]
-        error_pct = abs(pred_val - true_val) / abs(true_val) * 100 if abs(true_val) > 1e-12 else float('inf')
-        single_sample_metrics[output_name] = (true_val, pred_val, error_pct)
-    
-    # 打印单个样本的详细信息
-    print("\n单个样本详细信息:")
-    print("输入参数 (原始尺度):")
-    for j, feature in enumerate(DATA_CONFIG['input_features_used']):  # 注意使用input_features_used
-        print(f"  {feature}: {sample_input_original[j]:.6f}")
-    
-    print("\n预测结果对比:")
-    for output_name, (true_val, pred_val, error_pct) in single_sample_metrics.items():
-        print(f"  {output_name}:")
-        print(f"    真实值: {true_val:.6e}")
-        print(f"    预测值: {pred_val:.6e}")
-        print(f"    误差: {error_pct:.2f}%")
-    
-    # 5. 打印精度总结
-    model_manager.create_precision_summary(train_metrics, test_metrics, single_sample_metrics)
+    def forward(self, predictions, targets):
+        if self.weights is not None:
+            # 将权重移动到相同设备
+            weights = self.weights.to(predictions.device)
+            # 计算加权MSE
+            loss_per_output = torch.mean((predictions - targets) ** 2, dim=0)
+            weighted_loss = torch.sum(weights * loss_per_output)
+            return weighted_loss
+        else:
+            # 普通MSE
+            return nn.MSELoss()(predictions, targets)

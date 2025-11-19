@@ -10,9 +10,31 @@ from utils import save_checkpoint, find_latest_checkpoint, load_model
 from utils import print_training_progress
 from config import TRAIN_CONFIG, DEVICE, OPTIMIZER_CONFIG, SCHEDULER_CONFIG, MODEL_CONFIG
 
+class WeightedMSELoss(nn.Module):
+    """加权MSE损失函数"""
+    def __init__(self, weights=None):
+        super().__init__()
+
+        if weights is not None:
+            self.weights = torch.tensor(weights, dtype=torch.float32)
+        else:
+            self.weights = None
+    
+    def forward(self, predictions, targets):
+        if self.weights is not None:
+            # 将权重移动到相同设备
+            weights = self.weights.to(predictions.device)
+            # 计算加权MSE
+            loss_per_output = torch.mean((predictions - targets) ** 2, dim=0)
+            weighted_loss = torch.sum(weights * loss_per_output)
+            return weighted_loss
+        else:
+            # 普通MSE
+            return nn.MSELoss()(predictions, targets)
 class ModelManager:
     def __init__(self, model, checkpoint_dir=None):
         self.model = model
+        self.scale_factor = 1e9
         self.checkpoint_dir = checkpoint_dir or TRAIN_CONFIG['checkpoint_dir']
         self.device = DEVICE
         self.best_val_loss = float('inf')
@@ -24,8 +46,10 @@ class ModelManager:
         """设置训练组件 - 使用新的优化器和调度器"""
         learning_rate = learning_rate or OPTIMIZER_CONFIG['lr']
         weight_decay = weight_decay or OPTIMIZER_CONFIG['weight_decay']
-        
-        self.criterion = nn.MSELoss()
+        output_weights = [1.5, 1.0, 1.5, 1.0, 0.8]
+        # 使用加权MSE损失
+        self.criterion = WeightedMSELoss(weights=output_weights)
+        # self.criterion = nn.MSELoss()
         
         # 使用AdamW优化器
         self.optimizer = optim.AdamW(
@@ -46,6 +70,7 @@ class ModelManager:
         self.model = self.model.to(self.device)
         
         print(f"使用优化器: {type(self.optimizer).__name__}")
+        print(f"损失函数: 加权MSE (权重: {output_weights})")
         print(f"使用调度器: ReduceLROnPlateau")
         print(f"初始学习率: {learning_rate}")
     
@@ -193,8 +218,7 @@ class ModelManager:
         # 反标准化
         predictions_original = preprocessor.inverse_transform_y(all_predictions)
         targets_original = preprocessor.inverse_transform_y(all_targets)
-        # predictions_original = y_scaler.inverse_transform(all_predictions)
-        # targets_original = y_scaler.inverse_transform(all_targets)
+
         metrics = self._calculate_comprehensive_metrics(predictions_original, targets_original, output_names, dataset_name)
         
         return predictions_original, targets_original, metrics
@@ -304,8 +328,9 @@ class ModelManager:
                     # 逆标准化 -> 逆对数
                     log_data = scaler.inverse_transform(target_data)
                     original_data = 10 ** log_data
-                elif transform_type == 'yeo-johnson':
+                elif transform_type == 'multi+quantile':
                     original_data = scaler.inverse_transform(target_data)
+                    original_data  = original_data /self.scale_factor
                 else:  # standard
                     original_data = scaler.inverse_transform(target_data)
                 
