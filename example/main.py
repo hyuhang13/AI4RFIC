@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import os
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-
+from typing import List, Tuple, Dict, Optional, Callable
 from config import TRAIN_CONFIG, DATA_CONFIG, DEVICE
 from data_preprocessor import DataPreprocessor
 from data_loader import DataLoaderCreator
@@ -145,38 +145,101 @@ def train_neural_network(model_type='advanced', create_report=True):
     )
     model_manager.create_training_summary(train_losses, val_losses, train_metrics, test_metrics)
     
-
-
-def run_genetic_optimization(model, X_scaler, y_scaler):
-    """运行遗传算法优化"""
-    print("\n=== 运行遗传算法优化 ===")
+def run_genetic_optimization(model_manager, target_freq=15.0, 
+                                   target_s11_db=-20, target_s21_db=-1,
+                                   population_size=50, generations=100):
+    """
+    运行矩阵遗传算法优化的主函数接口
+    """
+    print(f"\n{'='*60}")
+    print("启动矩阵结构遗传优化")
+    print(f"{'='*60}")
     
-    # 创建遗传算法优化器
-    ga = GeneticAlgorithm(model, X_scaler, y_scaler)
+    # 创建遗传算法实例
+    ga = GeneticAlgorithm(model_manager, matrix_shape=(19, 19))
     
-    # 设置设计目标
-    target_freq = 4.0  # GHz
-    target_Leff = 2e-9  # 2nH
+    # 设置目标参数
+    target_params = {
+        'S11': {
+            'magnitude_db': target_s11_db,  # 目标S11幅度(dB)
+            'weight': 1.0  # 权重
+        },
+        'S21': {
+            'magnitude_db': target_s21_db,  # 目标S21幅度(dB)
+            'weight': 0.8
+        },
+        'symmetry': {
+            'weight': 0.3  # 对称性权重
+        },
+        'complexity': {
+            'weight': 0.1  # 复杂度权重
+        }
+    }
     
     # 运行优化
-    best_params, best_performance, best_fitness = ga.optimize(
+    best_matrix, best_info, best_fitness, fitness_history, best_fitness_history = ga.optimize(
         target_freq=target_freq,
-        target_Leff=target_Leff
+        target_params=target_params,
+        population_size=population_size,
+        generations=generations,
+        verbose=True
     )
     
-    # 输出优化结果
-    print("\n=== 优化结果 ===")
-    print(f"目标: Leff = {target_Leff:.2e} at {target_freq} GHz")
-    print(f"最佳适应度: {best_fitness:.4f}")
-    print("\n最佳参数:")
-    for i, param_name in enumerate(ga.input_features):
-        print(f"  {param_name}: {best_params[i]}")
+    # 可视化结果
+    ga.visualize_results(best_matrix, fitness_history, best_fitness_history)
     
-    print("\n预测性能:")
-    for i, target_name in enumerate(ga.output_targets):
-        print(f"  {target_name}: {best_performance[i]:.2e}")
+    # 保存结果
+    save_optimization_results(best_matrix, best_info, best_fitness, target_freq)
     
-    return best_params, best_performance
+    return best_matrix, best_info, best_fitness
+
+
+def save_optimization_results(matrix: np.ndarray, info: Dict, 
+                            fitness: float, target_freq: float):
+    """保存优化结果"""
+    import pickle
+    import datetime
+    
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    results = {
+        'optimized_matrix': matrix,
+        'fitness': fitness,
+        'target_frequency_ghz': target_freq,
+        's_parameters': {
+            'S11_mag_db': info['S11_mag_db'],
+            'S21_mag_db': info['S21_mag_db'],
+            'S12_mag_db': info['S12_mag_db'],
+            'S22_mag_db': info['S22_mag_db'],
+            'S11_phase_deg': info['S11_phase_deg'],
+            'S21_phase_deg': info['S21_phase_deg'],
+        },
+        'raw_s_params': info['S_params_raw'],
+        'matrix_density': info['matrix_density'],
+        'timestamp': timestamp,
+        'fitness_components': info.get('fitness_components', {})
+    }
+    
+    # 保存为pickle文件
+    results_file = f'optimization_results_{timestamp}.pkl'
+    with open(results_file, 'wb') as f:
+        pickle.dump(results, f)
+    
+    # 保存矩阵为文本文件
+    matrix_file = f'optimized_matrix_{timestamp}.txt'
+    np.savetxt(matrix_file, matrix, fmt='%d', delimiter=',')
+    
+    # 保存矩阵为图像
+    plt.figure(figsize=(6, 6))
+    plt.imshow(matrix, cmap='binary', interpolation='nearest')
+    plt.title(f'Optimized Matrix @ {target_freq} GHz')
+    plt.colorbar(label='Value (0/1)')
+    plt.savefig(f'optimized_matrix_{timestamp}.png', dpi=300, bbox_inches='tight')
+    
+    print(f"\n优化结果已保存:")
+    print(f"  - 数据文件: {results_file}")
+    print(f"  - 矩阵文件: {matrix_file}")
+    print(f"  - 图像文件: optimized_matrix_{timestamp}.png")
 
 if __name__ == "__main__":
     # 设置随机种子
@@ -208,23 +271,16 @@ if __name__ == "__main__":
             if 'model_config' in checkpoint:
                 print("download")
                 config = checkpoint['model_config']
-                model = CnnNet(
-                    input_size=config['input_size'],
-                    output_size=config['output_size'],
-                    hidden_dims=config['hidden_dims'],
-                    dropout_rates=config['dropout_rates'],
-                    use_batchnorm=config['use_batchnorm']
-                )
+                model = CnnNet()
             else:
                 # 向后兼容
                 print("undownload")
                 model = CnnNet()
                 
             model.load_state_dict(checkpoint['model_state_dict'])
-            X_scaler = checkpoint['X_scaler']
-            y_scaler = checkpoint['y_scaler']
-            
-            run_genetic_optimization(model, X_scaler, y_scaler)
+            manager = ModelManager(model, checkpoint_dir=model_path)
+            manager.best_val_loss = checkpoint.get('best_val_loss', float('inf'))
+            best_matrix, best_prediction, best_fitness = run_genetic_optimization(model,)
         except FileNotFoundError:
             print(f"错误: 未找到训练好的模型 {model_path}，请先运行模式1训练神经网络")
     

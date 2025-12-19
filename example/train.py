@@ -353,7 +353,9 @@ class ModelManager:
             matrix = torch.FloatTensor(matrix)
         if isinstance(frequency, (int, float)):
             frequency = torch.FloatTensor([[frequency / 30]])  # 归一化
-        
+        print("Sample Input:\n")
+        print(matrix)
+        print(frequency)
         # 添加批次维度
         if len(matrix.shape) == 3:  # (1, 19, 19)
             matrix = matrix.unsqueeze(0)  # (1, 1, 19, 19)
@@ -377,7 +379,8 @@ class ModelManager:
             'S22_real': predictions_np[6],
             'S22_imag': predictions_np[7]
         }
-        
+        print("Predict:s_param_dict\n")
+        print(s_param_dict)
         return s_param_dict
     
     def evaluate_all_test_samples(self, test_loader):

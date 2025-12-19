@@ -22,12 +22,13 @@ DATA_CONFIG = {
 
 # 遗传算法配置
 GA_CONFIG = {
-    'population_size': 4096,
-    'generations': 100,
-    'mutation_rate': 0.1,
-    'elite_size': 5,
-    'tournament_size': 256
-}
+            'population_size': 4096,
+            'generations': 100,
+            'mutation_rate': 0.1,
+            'elite_size': 5,
+            'tournament_size': 256,
+            'crossover_rate' :0.8
+        }
 # 训练配置
 TRAIN_CONFIG = {
     'batch_size': 1024,
