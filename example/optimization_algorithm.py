@@ -3,7 +3,11 @@ import numpy as np
 import random
 from config import GA_CONFIG, DATA_CONFIG
 import torch
+from typing import List, Tuple, Dict, Optional, Callable
 class GeneticAlgorithm:
+    """
+    遗传算法优化器：优化19×19二进制矩阵结构以获得目标S参数
+    """
     def __init__(self, model, X_scaler, y_scaler):
         self.model = model
         self.X_scaler = X_scaler

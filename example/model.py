@@ -3,146 +3,209 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from config import MODEL_CONFIG, OPTIMIZER_CONFIG, SCHEDULER_CONFIG
-
-class InductorNet(nn.Module):
-    def __init__(self, input_size=None, output_size=None, hidden_dims=None, 
-                 dropout_rates=None, use_batchnorm=None):
-        super(InductorNet, self).__init__()
-        
-        # 使用配置参数或默认值
-        input_size = input_size or MODEL_CONFIG['input_size']
-        output_size = output_size or MODEL_CONFIG['output_size']
-        # hidden_dims = hidden_dims or MODEL_CONFIG['hidden_dims']
-        # dropout_rates = dropout_rates or MODEL_CONFIG['dropout_rates']
-        use_batchnorm = use_batchnorm or MODEL_CONFIG['use_batchnorm']
+class SingleOutputInductorNet(nn.Module):
+    """针对单个输出的神经网络"""
+    def __init__(self, input_size, output_size=1, hidden_dims=[128, 64, 32], 
+                 dropout_rate=0.2, use_batchnorm=True):
+        super().__init__()
         
         layers = []
         prev_dim = input_size
-        init_method='kaiming'
-        # 使用更合理的网络结构
-        hidden_dims = hidden_dims or [256, 512, 256, 128, 64]
-        dropout_rates = dropout_rates or [0.4, 0.4, 0.2, 0.2, 0.1]
         
-        self.input_size = input_size
-        self.output_size = output_size
+        for hidden_dim in hidden_dims:
+            layers.append(nn.Linear(prev_dim, hidden_dim))
+            if use_batchnorm:
+                layers.append(nn.BatchNorm1d(hidden_dim))
+            layers.append(nn.ReLU())
+            layers.append(nn.Dropout(dropout_rate))
+            prev_dim = hidden_dim
         
-        # 共享特征提取层
-        self.shared_layers = nn.Sequential(
-            nn.Linear(input_size, hidden_dims[0]),
-            nn.BatchNorm1d(hidden_dims[0]) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(dropout_rates[0]),
-            
-            nn.Linear(hidden_dims[0], hidden_dims[1]),
-            nn.BatchNorm1d(hidden_dims[1]) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(dropout_rates[1]),
-            
-            nn.Linear(hidden_dims[1], hidden_dims[2]),
-            nn.BatchNorm1d(hidden_dims[2]) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(dropout_rates[2]),
-        )
-        
-        # 为表现好的目标（Ldiff, Leff）设计的输出头
-        self.good_targets_head = nn.Sequential(
-            nn.Linear(hidden_dims[2], hidden_dims[3]),
-            nn.BatchNorm1d(hidden_dims[3]) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(dropout_rates[3]),
-            
-            nn.Linear(hidden_dims[3], hidden_dims[4]),
-            nn.BatchNorm1d(hidden_dims[4]) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(dropout_rates[4]),
-            
-            nn.Linear(hidden_dims[4], 2),  # Ldiff和Leff
-        )
-        
-        # 为表现差的目标（Qdiff, Q, Reff）设计的专门输出头
-        self.poor_targets_head = nn.Sequential(
-            nn.Linear(hidden_dims[2], 128),
-            nn.BatchNorm1d(128) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(0.3),
-            
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64) if use_batchnorm else nn.Identity(),
-            nn.LeakyReLU(0.01),
-            nn.Dropout(0.2),
-            
-            nn.Linear(64, 3),  # Qdiff, Q, Reff
-        )
+        layers.append(nn.Linear(prev_dim, output_size))
+        self.network = nn.Sequential(*layers)
     
     def forward(self, x):
-        # 共享特征提取
-        shared_features = self.shared_layers(x)
+        return self.network(x)
+
+
+class CnnNet(nn.Module):
+    """
+    融合频率信息的CNN模型
+    使用双分支结构：图像分支 + 频率分支
+    """
+    def __init__(self):
+        super().__init__()
         
-        # 分别预测不同组的目标
-        good_targets = self.good_targets_head(shared_features)
-        poor_targets = self.poor_targets_head(shared_features)
+        # ===== 图像分支（处理二进制矩阵）=====
+        self.image_branch = nn.Sequential(
+            # 第一卷积块
+            nn.Conv2d(1, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            
+            # 第二卷积块
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            
+            # 第三卷积块
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            
+            # 自适应池化到固定大小
+            nn.AdaptiveAvgPool2d((2, 2))
+        )
         
-        # 合并输出 [Ldiff, Qdiff, Leff, Q, Reff]
-        # 注意：需要确保顺序正确
-        output = torch.cat([
-            good_targets[:, 0:1],  # Ldiff
-            poor_targets[:, 0:1],  # Qdiff
-            good_targets[:, 1:2],  # Leff
-            poor_targets[:, 1:2],  # Q
-            poor_targets[:, 2:3]   # Reff
-        ], dim=1)
+        # ===== 频率分支（处理频率信息）=====
+        self.frequency_branch = nn.Sequential(
+            nn.Linear(1, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(inplace=True),
+            nn.Linear(32, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(inplace=True),
+            nn.Linear(64, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(inplace=True)
+        )
+        
+        # ===== 特征融合和回归 =====
+        # 图像特征维度: 128 * 2 * 2 = 512
+        # 频率特征维度: 128
+        # 融合后总维度: 512 + 128 = 640
+        
+        self.fusion_layers = nn.Sequential(
+            nn.Linear(512 + 128, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+            
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(inplace=True),
+            
+            nn.Linear(128, 8)  # 输出8个S参数
+        )
+        
+    def forward(self, matrix, frequency):
+        # 图像特征提取
+        image_features = self.image_branch(matrix)
+        image_features = image_features.view(image_features.size(0), -1)  # 展平
+        
+        # 频率特征提取
+        freq_features = self.frequency_branch(frequency)
+        
+        # 特征融合
+        combined_features = torch.cat([image_features, freq_features], dim=1)
+        
+        # 回归预测
+        output = self.fusion_layers(combined_features)
         
         return output
 
-
-class ResidualInductorNet(nn.Module):
-    """可选：带有残差连接的更复杂网络"""
-    def __init__(self, input_size=None, output_size=None, hidden_dims=None):
-        super(ResidualInductorNet, self).__init__()
-        
-        input_size = input_size or MODEL_CONFIG['input_size']
-        output_size = output_size or MODEL_CONFIG['output_size']
-        hidden_dims = hidden_dims or [256, 512, 256, 128]
-        
-        self.input_layer = nn.Linear(input_size, hidden_dims[0])
-        self.bn_input = nn.BatchNorm1d(hidden_dims[0])
-        
-        # 残差块
-        self.res_blocks = nn.ModuleList()
-        for i in range(len(hidden_dims) - 1):
-            res_block = nn.Sequential(
-                nn.Linear(hidden_dims[i], hidden_dims[i+1]),
-                nn.BatchNorm1d(hidden_dims[i+1]),
-                nn.ReLU(),
-                nn.Dropout(0.2),
-                nn.Linear(hidden_dims[i+1], hidden_dims[i+1]),
-                nn.BatchNorm1d(hidden_dims[i+1]),
-            )
-            self.res_blocks.append(res_block)
-            
-            # 如果维度不匹配，添加投影层
-            if hidden_dims[i] != hidden_dims[i+1]:
-                self.res_blocks.append(nn.Linear(hidden_dims[i], hidden_dims[i+1]))
-            else:
-                self.res_blocks.append(nn.Identity())
-        
-        self.output_layer = nn.Linear(hidden_dims[-1], output_size)
-        self.dropout = nn.Dropout(0.1)
+class ResidualNet(nn.Module):
+    """
+    使用注意力机制融合图像和频率信息的高级模型
+    """
     
-    def forward(self, x):
-        x = self.input_layer(x)
-        x = self.bn_input(x)
-        x = nn.ReLU()(x)
+    def __init__(self):
+        super(ResidualNet, self).__init__()
         
-        for i in range(0, len(self.res_blocks), 2):
-            res_block = self.res_blocks[i]
-            shortcut = self.res_blocks[i+1]
+        # 图像编码器
+        self.image_encoder = nn.Sequential(
+            nn.Conv2d(1, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2),
             
-            identity = shortcut(x)
-            out = res_block(x)
-            x = nn.ReLU()(out + identity)
-            x = self.dropout(x)
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2),
+            
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            nn.AdaptiveAvgPool2d((4, 4))
+        )
         
-        return self.output_layer(x)
-
-# 为了向后兼容，保留原来的类名
+        # 频率编码器
+        self.freq_encoder = nn.Sequential(
+            nn.Linear(1, 64),
+            nn.ReLU(inplace=True),
+            nn.Linear(64, 128),
+            nn.ReLU(inplace=True),
+            nn.Linear(128, 256),
+            nn.ReLU(inplace=True)
+        )
+        
+        # 注意力机制
+        self.image_attention = nn.Sequential(
+            nn.Linear(256 * 4 * 4, 256),
+            nn.Tanh(),
+            nn.Linear(256, 256 * 4 * 4),
+            nn.Sigmoid()
+        )
+        
+        self.freq_attention = nn.Sequential(
+            nn.Linear(256, 256),
+            nn.Tanh(),
+            nn.Linear(256, 256),
+            nn.Sigmoid()
+        )
+        
+        # 融合和回归
+        self.fusion = nn.Sequential(
+            nn.Linear(256 * 4 * 4 + 256, 1024),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+            
+            nn.Linear(1024, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            
+            nn.Linear(512, 256),
+            nn.ReLU(inplace=True),
+            
+            nn.Linear(256, 8)
+        )
+        
+    def forward(self, matrix, frequency):
+        # 编码图像
+        image_features = self.image_encoder(matrix)
+        image_features_flat = image_features.view(image_features.size(0), -1)
+        
+        # 编码频率
+        freq_features = self.freq_encoder(frequency)
+        
+        # 应用注意力
+        image_att = self.image_attention(image_features_flat)
+        attended_image = image_features_flat * image_att
+        
+        freq_att = self.freq_attention(freq_features)
+        attended_freq = freq_features * freq_att
+        
+        # 融合特征
+        combined = torch.cat([attended_image, attended_freq], dim=1)
+        
+        # 回归
+        output = self.fusion(combined)
+        
+        return output

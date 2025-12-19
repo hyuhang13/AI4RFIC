@@ -32,7 +32,7 @@ GA_CONFIG = {
 TRAIN_CONFIG = {
     'batch_size': 1024,
     'learning_rate': 0.001,
-    'epochs': 800,
+    'epochs': 1000,
     'weight_decay': 0.001,
     'checkpoint_dir': 'checkpoints/inductor_checkpoints',
     'resume_training': True
@@ -47,8 +47,8 @@ OPTIMIZER_CONFIG = {
 # 调度器配置
 SCHEDULER_CONFIG = {
     'type': 'ReduceLROnPlateau',
-    'patience': 10,
-    'factor': 0.95
+    'patience': 5,
+    'factor': 0.8
 }
 # 设备配置
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

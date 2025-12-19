@@ -9,8 +9,8 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 from config import TRAIN_CONFIG, DATA_CONFIG, DEVICE
 from data_preprocessor import DataPreprocessor
-from data_loader import InductorDataset
-from model import InductorNet,ResidualInductorNet 
+from data_loader import DataLoaderCreator
+from model import CnnNet, ResidualNet 
 from train import ModelManager
 from optimization_algorithm import GeneticAlgorithm
 from utils import TrainingVisualizer
@@ -22,38 +22,78 @@ def set_seed(seed=42):
     random.seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
+        # torch.cuda.manual_seed_all(seed)
+        # torch.backends.cudnn.deterministic = True
+        # torch.backends.cudnn.benchmark = False
 
 def train_neural_network(model_type='advanced', create_report=True):
     """训练神经网络仿真器"""
     print("=== 训练神经网络仿真器 ===")
     print(f"使用模型类型: {model_type}")
-    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # 1. 加载和预处理数据
     print("加载和预处理数据...")
     preprocessor = DataPreprocessor()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, '..', 'Diff_SQ_XFAB_MJ_All_copy.csv')
+    file_path = os.path.join(current_dir, '..', 'cleaned_inductor_data.csv')
     file_path = os.path.normpath(file_path)
     print(f"reading: {file_path}")
-    X, y = preprocessor.load_and_preprocess_data(file_path)
-    # X_train, X_test,X_val, y_train, y_test, y_val = preprocessor.split_data(X, y)
-    X_train, X_val, X_test, y_train, y_val, y_test = preprocessor.split_data(X, y)
-    # 创建数据加载器
-    train_dataset = InductorDataset(X_train, y_train)
-    val_dataset = InductorDataset(X_val, y_val)
-    test_dataset = InductorDataset(X_test, y_test)
-    train_loader = DataLoader(train_dataset, batch_size=TRAIN_CONFIG['batch_size'], shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=TRAIN_CONFIG['batch_size'], shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=TRAIN_CONFIG['batch_size'], shuffle=False)
+    # X, y = preprocessor.load_and_preprocess_data(file_path)
+    preprocessor.load_and_clean_data()
+    all_matrices, all_frequencies, all_s_params, all_indices = preprocessor.get_all_data()
+    print(f"数据形状:")
+    print(f"  矩阵: {all_matrices.shape}")
+    print(f"  频率: {all_frequencies.shape}")
+    print(f"  S参数: {all_s_params.shape}")
+    # 2. 使用划分数据
+    print("\n划分数据...")
     
-    # 2. 构建神经网络
-    print("构建神经网络...")
+    split_data_dict = preprocessor.split_data(
+        all_matrices, all_frequencies, all_s_params, all_indices,
+        test_size=0.1, val_size=0.2, random_state=42
+    )
+    # 3. 分析数据分布
+    print("\n" + "=" * 60)
+    print("步骤3: 分析数据分布")
+    print("=" * 60)
+    
+    preprocessor.analyze_data_distribution(split_data_dict)
+    preprocessor.visualize_data_distribution(split_data_dict)
+    # 4. 创建DataLoader
+    print("\n" + "=" * 60)
+    print("步骤4: 创建DataLoader")
+    print("=" * 60)
+    
+    creator = DataLoaderCreator()
+    train_loader, val_loader, test_loader, train_dataset, val_dataset, test_dataset = creator.create_data_loaders(
+        split_data_dict, batch_size=TRAIN_CONFIG['batch_size'], num_workers=4
+    )
+    
+    print(f"训练集批次数量: {len(train_loader)}")
+    print(f"验证集批次数量: {len(val_loader)}")
+    print(f"测试集批次数量: {len(test_loader)}")
+    """
+    preprocess among different dataset!!
+    """
+    # # 3. 只在训练集上拟合预处理器
+    # print("\n在训练集上拟合预处理器...")
+    # X_train_normalized, y_train_normalized = preprocessor.fit_preprocessors(X_train, y_train)
+    
+    # # 4. 使用训练集的预处理器变换验证集和测试集
+    # print("\n变换验证集和测试集...")
+    # X_val_normalized, y_val_normalized = preprocessor.transform_data(X_val, y_val)
+    # X_test_normalized, y_test_normalized = preprocessor.transform_data(X_test, y_test)
+    
+    # 5. 构建神经网络
+    print("\n" + "=" * 60)
+    print("步骤5: 创建神经网络...")
+    print("=" * 60)
     if model_type == 'residual':
-        model = ResidualInductorNet()
+        model = ResidualNet()
         print("使用残差网络")
     else:
-        model = InductorNet()
-        print("使用高级深度网络")
+        model = CnnNet()
+        print("使用Cnn网络")
     
     # 打印模型信息
     total_params = sum(p.numel() for p in model.parameters())
@@ -61,116 +101,51 @@ def train_neural_network(model_type='advanced', create_report=True):
     print(f"模型总参数: {total_params:,}")
     print(f"可训练参数: {trainable_params:,}")
     
-    # 3. 训练模型
-    model_manager = ModelManager(model)
+    # 6. 训练模型
+    print("\n" + "=" * 60)
+    print("步骤6: 创建神经网络...")
+    print("=" * 60)
+    model_manager = ModelManager(model, checkpoint_dir='./frequency_checkpoints')
     model_manager.setup_training()
     
     train_losses, val_losses = model_manager.train_model(
-        train_loader, val_loader, 
+        train_loader=train_loader,
+        val_loader=val_loader,
         epochs=TRAIN_CONFIG['epochs'],
         resume=TRAIN_CONFIG['resume_training'],
         print_every=20,  # 每20个epoch打印一次进度
         save_every=50    # 每50个epoch保存一次检查点
     )
     
-    # 4. 评估模型性能
+    # 7. 评估模型性能
     print("\n在测试集上评估模型性能...")
     
-    predictions, targets, metrics_summary = model_manager.evaluate_model(
-        preprocessor,test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets']
+    predictions, targets, frequencies, test_metrics = model_manager.evaluate_model(
+        test_loader, dataset_name="测试集"
     )
-    # 4. 进行三种精度评估
-    print("\n=== 进行三种精度评估 ===")
+    model_manager.print_evaluation_results(test_metrics)
+    # 8. 详细误差分析
+    sample_errors, all_predictions, all_targets = model_manager.evaluate_all_test_samples(test_loader)
+    error_stats, min_sample, max_sample = model_manager.analyze_error_statistics(sample_errors)
     
-    # 4.1 训练集精度评估
-    print("1. 评估训练集精度...")
-    train_predictions, train_targets, train_metrics = model_manager.evaluate_model(
-        preprocessor,train_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "训练集"
+    # 9. 创建误差分布图
+    model_manager.create_error_distribution_plot(sample_errors, save_path='error_distribution.png')
+    
+    # 10. 保存最终模型
+    model_manager.save_final_model('final_frequency_model.pth', model_info={
+        'input_type': 'matrix_19x19 + frequency',
+        'output_type': '8 S-parameters',
+        'model_architecture': 'FrequencyAwareSParamCNN'
+    })
+    
+    # 11. 创建训练总结
+    # 需要先获取训练集的评估结果
+    train_predictions, train_targets, train_freqs, train_metrics = model_manager.evaluate_model(
+        train_loader, dataset_name="训练集"
     )
+    model_manager.create_training_summary(train_losses, val_losses, train_metrics, test_metrics)
     
-    # 4.2 测试集精度评估
-    print("2. 评估测试集精度...")
-    test_predictions, test_targets, test_metrics = model_manager.evaluate_model(
-        preprocessor,test_loader, preprocessor.y_scaler, DATA_CONFIG['output_targets'], "测试集"
-    )
-    
-    # 4.3 单个样本精度评估（使用修正后的方法）
-    print("3. 评估单个样本精度...")
-    
-    # 使用测试集中的一个样本
-    sample_idx = 109
-    sample_input_original = preprocessor.X_scaler.inverse_transform([X_test[sample_idx]])[0]
-    sample_target_normalized = y_test[sample_idx]
-    for i in range(sample_idx,sample_idx+20):
-        print(X_test[sample_idx+i])
-        print("******************************************")
-        print(sample_idx+i)
-        print(y_test[sample_idx+i])
-    # 使用修正后的单个样本评估函数
-    sample_prediction_original, sample_target_original = model_manager.evaluate_single_sample_corrected(
-        preprocessor.X_scaler, 
-        preprocessor.y_scalers,  # 注意：这里传递的是y_scalers字典，不是y_scaler对象
-        sample_input_original,
-        sample_target_normalized,  # 传递归一化的真实值
-        DATA_CONFIG['output_targets']
-    )
-    
-    # 计算单个样本误差
-    single_sample_metrics = {}
-    for i, output_name in enumerate(DATA_CONFIG['output_targets']):
-        true_val = sample_target_original[i]
-        pred_val = sample_prediction_original[i]
-        error_pct = abs(pred_val - true_val) / abs(true_val) * 100 if abs(true_val) > 1e-12 else float('inf')
-        single_sample_metrics[output_name] = (true_val, pred_val, error_pct)
-    
-    # 打印单个样本的详细信息
-    print("\n单个样本详细信息:")
-    print("输入参数 (原始尺度):")
-    for j, feature in enumerate(['Line_Width', 'Turns','Y_Dimension', 'X_Dimension', 'freq']):  # 注意使用input_features_used
-        print(f"  {feature}: {sample_input_original[j]:.6f}")
-    
-    print("\n预测结果对比:")
-    for output_name, (true_val, pred_val, error_pct) in single_sample_metrics.items():
-        print(f"  {output_name}:")
-        print(f"    真实值: {true_val:.6e}")
-        print(f"    预测值: {pred_val:.6e}")
-        print(f"    误差: {error_pct:.2f}%")
-    
-    # 5. 打印精度总结
-    model_manager.create_precision_summary(train_metrics, test_metrics, single_sample_metrics)
-    # 5. 创建可视化报告
-    if create_report:
-        print("\n生成训练报告和性能可视化...")
-        
-        visualizer = TrainingVisualizer()
-        
-        report_save_path = f'reports/inductor_model_{model_type}'
-        os.makedirs('reports', exist_ok=True)
-        
-        visualizer.create_comprehensive_report(
-            preprocessor = preprocessor,
-            model=model,
-            train_loader=train_loader,
-            val_loader=val_loader,  # 使用测试集作为验证集进行可视化
-            y_scaler=preprocessor.y_scaler,
-            output_names=DATA_CONFIG['output_targets'],
-            train_losses=train_losses,
-            val_losses=val_losses,
-            save_path=report_save_path
-        )
-    
-    # 6. 保存模型
-    final_model_path = f'models/inductor_model_{model_type}_final.pth'
-    os.makedirs('models', exist_ok=True)
-    
-    model_manager.save_final_model(
-        final_model_path, 
-        preprocessor.X_scaler, 
-        preprocessor.y_scaler,
-        train_losses, val_losses
-    )
-    
-    return model, preprocessor.X_scaler, preprocessor.y_scaler, metrics_summary
+
 
 def run_genetic_optimization(model, X_scaler, y_scaler):
     """运行遗传算法优化"""
@@ -225,13 +200,15 @@ if __name__ == "__main__":
         # 仅运行遗传算法（需要已训练好的模型）
         try:
             # 加载已训练的模型
-            model_path = f'models/inductor_model_{model_type_name}_final.pth'
+            model_path = f'checkpoints/inductor_checkpoints/checkpoint_epoch_999.pth'
             checkpoint = torch.load(model_path)
-            
+            print(checkpoint.keys())
+            print("\n" + "="*50)
             # 根据保存的配置重建模型
             if 'model_config' in checkpoint:
+                print("download")
                 config = checkpoint['model_config']
-                model = InductorNet(
+                model = CnnNet(
                     input_size=config['input_size'],
                     output_size=config['output_size'],
                     hidden_dims=config['hidden_dims'],
@@ -240,7 +217,8 @@ if __name__ == "__main__":
                 )
             else:
                 # 向后兼容
-                model = InductorNet()
+                print("undownload")
+                model = CnnNet()
                 
             model.load_state_dict(checkpoint['model_state_dict'])
             X_scaler = checkpoint['X_scaler']

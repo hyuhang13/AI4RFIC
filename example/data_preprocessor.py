@@ -4,220 +4,326 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler, PowerTransformer, QuantileTransformer
 from sklearn.model_selection import train_test_split
 from config import DATA_CONFIG
-
+from tqdm import tqdm
+import matplotlib as plt
+import torch
 class DataPreprocessor:
-    def __init__(self):
+    def __init__(self, matrix_file='matrix.txt', s_param_file='dataset.csv'):
+        """
+        init dataset: matrix_file, s_param_file
+        """
+        self.matrix_file = matrix_file
+        self.s_param_file = s_param_file
+        self.idx = 100000
+
         self.input_features = DATA_CONFIG['input_features']
         self.output_targets = DATA_CONFIG['output_targets']
         self.X_scaler = None
         self.y_scaler = None
         self.y_scalers = {}
-        self.removed_feature_indices = []
-        self.scale_factor = 1e9
-    def load_and_preprocess_data(self, file_path):
+
+        
+    def _load_matrices(self):
+        """加载二进制矩阵"""
+        print("正在加载二进制矩阵...")
+        matrices = []
+        current_matrix = []
+        
+        with open(self.matrix_file, 'r') as f:
+            for line in f:
+                line = line.strip()
+                
+                # 跳过空行和注释行
+                if not line or line.startswith('#'):
+                    if current_matrix and len(current_matrix) == 19:
+                        matrices.append(np.array(current_matrix, dtype=np.float32))
+                        current_matrix = []
+                    continue
+                
+                # 解析矩阵行
+                row = [float(x) for x in line.split(',')]
+                if len(row) == 19:
+                    current_matrix.append(row)
+        
+        # 添加最后一个矩阵
+        if current_matrix and len(current_matrix) == 19:
+            matrices.append(np.array(current_matrix, dtype=np.float32))
+        
+        # 转换为三维数组 (N, 19, 19)
+        matrices_array = np.stack(matrices)
+        
+        # 重塑为适合CNN的格式 (N, 1, 19, 19) - 单通道图像
+        matrices_array = matrices_array[:, np.newaxis, :, :]
+        
+        print(f"矩阵数据形状: {matrices_array.shape}")
+        return matrices_array
+    
+    def _load_s_params(self):
+        """加载S参数"""
+        print("正在加载S参数...")
+        # 读取CSV文件
+        df = pd.read_csv(self.s_param_file)
+        
+        # 提取所有唯一的矩阵索引
+        matrix_indices = df.iloc[:, 0].unique()
+        s_param_dict = {}
+        # 对于每个矩阵，提取其300个频率点的S参数
+        
+        for idx in tqdm(matrix_indices, desc="处理S参数"):
+            # 获取当前矩阵的所有行
+            matrix_data = df[df.iloc[:, 0] == idx]
+            
+            # 确保有300行数据
+            if len(matrix_data) != 300:
+                # 如果数据不足300行，使用插值填充
+                print(f"警告: 矩阵{idx}只有{len(matrix_data)}行数据")
+                # 这里可以添加插值逻辑，但根据您的描述应该是完整的300行
+                continue
+            
+            # 提取S参数（跳过第一列索引和第二列频率）
+            frequencies = matrix_data.iloc[:, 1].values #(300,1) 
+            s_params = matrix_data.iloc[:, 2:].values   #(300,8)
+            s_param_dict[int(idx)] = {
+                'frequencies': frequencies.astype(np.float32),
+                's_params': s_params.astype(np.float32)
+            }
+            
+        return s_param_dict
+    
+    def __len__(self):
+        return len(self.matrices)*300
+    
+    def __getitem__(self, idx):
+        # 计算矩阵索引和频率索引
+        matrix_idx = idx // 300
+        freq_idx = idx % 300
+        
+        # 获取矩阵
+        matrix = self.matrices[matrix_idx]
+        
+        # 获取频率和S参数
+        matrix_id = matrix_idx + 1  # 因为matrix.txt从索引1开始
+        if matrix_id in self.s_param_dict:
+            frequencies = self.s_param_dict[matrix_id]['frequencies']
+            s_params_all = self.s_param_dict[matrix_id]['s_params']
+            
+            frequency = frequencies[freq_idx]
+            s_params = s_params_all[freq_idx]
+        else:
+            # 如果找不到，使用近似值
+            print("ERROR:wrong idx!\n")
+            frequency = np.float32(freq_idx * 0.1e9)  # 0.1GHz步长
+            s_params = np.zeros(8, dtype=np.float32)
+        
+        # 频率归一化 (0-30GHz归一化到0-1)
+        frequency_norm = frequency / 30e9
+        
+        return {
+            'matrix': torch.FloatTensor(matrix),  # (1, 19, 19)
+            'frequency': torch.FloatTensor([frequency_norm]),  # 归一化频率
+            's_params': torch.FloatTensor(s_params)  # 8个S参数
+        }
+
+    def load_and_clean_data(self):
         """
         改进的标准化预处理：对表现差的目标使用RobustScaler
         """
-        # 读取和清洗数据
-        df = pd.read_csv(file_path)
-        print("原始列名:", df.columns.tolist())
-        print("数据形状:", df.shape)
+        self.matrices = self._load_matrices()
+        self.s_params = self._load_s_params()
+        # 验证数据一致性
+        assert len(self.matrices) == len(self.s_params), \
+            f"矩阵数量({len(self.matrices)})与S参数数量({len(self.s_params)})不匹配"
         
-        # 数据清洗和转换
-        print("数据清洗前:")
-        for col in self.input_features + self.output_targets:
-            print(f"{col}: 数据类型={df[col].dtype}, 示例={df[col].iloc[:3].tolist()}")
-        
-        # 专门处理频率列
-        if df['freq'].dtype == 'object':
-            df['freq'] = df['freq'].str.replace('GHz', '', regex=False).str.strip()
-            df['freq'] = pd.to_numeric(df['freq'], errors='coerce')
-            print(f"频率列转换后，缺失值数量: {df['freq'].isna().sum()}")
-        
-        # 处理其他列
-        for col in self.input_features + self.output_targets:
-            if df[col].dtype == 'object':
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-                na_count = df[col].isna().sum()
-                if na_count > 0:
-                    print(f"列 {col} 转换后有 {na_count} 个缺失值")
-        
-        print("数据清洗后:")
-        for col in self.input_features + self.output_targets:
-            print(f"{col}: 数据类型={df[col].dtype}, 示例={df[col].iloc[:3].tolist()}")
-        
-        # 移除Line_space特征
-        if 'Line_space' in self.input_features:
-            line_space_idx = self.input_features.index('Line_space')
-            self.removed_feature_indices.append(line_space_idx)
-            self.input_features_used = [feat for feat in self.input_features if feat != 'Line_space']
-            print(f"移除恒定特征: Line_space")
-            print(f"使用的输入特征: {self.input_features_used}")
-        else:
-            self.input_features_used = self.input_features.copy()
-        
-        # 提取特征和目标
-        X = df[self.input_features_used].values
-        y = df[self.output_targets].values
-        # 数据完整性检查
-        print("\n=== 原始数据统计 ===")
-        for i, target in enumerate(self.output_targets):
-            target_col = y[:, i]
-            print(f"{target}: 范围[{target_col.min():.6e}, {target_col.max():.6e}], "
-                  f"均值:{target_col.mean():.6e}, 标准差:{target_col.std():.6e}")
-        # 输入特征标准化
-        self.X_scaler = StandardScaler()
-        X_normalized = self.X_scaler.fit_transform(X)
-        # 对输出目标分别处理
-        y_normalized = np.zeros_like(y)
-        
-        # 对Ldiff和Leff使用StandardScaler（表现好）
-        for i, target in enumerate(self.output_targets):
-            # if target in ['Ldiff', 'Leff']:
-            #     scaler = StandardScaler()
-            #     y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
-            #     self.y_scalers[target] = ('standard', scaler)
-            
-            # 对Qdiff和Q使用Yeo-Johnson变换（处理负值）
-            if target in ['Ldiff', 'Leff']:
-                scaler = QuantileTransformer(
-                n_quantiles=min(1000, len(y)),
-                output_distribution='normal',  # 
-                random_state=42
-                )
-                y_expanded = y[:, i] * self.scale_factor
-                y_normalized[:, i] = scaler.fit_transform(y_expanded.reshape(-1, 1)).flatten()
-                # y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
-                self.y_scalers[target] = ('multi+quantile', scaler)
-            elif target in ['Qdiff', 'Q']:
-                # scaler = PowerTransformer(method='yeo-johnson', standardize=True)
-                # y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
-                # self.y_scalers[target] = ('yeo-johnson', scaler)
-                scaler = QuantileTransformer(
-                n_quantiles=min(1000, len(y)),
-                output_distribution='normal',  # 
-                random_state=42
-                )
-                y_normalized[:, i] = scaler.fit_transform(y[:, i].reshape(-1, 1)).flatten()
-                self.y_scalers[target] = ('quantile', scaler)
-            # 对Reff使用对数变换 + 标准化（处理大范围正值）
-            elif target == 'Reff':
-                # 确保所有值为正
-                reff_data = np.maximum(y[:, i], 1e-12)  # 避免0或负值
-                # 对数变换
-                log_reff = np.log10(reff_data)
-                # 标准化
-                scaler = StandardScaler()
-                y_normalized[:, i] = scaler.fit_transform(log_reff.reshape(-1, 1)).flatten()
-                self.y_scalers[target] = ('log+standard', scaler, reff_data.min(), reff_data.max())
-        
-        # 打印处理后的统计
-        print("\n=== 改进预处理后的目标范围 ===")
-        for i, target in enumerate(self.output_targets):
-            col = y_normalized[:, i]
-            transform_type = self.y_scalers[target][0]
-            print(f"  {target} ({transform_type}): [{col.min():.2f}, {col.max():.2f}], "
-                  f"均值:{col.mean():.3f}, 标准差:{col.std():.3f}")
-        
-        return X_normalized, y_normalized
+        print(f"数据集加载完成：{len(self.matrices)}个样本")
+
+    def fit_preprocessors(self, X_train, y_train):
+        """
+        只在训练集上拟合预处理器
+        """
+        pass
     
+    def transform_data(self, X, y):
+        """
+        使用训练集拟合的预处理器变换数据
+        """
+        pass
+
     def inverse_transform_y(self, y_normalized):
-        y_original = np.zeros_like(y_normalized)
-        
-        for i, target in enumerate(self.output_targets):
-            if target in self.y_scalers:
-                transform_type, scaler = self.y_scalers[target][0], self.y_scalers[target][1]
-                target_data = y_normalized[:, i].reshape(-1, 1)
-                
-                if transform_type == 'log+standard':
-                    # 反标准化 -> 反对数
-                    log_data = scaler.inverse_transform(target_data)
-                    original_data = 10 ** log_data
-                elif transform_type == 'multi+quantile':
-                    original_data = scaler.inverse_transform(target_data)
-                    original_data  = original_data /self.scale_factor
-                else:  # standard
-                    original_data = scaler.inverse_transform(target_data)
-                
-                y_original[:, i] = original_data.flatten()
-        
-        return y_original
-    def preprocess_new_data(self, X_new):
-        """
-        对新数据进行相同的预处理
-        """
-        if self.X_scaler is None:
-            raise ValueError("必须先调用load_and_preprocess_data方法")
-        
-        # 移除Line_space特征
-        if self.removed_feature_indices:
-            X_processed = np.delete(X_new, self.removed_feature_indices, axis=1)
-        else:
-            X_processed = X_new.copy()
-        
-        # 标准化
-        X_normalized = self.X_scaler.transform(X_processed)
-        
-        return X_normalized
+        pass
     
-    def split_data(self, X, y, val_size=0.2, test_size=0.1, random_state=42):
+    def get_all_data(self):
+        """获取所有数据，用于train_test_split"""
+        print("正在准备所有数据用于train_test_split...")
+        
+        all_matrices = []
+        all_frequencies = []
+        all_s_params = []
+        all_indices = []
+        all_matrix_indices = []
+        all_freq_indices = []
+
+        total_matrices = len(self.matrices)  # 100,000
+        freq_per_matrix = 300
+        all_matrix_data = self.matrices
+        # 遍历所有样本
+        for matrix_idx in tqdm(range(total_matrices), desc="收集数据"):
+            matrix = all_matrix_data[matrix_idx]  # (1, 19, 19)
+            matrix_id = matrix_idx + 1
+            if matrix_id in self.s_param_dict:
+                frequencies = self.s_param_dict[matrix_id]['frequencies']  # (300,1)
+                s_params_all = self.s_param_dict[matrix_id]['s_params']  # (300, 8)
+
+                for freq_idx in range(freq_per_matrix):
+                    all_matrices.append(matrix)
+                    all_frequencies.append([frequencies[freq_idx] / 30e9])  
+                    all_s_params.append(s_params_all[freq_idx])
+                    all_matrix_indices.append(matrix_idx)
+                    all_freq_indices.append(freq_idx)
+            else:
+                print("can't find S_matrix")
+                for freq_idx in range(freq_per_matrix):
+                    all_matrices.append(matrix)
+                    frequency = freq_idx * 0.1e9
+                    all_frequencies.append([frequency / 30e9])  
+                    all_s_params.append(np.zeros(8, dtype=np.float32))
+                    all_matrix_indices.append(matrix_idx)
+                    all_freq_indices.append(freq_idx)
+        
+        # 转换为numpy数组 N = 100000*300,
+        print("转换为numpy数组...")
+        all_matrices_array = np.stack(all_matrices)  # (N, 1, 19, 19)
+        all_frequencies_array = np.stack(all_frequencies)  # (N, 1)
+        all_s_params_array = np.stack(all_s_params)  # (N, 8)
+        all_matrix_indices_array = np.array(all_matrix_indices)  # (N,)
+        all_freq_indices_array = np.array(all_freq_indices)  # (N,)
+    
+        print(f"数据形状:")
+        print(f"  矩阵: {all_matrices_array.shape}")
+        print(f"  频率: {all_frequencies_array.shape}")
+        print(f"  S参数: {all_s_params_array.shape}")
+        
+        return all_matrices_array, all_frequencies_array, all_s_params_array
+        
+    def split_data(self, X_matrices, X_frequencies, y_s_params, indices=None,
+                   test_size=0.2, val_size=0.1, random_state=42):
         """
-        划分训练集、验证集和测试集
+        使用train_test_split划分数据
         
-        参数:
-        - X: 特征数据
-        - y: 目标数据
-        - val_size: 验证集比例 (默认0.2)
-        - test_size: 测试集比例 (默认0.1)
-        - random_state: 随机种子，确保结果可复现
-        
-        返回:
-        - X_train, X_val, X_test, y_train, y_val, y_test
+        Args:
+            X_matrices: 矩阵数据 (N, 1, 19, 19)
+            X_frequencies: 频率数据 (N, 1)
+            y_s_params: S参数标签 (N, 8)
+            indices: 原始索引 (N,)
+            test_size: 测试集比例 (默认0.2)
+            val_size: 验证集比例 (默认0.1)
+            random_state: 随机种子
+            
+        Returns:
+            划分后的数据集
         """
-        # 计算训练集比例
-        train_size = 1 - val_size - test_size
-        print(f"数据划分比例: 训练集 {train_size:.0%}, 验证集 {val_size:.0%}, 测试集 {test_size:.0%}")
+        print(f"数据划分比例: 训练集 {1-test_size-val_size:.0%}, "
+              f"验证集 {val_size:.0%}, 测试集 {test_size:.0%}")
         
-        # 第一步：先分出测试集
-        X_temp, X_test, y_temp, y_test = train_test_split(
-            X, y, 
+        # 第一步：划分训练集和临时集（包含验证集和测试集）
+        X_temp_matrices, X_test_matrices, X_temp_freq, X_test_freq, \
+        y_temp, y_test, temp_idx, test_idx = train_test_split(
+            X_matrices, X_frequencies, y_s_params, indices,
             test_size=test_size,
             random_state=random_state,
-            shuffle=True  # 打乱数据
+            shuffle=True
         )
         
-        # 第二步：从剩余数据中分出验证集
-        # 注意：这里需要调整验证集的比例，因为是在剩余数据中的比例
-        val_size_adjusted = 0.2#val_size / (1 - test_size)
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_temp, y_temp,
+        # 第二步：从临时集中划分验证集
+        # 计算验证集在临时集中的比例
+        val_size_adjusted = val_size / (1 - test_size)
+        
+        X_train_matrices, X_val_matrices, X_train_freq, X_val_freq, \
+        y_train, y_val, train_idx, val_idx = train_test_split(
+            X_temp_matrices, X_temp_freq, y_temp, temp_idx,
             test_size=val_size_adjusted,
             random_state=random_state,
-            shuffle=True  # 打乱数据
+            shuffle=True
         )
         
-        # 输出数据集大小
-        print(f"训练集: {X_train.shape[0]} 样本")
-        print(f"验证集: {X_val.shape[0]} 样本") 
-        print(f"测试集: {X_test.shape[0]} 样本")
+        # 打印划分结果
+        print(f"训练集: {X_train_matrices.shape[0]} 个样本")
+        print(f"验证集: {X_val_matrices.shape[0]} 个样本")
+        print(f"测试集: {X_test_matrices.shape[0]} 个样本")
         
-        return X_train, X_val, X_test, y_train, y_val, y_test
+        # 返回划分结果
+        return {
+            'train': {
+                'matrices': X_train_matrices,
+                'frequencies': X_train_freq,
+                's_params': y_train,
+                'indices': train_idx
+            },
+            'val': {
+                'matrices': X_val_matrices,
+                'frequencies': X_val_freq,
+                's_params': y_val,
+                'indices': val_idx
+            },
+            'test': {
+                'matrices': X_test_matrices,
+                'frequencies': X_test_freq,
+                's_params': y_test,
+                'indices': test_idx
+            }
+        }
+    def analyze_data_distribution(self, split_data_dict):
+        """分析数据分布"""
+        print("\n" + "="*60)
+        print("数据分布分析")
+        print("="*60)
+        
+        train_size = len(split_data_dict['train']['s_params'])
+        val_size = len(split_data_dict['val']['s_params'])
+        test_size = len(split_data_dict['test']['s_params'])
+        total_size = train_size + val_size + test_size
+        
+        print(f"训练集: {train_size:,} 个样本 ({train_size/total_size:.1%})")
+        print(f"验证集: {val_size:,} 个样本 ({val_size/total_size:.1%})")
+        print(f"测试集: {test_size:,} 个样本 ({test_size/total_size:.1%})")
+        print(f"总计: {total_size:,} 个样本")
+        
+        # 分析S参数的统计特性
+        print("\nS参数统计特性:")
+        for split_name, split_data in split_data_dict.items():
+            s_params = split_data['s_params']
+            print(f"\n{split_name.capitalize()}集:")
+            print(f"  形状: {s_params.shape}")
+            print(f"  均值范围: [{s_params.mean(axis=0).min():.4f}, {s_params.mean(axis=0).max():.4f}]")
+            print(f"  标准差范围: [{s_params.std(axis=0).min():.4f}, {s_params.std(axis=0).max():.4f}]")
+            print(f"  最小值范围: [{s_params.min(axis=0).min():.4f}, {s_params.min(axis=0).max():.4f}]")
+            print(f"  最大值范围: [{s_params.max(axis=0).min():.4f}, {s_params.max(axis=0).max():.4f}]")
     
-    # def preprocess_new_data(self, X_new):
-    #     """
-    #     对新数据进行相同的预处理
-    #     X_new: 新数据，形状为(n_samples, n_features)，特征顺序应与原始input_features一致
-    #     """
-    #     if self.X_scaler is None:
-    #         raise ValueError("必须先调用load_and_preprocess_data方法训练预处理器")
+
+    def visualize_data_distribution(self,split_data_dict, save_path='data_distribution.png'):
+        """可视化数据分布"""
+        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
         
-    #     # 移除Line_space特征
-    #     if self.removed_feature_indices:
-    #         X_processed = np.delete(X_new, self.removed_feature_indices, axis=1)
-    #     else:
-    #         X_processed = X_new.copy()
+        # S11实部的分布
+        for ax_idx, (split_name, split_data) in enumerate(split_data_dict.items()):
+            s_params = split_data['s_params']
+            s11_real = s_params[:, 0]  # 第一个是S11实部
+            
+            axes[0, ax_idx].hist(s11_real, bins=50, alpha=0.7, color=['blue', 'green', 'red'][ax_idx])
+            axes[0, ax_idx].set_title(f'{split_name.capitalize()}集 - S11实部分布')
+            axes[0, ax_idx].set_xlabel('S11实部值')
+            axes[0, ax_idx].set_ylabel('频数')
+            axes[0, ax_idx].grid(True, alpha=0.3)
         
-    #     # 标准化
-    #     X_normalized = self.X_scaler.transform(X_processed)
+        # 频率分布
+        for ax_idx, (split_name, split_data) in enumerate(split_data_dict.items()):
+            frequencies = split_data['frequencies']
+            
+            axes[1, ax_idx].hist(frequencies, bins=50, alpha=0.7, color=['blue', 'green', 'red'][ax_idx])
+            axes[1, ax_idx].set_title(f'{split_name.capitalize()}集 - 频率分布')
+            axes[1, ax_idx].set_xlabel('归一化频率')
+            axes[1, ax_idx].set_ylabel('频数')
+            axes[1, ax_idx].grid(True, alpha=0.3)
         
-    #     return X_normalized
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.show()

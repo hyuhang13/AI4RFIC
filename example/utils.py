@@ -10,24 +10,8 @@ import matplotlib.font_manager as fm
 
 from matplotlib import rcParams
 
-
 def save_checkpoint(model, optimizer, epoch, train_losses, val_losses, filepath):
     """保存训练检查点"""
-
-    state_dict = model.state_dict()
-    
-    print("=== five items ===")
-
-    # for name, param in model.named_parameters():
-    #     print(f"  {name}: {param.shape}")
-    # BatchNormÌØ¶¨¼ì²é
-    bn_keys = [key for key in state_dict.keys() if 'batchnorm' in key.lower() or 'bn' in key.lower()]
-    print(f"BatchNorm²: {len(bn_keys)}")
-    
-    if bn_keys:
-        print("BatchNorm:")
-        for key in bn_keys[:2]:  # Ö»ÏÔÊ¾Ç°2¸ö
-            print(f"  {key}: {state_dict[key].shape}")
     checkpoint = {
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -35,31 +19,24 @@ def save_checkpoint(model, optimizer, epoch, train_losses, val_losses, filepath)
         'train_losses': train_losses,
         'val_losses': val_losses
     }
-    
     torch.save(checkpoint, filepath)
     print(f"检查点已保存: {filepath} (Epoch {epoch})")
     print(filepath)
+    # loaded_checkpoint = torch.load(filepath, map_location='cpu', weights_only=True)
+    # saved_state = loaded_checkpoint['model_state_dict']
+    # print("has been saved")
+    # # for name, tensor in saved_state.items():
+    # #     print(f"  {name}: {tensor.shape}")
 
-    loaded_checkpoint = torch.load(filepath, map_location='cpu', weights_only=True)
-    saved_state = loaded_checkpoint['model_state_dict']
-    print("has been saved")
-
-    # for name, tensor in saved_state.items():
-    #     print(f"  {name}: {tensor.shape}")
-
-def find_latest_checkpoint(checkpoint_dir='checkpoints'):
-    """查找最新的检查点文件"""
-    if not os.path.exists(checkpoint_dir):
+def find_latest_checkpoint(checkpoint_dir):
+    """查找最新的检查点"""
+    checkpoints = [f for f in os.listdir(checkpoint_dir) if f.startswith('checkpoint_epoch_')]
+    if not checkpoints:
         return None
     
-    # 查找所有检查点文件
-    checkpoint_files = glob.glob(os.path.join(checkpoint_dir, 'checkpoint_epoch_*.pth'))
-    if not checkpoint_files:
-        return None
-    
-    # 按epoch编号排序，返回最新的
-    checkpoint_files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-    return checkpoint_files[-1]
+    # 按epoch编号排序
+    checkpoints.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+    return os.path.join(checkpoint_dir, checkpoints[-1])
 
 def load_model(checkpoint_path, model, optimizer=None):
     """加载模型检查点"""
@@ -70,7 +47,11 @@ def load_model(checkpoint_path, model, optimizer=None):
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     
     return checkpoint.get('epoch', 0), checkpoint.get('train_losses', []), checkpoint.get('val_losses', [])
-
+def print_training_progress(epoch, train_loss, val_loss, lr, best_val_loss):
+    """打印训练进度"""
+    print(f"Epoch {epoch:4d} | Train Loss: {train_loss:.6f} | "
+          f"Val Loss: {val_loss:.6f} | LR: {lr:.6f} | "
+          f"Best Val: {best_val_loss:.6f}")
 class TrainingVisualizer:
     def __init__(self):
         self.fig = None
@@ -139,8 +120,10 @@ class TrainingVisualizer:
         all_targets = np.vstack(all_targets)
         
         # 反标准化
-        predictions_original = preprocessor.inverse_transform_y(all_predictions)
-        targets_original = preprocessor.inverse_transform_y(all_targets)
+        predictions_original = all_predictions
+        targets_original = all_targets
+        # predictions_original = preprocessor.inverse_transform_y(all_predictions)
+        # targets_original = preprocessor.inverse_transform_y(all_targets)
         # predictions_original = y_scaler.inverse_transform(all_predictions)
         # targets_original = y_scaler.inverse_transform(all_targets)
         if axes is None:
