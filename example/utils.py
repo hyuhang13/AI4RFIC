@@ -265,7 +265,7 @@ class TrainingVisualizer:
             fig3.savefig(f"{save_path}_residuals.png", dpi=300, bbox_inches='tight')
             print(f"Training report saved to: {save_path}_*.png")
         
-        plt.show()
+        # plt.show()
         
         return predictions, targets   
 

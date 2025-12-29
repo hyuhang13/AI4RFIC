@@ -5,17 +5,19 @@ from sklearn.preprocessing import StandardScaler, PowerTransformer, QuantileTran
 from sklearn.model_selection import train_test_split
 from config import DATA_CONFIG
 from tqdm import tqdm
-import matplotlib as plt
+# import matplotlib as plt
+import matplotlib.pyplot as plt
 import torch
 class DataPreprocessor:
-    def __init__(self, matrix_file='matrix.txt', s_param_file='dataset.csv'):
+    def __init__(self, matrix_file='binary_matrices.txt', s_param_file='dataset.csv'):
         """
         init dataset: matrix_file, s_param_file
         """
         self.matrix_file = matrix_file
         self.s_param_file = s_param_file
-        self.idx = 100000
-
+        self.idx = 2000#100000
+        self.s_param_dict = None
+        self.matrices = None
         self.input_features = DATA_CONFIG['input_features']
         self.output_targets = DATA_CONFIG['output_targets']
         self.X_scaler = None
@@ -56,6 +58,7 @@ class DataPreprocessor:
         matrices_array = matrices_array[:, np.newaxis, :, :]
         
         print(f"矩阵数据形状: {matrices_array.shape}")
+        self.matrices = matrices_array
         return matrices_array
     
     def _load_s_params(self):
@@ -82,12 +85,15 @@ class DataPreprocessor:
             
             # 提取S参数（跳过第一列索引和第二列频率）
             frequencies = matrix_data.iloc[:, 1].values #(300,1) 
+            #频率归一化
+            frequency_norm = self.prepare_frequency_input(frequencies, 'log')
+
             s_params = matrix_data.iloc[:, 2:].values   #(300,8)
             s_param_dict[int(idx)] = {
-                'frequencies': frequencies.astype(np.float32),
+                'frequencies': frequency_norm.astype(np.float32),
                 's_params': s_params.astype(np.float32)
             }
-            
+        self.s_param_dict = s_param_dict
         return s_param_dict
     
     def __len__(self):
@@ -112,15 +118,15 @@ class DataPreprocessor:
         else:
             # 如果找不到，使用近似值
             print("ERROR:wrong idx!\n")
-            frequency = np.float32(freq_idx * 0.1e9)  # 0.1GHz步长
+            frequency = np.float32(freq_idx * 0.1)  # 0.1GHz步长
             s_params = np.zeros(8, dtype=np.float32)
         
         # 频率归一化 (0-30GHz归一化到0-1)
-        frequency_norm = frequency / 30e9
+        #frequency_norm = frequency / 30e9
         
         return {
             'matrix': torch.FloatTensor(matrix),  # (1, 19, 19)
-            'frequency': torch.FloatTensor([frequency_norm]),  # 归一化频率
+            'frequency': torch.FloatTensor([frequency]),  # 归一化频率
             's_params': torch.FloatTensor(s_params)  # 8个S参数
         }
 
@@ -175,7 +181,7 @@ class DataPreprocessor:
 
                 for freq_idx in range(freq_per_matrix):
                     all_matrices.append(matrix)
-                    all_frequencies.append([frequencies[freq_idx] / 30e9])  
+                    all_frequencies.append([frequencies[freq_idx]])  
                     all_s_params.append(s_params_all[freq_idx])
                     all_matrix_indices.append(matrix_idx)
                     all_freq_indices.append(freq_idx)
@@ -183,8 +189,8 @@ class DataPreprocessor:
                 print("can't find S_matrix")
                 for freq_idx in range(freq_per_matrix):
                     all_matrices.append(matrix)
-                    frequency = freq_idx * 0.1e9
-                    all_frequencies.append([frequency / 30e9])  
+                    frequency = freq_idx * 0.1
+                    all_frequencies.append([frequency])  
                     all_s_params.append(np.zeros(8, dtype=np.float32))
                     all_matrix_indices.append(matrix_idx)
                     all_freq_indices.append(freq_idx)
@@ -201,9 +207,25 @@ class DataPreprocessor:
         print(f"  矩阵: {all_matrices_array.shape}")
         print(f"  频率: {all_frequencies_array.shape}")
         print(f"  S参数: {all_s_params_array.shape}")
-        
-        return all_matrices_array, all_frequencies_array, all_s_params_array
-        
+        print(f"indices: {all_matrix_indices_array.shape}")
+        return all_matrices_array, all_frequencies_array, all_s_params_array, all_matrix_indices_array
+    def prepare_frequency_input(self, frequencies, method='log'):
+        """准备频率输入"""
+        if method == 'log':
+            # 对数归一化（适合宽频带）
+            log_freq = np.log10(frequencies)
+            log_min = np.min(log_freq)
+            log_max = np.max(log_freq)
+            return (log_freq - log_min) / (log_max - log_min)
+        elif method == 'linear':
+            # 线性归一化
+            return (frequencies - frequencies.min()) / (frequencies.max() - frequencies.min())
+        elif method == 'periodic':
+            # 周期性编码（适合高频）
+            # 将频率转换为正弦和余弦特征
+            normalized = (frequencies - frequencies.min()) / (frequencies.max() - frequencies.min())
+            angle = 2 * np.pi * normalized
+            return np.column_stack([np.sin(angle), np.cos(angle)])  
     def split_data(self, X_matrices, X_frequencies, y_s_params, indices=None,
                    test_size=0.2, val_size=0.1, random_state=42):
         """
@@ -246,9 +268,9 @@ class DataPreprocessor:
         )
         
         # 打印划分结果
-        print(f"训练集: {X_train_matrices.shape[0]} 个样本")
-        print(f"验证集: {X_val_matrices.shape[0]} 个样本")
-        print(f"测试集: {X_test_matrices.shape[0]} 个样本")
+        # print(f"训练集: {X_train_matrices.shape[0]} 个样本")
+        # print(f"验证集: {X_val_matrices.shape[0]} 个样本")
+        # print(f"测试集: {X_test_matrices.shape[0]} 个样本")
         
         # 返回划分结果
         return {
@@ -273,9 +295,9 @@ class DataPreprocessor:
         }
     def analyze_data_distribution(self, split_data_dict):
         """分析数据分布"""
-        print("\n" + "="*60)
-        print("数据分布分析")
-        print("="*60)
+        # print("\n" + "="*60)
+        # print("数据分布分析")
+        # print("="*60)
         
         train_size = len(split_data_dict['train']['s_params'])
         val_size = len(split_data_dict['val']['s_params'])
@@ -309,9 +331,9 @@ class DataPreprocessor:
             s11_real = s_params[:, 0]  # 第一个是S11实部
             
             axes[0, ax_idx].hist(s11_real, bins=50, alpha=0.7, color=['blue', 'green', 'red'][ax_idx])
-            axes[0, ax_idx].set_title(f'{split_name.capitalize()}集 - S11实部分布')
-            axes[0, ax_idx].set_xlabel('S11实部值')
-            axes[0, ax_idx].set_ylabel('频数')
+            axes[0, ax_idx].set_title(f'{split_name.capitalize()} - S11_Real Distribution')
+            axes[0, ax_idx].set_xlabel('S11_Real')
+            axes[0, ax_idx].set_ylabel('Freq')
             axes[0, ax_idx].grid(True, alpha=0.3)
         
         # 频率分布
@@ -319,11 +341,12 @@ class DataPreprocessor:
             frequencies = split_data['frequencies']
             
             axes[1, ax_idx].hist(frequencies, bins=50, alpha=0.7, color=['blue', 'green', 'red'][ax_idx])
-            axes[1, ax_idx].set_title(f'{split_name.capitalize()}集 - 频率分布')
-            axes[1, ax_idx].set_xlabel('归一化频率')
-            axes[1, ax_idx].set_ylabel('频数')
+            axes[1, ax_idx].set_title(f'{split_name.capitalize()} - Freq Distribution')
+            axes[1, ax_idx].set_xlabel('Normalization Freq')
+            axes[1, ax_idx].set_ylabel('Hz')
             axes[1, ax_idx].grid(True, alpha=0.3)
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        plt.show()
+        # plt.show()
+        plt.close()

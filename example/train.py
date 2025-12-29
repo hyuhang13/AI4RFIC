@@ -5,17 +5,21 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import os
 import numpy as np
-
+import seaborn as sns
+import pandas as pd
+from matplotlib.patches import Patch
 from utils import save_checkpoint, find_latest_checkpoint, load_model
 from utils import print_training_progress
 from config import TRAIN_CONFIG, DEVICE, OPTIMIZER_CONFIG, SCHEDULER_CONFIG, MODEL_CONFIG
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-
+import matplotlib
+matplotlib.use('Agg')  # 全局设置无GUI后端，必须在import plt前/绘图前执行
+import matplotlib.pyplot as plt
 class WeightedMSELoss(nn.Module):
     """加权MSE损失函数"""
     def __init__(self, weights=None):
         super().__init__()
-
+        torch.cuda.empty_cache()
         if weights is not None:
             self.weights = torch.tensor(weights, dtype=torch.float32)
         else:
@@ -241,19 +245,23 @@ class ModelManager:
         all_predictions = []
         all_targets = []
         all_frequencies = []
-        
+        i = 0
         with torch.no_grad():
             for batch in test_loader:
+                # matrices = batch['matrix'].to(self.device)
+                # frequencies = batch['frequency'].to(self.device)
+                # s_params = batch['s_params'].to(self.device)
                 matrices = batch['matrix'].to(self.device)
                 frequencies = batch['frequency'].to(self.device)
                 s_params = batch['s_params'].to(self.device)
-                
                 predictions = self.model(matrices, frequencies)
                 
                 all_predictions.append(predictions.cpu().numpy())
                 all_targets.append(s_params.cpu().numpy())
                 all_frequencies.append(frequencies.cpu().numpy())
-        
+                # print("##############\n")
+                # print(i)
+                # i += 1
         # 合并所有批次
         all_predictions = np.vstack(all_predictions)
         all_targets = np.vstack(all_targets)
@@ -352,7 +360,7 @@ class ModelManager:
         if isinstance(matrix, np.ndarray):
             matrix = torch.FloatTensor(matrix)
         if isinstance(frequency, (int, float)):
-            frequency = torch.FloatTensor([[frequency / 30]])  # 归一化
+            frequency = torch.FloatTensor([[frequency]])  # 归一化
         print("Sample Input:\n")
         print(matrix)
         print(frequency)
@@ -552,12 +560,12 @@ class ModelManager:
             if rel_errors:
                 axes[i].hist(rel_errors, bins=50, alpha=0.7, color='skyblue', edgecolor='black')
                 axes[i].axvline(np.mean(rel_errors), color='red', linestyle='--', 
-                               label=f'均值: {np.mean(rel_errors):.2f}%')
+                               label=f'Mean: {np.mean(rel_errors):.2f}%')
                 axes[i].axvline(np.median(rel_errors), color='green', linestyle='--', 
-                               label=f'中位数: {np.median(rel_errors):.2f}%')
-                axes[i].set_xlabel('相对误差 (%)')
-                axes[i].set_ylabel('频数')
-                axes[i].set_title(f'{name} 误差分布')
+                               label=f'Median: {np.median(rel_errors):.2f}%')
+                axes[i].set_xlabel('Relative Error (%)')
+                axes[i].set_ylabel('Hz')
+                axes[i].set_title(f'{name} Error Distribution')
                 axes[i].legend()
                 axes[i].grid(True, alpha=0.3)
         
@@ -566,12 +574,12 @@ class ModelManager:
         if avg_errors:
             axes[-1].hist(avg_errors, bins=50, alpha=0.7, color='orange', edgecolor='black')
             axes[-1].axvline(np.mean(avg_errors), color='red', linestyle='--', 
-                            label=f'均值: {np.mean(avg_errors):.2f}%')
+                            label=f'Mean: {np.mean(avg_errors):.2f}%')
             axes[-1].axvline(np.median(avg_errors), color='green', linestyle='--', 
-                            label=f'中位数: {np.median(avg_errors):.2f}%')
-            axes[-1].set_xlabel('平均相对误差 (%)')
-            axes[-1].set_ylabel('频数')
-            axes[-1].set_title('样本平均误差分布')
+                            label=f'Median: {np.median(avg_errors):.2f}%')
+            axes[-1].set_xlabel('Average Relative Error (%)')
+            axes[-1].set_ylabel('Hz')
+            axes[-1].set_title('Sample Mean Error Distribution')
             axes[-1].legend()
             axes[-1].grid(True, alpha=0.3)
         
@@ -581,7 +589,7 @@ class ModelManager:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
             print(f"误差分布图已保存到: {save_path}")
         
-        plt.show()
+        # plt.show()
     
     def save_final_model(self, filepath, model_info=None):
         """保存最终模型"""
@@ -657,3 +665,423 @@ class ModelManager:
             print(f"  {name}: 训练集R²={train_r2:.4f}, 测试集R²={test_r2:.4f}")
         
         print("\n" + "="*80)
+    def plot_training_history(self, train_losses, val_losses, save_path=None):
+        """
+        绘制训练历史曲线
+        
+        Args:
+            train_losses: 训练损失列表
+            val_losses: 验证损失列表
+            save_path: 保存路径（可选）
+        """
+        plt.figure(figsize=(12, 6))
+        
+        # 绘制损失曲线
+        epochs = range(1, len(train_losses) + 1)
+        
+        plt.subplot(1, 2, 1)
+        plt.plot(epochs, train_losses, 'b-', label='Training Loss', linewidth=2, alpha=0.8)
+        plt.plot(epochs, val_losses, 'r-', label='Validation Loss', linewidth=2, alpha=0.8)
+        plt.xlabel('Epochs', fontsize=12)
+        plt.ylabel('Loss', fontsize=12)
+        plt.title('Training and Validation Loss', fontsize=14, fontweight='bold')
+        plt.legend(fontsize=11)
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        
+        # 绘制对数尺度损失曲线
+        plt.subplot(1, 2, 2)
+        plt.semilogy(epochs, train_losses, 'b-', label='Training Loss', linewidth=2, alpha=0.8)
+        plt.semilogy(epochs, val_losses, 'r-', label='Validation Loss', linewidth=2, alpha=0.8)
+        plt.xlabel('Epochs', fontsize=12)
+        plt.ylabel('Log Loss', fontsize=12)
+        plt.title('Log Scale Loss Curve', fontsize=14, fontweight='bold')
+        plt.legend(fontsize=11)
+        plt.grid(True, alpha=0.3, which='both')
+        plt.tight_layout()
+        
+        plt.suptitle(f'Model Training History (Best Val Loss: {self.best_val_loss:.6f})', 
+                    fontsize=16, fontweight='bold', y=1.02)
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"训练历史图已保存到: {save_path}")
+        print("???????????????????????????????????2")
+        # plt.show()
+        return plt.gcf()
+    def plot_scatter_comparison(self, predictions, targets, frequencies=None, 
+                               dataset_name="Test Set", save_path=None):
+        """
+        绘制预测值与真实值的散点对比图
+        
+        Args:
+            predictions: 预测值数组 (n_samples, 8)
+            targets: 真实值数组 (n_samples, 8)
+            frequencies: 频率数组 (n_samples, 1) 可选
+            dataset_name: 数据集名称
+            save_path: 保存路径（可选）
+        """
+        s_param_names = ['S11_real', 'S11_imag', 'S21_real', 'S21_imag',
+                        'S12_real', 'S12_imag', 'S22_real', 'S22_imag']
+        
+        # 计算每个S参数的R²和MAE
+        metrics_per_param = []
+        for i, name in enumerate(s_param_names):
+            pred_i = predictions[:, i]
+            target_i = targets[:, i]
+            r2 = r2_score(target_i, pred_i)
+            mae = mean_absolute_error(target_i, pred_i)
+            metrics_per_param.append({
+                'name': name,
+                'r2': r2,
+                'mae': mae
+            })
+        
+        # 创建子图
+        fig, axes = plt.subplots(2, 4, figsize=(20, 10))
+        axes = axes.flatten()
+        
+        # 为每个S参数绘制散点图
+        for i, (name, metrics) in enumerate(zip(s_param_names, metrics_per_param)):
+            ax = axes[i]
+            pred_i = predictions[:, i]
+            target_i = targets[:, i]
+            
+            # 绘制散点
+            if frequencies is not None:
+                # 使用频率作为颜色映射
+                scatter = ax.scatter(target_i, pred_i, c=frequencies.flatten(), 
+                                   cmap='viridis', alpha=0.6, s=30, 
+                                   edgecolors='white', linewidth=0.5)
+                # 添加颜色条
+                if i == 0:  # 只在第一个子图添加颜色条
+                    cbar = fig.colorbar(scatter, ax=ax, shrink=0.8)
+                    cbar.set_label('Normalized Frequency', fontsize=10)
+            else:
+                ax.scatter(target_i, pred_i, alpha=0.6, s=30, 
+                          color='steelblue', edgecolors='white', linewidth=0.5)
+            
+            # 添加对角线（理想预测线）
+            min_val = min(np.min(target_i), np.min(pred_i))
+            max_val = max(np.max(target_i), np.max(pred_i))
+            ax.plot([min_val, max_val], [min_val, max_val], 
+                   'r--', alpha=0.7, linewidth=2, label='Perfect Prediction')
+            
+            # 设置坐标轴
+            ax.set_xlabel('True Values', fontsize=11)
+            ax.set_ylabel('Predicted Values', fontsize=11)
+            ax.set_title(f'{name}\nR² = {metrics["r2"]:.4f}, MAE = {metrics["mae"]:.4f}', 
+                        fontsize=12, fontweight='bold')
+            ax.grid(True, alpha=0.3)
+            ax.set_aspect('equal', 'box')
+            
+            # 添加R²和MAE文本
+            textstr = f'R² = {metrics["r2"]:.4f}\nMAE = {metrics["mae"]:.4f}'
+            ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=10,
+                   verticalalignment='top', bbox=dict(boxstyle='round', 
+                   facecolor='white', alpha=0.8, edgecolor='gray'))
+        
+        # 移除多余的子图
+        for i in range(len(s_param_names), len(axes)):
+            fig.delaxes(axes[i])
+        
+        plt.suptitle(f'Prediction vs True Values - {dataset_name}\nScatter Plot Comparison', 
+                    fontsize=16, fontweight='bold', y=1.02)
+        plt.tight_layout()
+        print("???????????????????????????????????4")
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"散点对比图已保存到: {save_path}")
+        print("???????????????????????????????????5")
+        # plt.show()
+        return fig, axes
+    def plot_residual_distribution(self, predictions, targets, save_path=None):
+        """
+        绘制残差分布图
+        
+        Args:
+            predictions: 预测值数组
+            targets: 真实值数组
+            save_path: 保存路径（可选）
+        """
+        s_param_names = ['S11_real', 'S11_imag', 'S21_real', 'S21_imag',
+                        'S12_real', 'S12_imag', 'S22_real', 'S22_imag']
+        
+        residuals = predictions - targets
+        
+        fig, axes = plt.subplots(2, 4, figsize=(20, 10))
+        axes = axes.flatten()
+        
+        for i, name in enumerate(s_param_names):
+            ax = axes[i]
+            residual_i = residuals[:, i]
+            
+            # 绘制残差直方图
+            n, bins, patches = ax.hist(residual_i, bins=50, alpha=0.7, 
+                                     color='skyblue', edgecolor='black', 
+                                     density=True)
+            
+            # 添加正态分布曲线
+            from scipy.stats import norm
+            mu, std = norm.fit(residual_i)
+            x = np.linspace(min(residual_i), max(residual_i), 100)
+            p = norm.pdf(x, mu, std)
+            ax.plot(x, p, 'r-', linewidth=2, label=f'Normal Fit\nμ={mu:.4f}, σ={std:.4f}')
+            
+            # 添加均值和中位数线
+            ax.axvline(residual_i.mean(), color='green', linestyle='--', 
+                      linewidth=2, label=f'Mean: {residual_i.mean():.4f}')
+            ax.axvline(np.median(residual_i), color='orange', linestyle='--', 
+                      linewidth=2, label=f'Median: {np.median(residual_i):.4f}')
+            
+            ax.set_xlabel('Residual', fontsize=11)
+            ax.set_ylabel('Density', fontsize=11)
+            ax.set_title(f'{name} Residual Distribution', fontsize=12, fontweight='bold')
+            ax.legend(fontsize=9)
+            ax.grid(True, alpha=0.3)
+        
+        # 移除多余的子图
+        for i in range(len(s_param_names), len(axes)):
+            fig.delaxes(axes[i])
+        
+        plt.suptitle('Residual Distribution Analysis\n(Prediction - True Value)', 
+                    fontsize=16, fontweight='bold', y=1.02)
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"残差分布图已保存到: {save_path}")
+        
+        # plt.show()
+        return fig, axes
+    def plot_prediction_comparison_by_frequency(self, predictions, targets, frequencies, 
+                                               save_path=None):
+        """
+        按频率分组的预测对比图
+        
+        Args:
+            predictions: 预测值
+            targets: 真实值
+            frequencies: 频率值（归一化的）
+            save_path: 保存路径
+        """
+        # 将频率反归一化并分组
+        freq_ghz = frequencies.flatten() * 30  # 反归一化，假设原始归一化到0-30GHz
+        freq_bins = [0, 9, 10, 11, 12]  # 频率分组 (GHz)
+        freq_labels = ['8-9GHz', '9-10GHz', '10-11GHz', '11-12GHz']
+        
+        freq_groups = pd.cut(freq_ghz, bins=freq_bins, labels=freq_labels, include_lowest=True)
+        
+        # 计算每个频率组的误差指标
+        group_metrics = {}
+        for group in freq_labels:
+            mask = freq_groups == group
+            if np.sum(mask) > 0:
+                group_pred = predictions[mask]
+                group_true = targets[mask]
+                mae = mean_absolute_error(group_true, group_pred)
+                rmse = np.sqrt(mean_squared_error(group_true, group_pred))
+                r2 = r2_score(group_true, group_pred)
+                group_metrics[group] = {'MAE': mae, 'RMSE': rmse, 'R2': r2, 'count': np.sum(mask)}
+        
+        # 创建图形
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        axes = axes.flatten()
+        
+        # 1. 各频率组的样本数量
+        ax1 = axes[0]
+        counts = [group_metrics[g]['count'] for g in freq_labels if g in group_metrics]
+        labels = [g for g in freq_labels if g in group_metrics]
+        ax1.bar(labels, counts, color=sns.color_palette("husl", len(labels)))
+        ax1.set_xlabel('Frequency Range', fontsize=12)
+        ax1.set_ylabel('Number of Samples', fontsize=12)
+        ax1.set_title('Sample Distribution by Frequency', fontsize=14, fontweight='bold')
+        ax1.grid(True, alpha=0.3)
+        
+        # 在柱状图上添加数量标签
+        for i, count in enumerate(counts):
+            ax1.text(i, count + max(counts)*0.02, str(count), 
+                    ha='center', va='bottom', fontsize=11)
+        
+        # 2. 各频率组的MAE
+        ax2 = axes[1]
+        mae_values = [group_metrics[g]['MAE'] for g in labels]
+        bars = ax2.bar(labels, mae_values, color=sns.color_palette("husl", len(labels)))
+        ax2.set_xlabel('Frequency Range', fontsize=12)
+        ax2.set_ylabel('MAE', fontsize=12)
+        ax2.set_title('MAE by Frequency Range', fontsize=14, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
+        
+        # 3. 各频率组的R²
+        ax3 = axes[2]
+        r2_values = [group_metrics[g]['R2'] for g in labels]
+        bars = ax3.bar(labels, r2_values, color=sns.color_palette("husl", len(labels)))
+        ax3.set_xlabel('Frequency Range', fontsize=12)
+        ax3.set_ylabel('R² Score', fontsize=12)
+        ax3.set_title('R² Score by Frequency Range', fontsize=14, fontweight='bold')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_ylim(0, 1)  # R²通常在0-1之间
+        
+        # 4. 整体预测误差随频率变化
+        ax4 = axes[3]
+        # 计算每个样本的平均绝对误差
+        sample_mae = np.mean(np.abs(predictions - targets), axis=1)
+        scatter = ax4.scatter(freq_ghz, sample_mae, alpha=0.6, s=30, 
+                             c=sample_mae, cmap='plasma')
+        ax4.set_xlabel('Frequency (GHz)', fontsize=12)
+        ax4.set_ylabel('Sample MAE', fontsize=12)
+        ax4.set_title('Prediction Error vs Frequency', fontsize=14, fontweight='bold')
+        ax4.grid(True, alpha=0.3)
+        
+        # 添加颜色条
+        cbar = plt.colorbar(scatter, ax=ax4)
+        cbar.set_label('MAE', fontsize=11)
+        
+        plt.suptitle('Frequency-based Performance Analysis', 
+                    fontsize=16, fontweight='bold', y=1.02)
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"频率分析图已保存到: {save_path}")
+        
+        # plt.show()
+        return fig, axes, group_metrics
+    
+    def create_comprehensive_visualization(self, train_losses, val_losses, 
+                                         test_predictions, test_targets, 
+                                         test_frequencies, output_dir=None):
+        """
+        创建综合可视化报告，包含所有图表
+        
+        Args:
+            train_losses: 训练损失
+            val_losses: 验证损失
+            test_predictions: 测试集预测值
+            test_targets: 测试集真实值
+            test_frequencies: 测试集频率
+            output_dir: 输出目录
+            
+        Returns:
+            包含所有图形的字典
+        """
+        import os
+        
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+        
+        figures = {}
+        
+        print("开始生成可视化报告...")
+        
+        # 1. 训练历史图
+        print("1. 生成训练历史图...")
+        fig_loss = self.plot_training_history(train_losses, val_losses)
+        figures['training_history'] = fig_loss
+        
+        if output_dir:
+            fig_loss.savefig(os.path.join(output_dir, 'training_history.png'), 
+                           dpi=300, bbox_inches='tight')
+        
+        # 2. 散点对比图
+        print("2. 生成散点对比图...")
+        fig_scatter, axes_scatter = self.plot_scatter_comparison(
+            test_predictions, test_targets, test_frequencies, "Test Set"
+        )
+        figures['scatter_comparison'] = fig_scatter
+        
+        if output_dir:
+            fig_scatter.savefig(os.path.join(output_dir, 'scatter_comparison.png'), 
+                              dpi=300, bbox_inches='tight')
+        
+        # 3. 残差分布图
+        print("3. 生成残差分布图...")
+        fig_residual, axes_residual = self.plot_residual_distribution(
+            test_predictions, test_targets
+        )
+        figures['residual_distribution'] = fig_residual
+        
+        if output_dir:
+            fig_residual.savefig(os.path.join(output_dir, 'residual_distribution.png'), 
+                               dpi=300, bbox_inches='tight')
+        
+        # 4. 频率分析图
+        print("4. 生成频率分析图...")
+        fig_freq, axes_freq, freq_metrics = self.plot_prediction_comparison_by_frequency(
+            test_predictions, test_targets, test_frequencies
+        )
+        figures['frequency_analysis'] = fig_freq
+        
+        if output_dir:
+            fig_freq.savefig(os.path.join(output_dir, 'frequency_analysis.png'), 
+                           dpi=300, bbox_inches='tight')
+        
+        # 5. 创建汇总报告
+        print("5. 生成汇总报告...")
+        self._create_summary_report(train_losses, val_losses, test_predictions, 
+                                  test_targets, output_dir)
+        
+        print("可视化报告生成完成!")
+        
+        return figures
+    def _create_summary_report(self, train_losses, val_losses, 
+                              test_predictions, test_targets, output_dir=None):
+        """创建文本格式的汇总报告"""
+        report_lines = []
+        
+        report_lines.append("=" * 80)
+        report_lines.append("模型训练与评估汇总报告")
+        report_lines.append("=" * 80)
+        report_lines.append(f"\n生成时间: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # 训练信息
+        report_lines.append("\n" + "-" * 40)
+        report_lines.append("训练过程信息")
+        report_lines.append("-" * 40)
+        report_lines.append(f"总训练轮数: {len(train_losses)}")
+        report_lines.append(f"最终训练损失: {train_losses[-1]:.6f}")
+        report_lines.append(f"最终验证损失: {val_losses[-1]:.6f}")
+        report_lines.append(f"最佳验证损失: {self.best_val_loss:.6f}")
+        
+        # 整体性能指标
+        overall_r2 = r2_score(test_targets, test_predictions)
+        overall_mae = mean_absolute_error(test_targets, test_predictions)
+        overall_rmse = np.sqrt(mean_squared_error(test_targets, test_predictions))
+        
+        report_lines.append("\n" + "-" * 40)
+        report_lines.append("整体测试性能")
+        report_lines.append("-" * 40)
+        report_lines.append(f"R² 分数: {overall_r2:.6f}")
+        report_lines.append(f"平均绝对误差 (MAE): {overall_mae:.6f}")
+        report_lines.append(f"均方根误差 (RMSE): {overall_rmse:.6f}")
+        
+        # 各S参数性能
+        s_param_names = ['S11_real', 'S11_imag', 'S21_real', 'S21_imag',
+                        'S12_real', 'S12_imag', 'S22_real', 'S22_imag']
+        
+        report_lines.append("\n" + "-" * 40)
+        report_lines.append("各S参数详细性能")
+        report_lines.append("-" * 40)
+        
+        for i, name in enumerate(s_param_names):
+            pred_i = test_predictions[:, i]
+            target_i = test_targets[:, i]
+            
+            r2 = r2_score(target_i, pred_i)
+            mae = mean_absolute_error(target_i, pred_i)
+            mre = np.mean(np.abs((pred_i - target_i) / (np.abs(target_i) + 1e-12))) * 100
+            
+            report_lines.append(f"\n{name}:")
+            report_lines.append(f"  R²: {r2:.6f}")
+            report_lines.append(f"  MAE: {mae:.6f}")
+            report_lines.append(f"  平均相对误差: {mre:.2f}%")
+        
+        # 将报告写入文件
+        if output_dir:
+            report_path = os.path.join(output_dir, 'summary_report.txt')
+            with open(report_path, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(report_lines))
+            print(f"汇总报告已保存到: {report_path}")
+        
+        # 在控制台打印报告
+        print('\n'.join(report_lines))

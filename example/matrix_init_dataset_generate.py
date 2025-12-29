@@ -43,7 +43,7 @@ def generate_binary_matrices(num_matrices=100000, matrix_size=19, output_file="b
 # ÔËÐÐÉú³Éº¯Êý
 if __name__ == "__main__":
     # ÅäÖÃ²ÎÊý - ¿É¸ù¾ÝÐèÒªÐÞ¸Ä
-    NUM_MATRICES = 100000
+    NUM_MATRICES = 2000
     MATRIX_SIZE = 19
     OUTPUT_FILE = "binary_matrices.txt"
     

@@ -545,7 +545,7 @@ class GeneticAlgorithm:
         
         plt.tight_layout()
         plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
-        plt.show()
+        # plt.show()
         
         # 单独保存最佳矩阵图像
         plt.figure(figsize=(8, 8))
@@ -553,4 +553,5 @@ class GeneticAlgorithm:
         plt.title(f'Optimized Binary Matrix (Frequency: {self.target_freq} GHz)')
         plt.colorbar(label='Value (0/1)')
         plt.savefig('optimized_matrix.png', dpi=300, bbox_inches='tight')
-        plt.show()
+        # plt.show()
+        plt.close()
