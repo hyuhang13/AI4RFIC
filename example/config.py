@@ -33,7 +33,7 @@ GA_CONFIG = {
 TRAIN_CONFIG = {
     'batch_size': 1024,
     'learning_rate': 0.001,
-    'epochs': 102,
+    'epochs': 300,
     'weight_decay': 0.001,
     'checkpoint_dir': 'checkpoints/inductor_checkpoints',
     'resume_training': True
