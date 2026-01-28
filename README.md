@@ -27,7 +27,7 @@
 
 1. 原始随机矩阵文件，即是Python生成的随机版图二进制文件，binary_matrices.py为生成随机二进制矩阵的Python文件，右边是生成的文件。为方便起见这里把原始数据分为五份，同时开5个workspace进行数据收集，提高速度，这里我们以part1_4.txt为例。
 
-![0c774fff-06be-472c-ad2c-d66063e38b28](file:///C:/Users/hhabu/Pictures/Typedown/0c774fff-06be-472c-ad2c-d66063e38b28.png)
+![Alt Text](images/image_1.png)
 
 2. 核心skill脚本，调用virtuoso进行生成版图，并调用EMX仿真实现S参数的收集，如下图所示（如上面所说，复制五份脚本）。
 
