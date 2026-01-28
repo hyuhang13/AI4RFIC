@@ -1,0 +1,49 @@
+2025-12-29 15:19:19 - INFO - 日志文件保存到: logs/training_20251229_151919.log
+2025-12-29 15:19:19 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2025-12-29 15:19:20 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2025-12-29 15:19:21 - INFO - === 训练神经网络仿真器 ===
+2025-12-29 15:19:21 - INFO - 使用模型类型: advanced
+2025-12-29 15:19:21 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2025-12-29 15:20:03 - INFO - 数据集已从 /root/aicp-data/saved_datasets/v1 加载
+2025-12-29 15:20:03 - INFO - 训练集大小: 21000000
+2025-12-29 15:20:03 - INFO - 验证集大小: 6000000
+2025-12-29 15:20:03 - INFO - 测试集大小: 3000000
+2025-12-29 15:20:03 - ERROR - Traceback (most recent call last):
+
+2025-12-29 15:20:03 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 427, in <module>
+
+2025-12-29 15:20:03 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2025-12-29 15:20:03 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 113, in train_neural_network
+
+2025-12-29 15:20:03 - ERROR - train_loader = data_loaders['train_loader']
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ~
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - ^
+2025-12-29 15:20:03 - ERROR - KeyError
+2025-12-29 15:20:03 - ERROR - : 
+2025-12-29 15:20:03 - ERROR - 'train_loader'

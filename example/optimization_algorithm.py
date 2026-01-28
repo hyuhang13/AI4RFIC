@@ -1,0 +1,631 @@
+# optimization/genetic_algorithm.py
+import numpy as np
+import random
+from config import GA_CONFIG, DATA_CONFIG
+import torch
+from typing import List, Tuple, Dict, Optional, Callable
+from config import DEVICE,GA_CONFIG
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from s_param_visualizer import SParamVisualizer
+class GeneticAlgorithm:
+    """
+    遗传算法优化器：优化19×19二进制矩阵结构以获得目标S参数
+    """
+    def __init__(self, model_manager, matrix_shape = (19,19),device = None):
+        self.model_manager = model_manager
+        self.height, self.width = matrix_shape
+        self.total_pixels = self.height * self.width
+        self.density = random.uniform(0.3, 0.7) #暂未使用该超参数
+        self.device = DEVICE
+        # S参数名称
+        self.s_param_names = ['S11', 'S21', 'S12', 'S22']
+        self.s_component_names = ['real', 'imag', 'mag', 'phase']
+        # 遗传算法参数
+        self.target_freq = None
+        self.population_size = GA_CONFIG['population_size']
+        self.generations = GA_CONFIG['generations']
+        self.mutation_rate = GA_CONFIG['mutation_rate']  # 变异率
+        self.crossover_rate = GA_CONFIG['crossover_rate']  # 交叉率
+        self.elite_size = GA_CONFIG['elite_size']  # 精英个体数量
+        self.tournament_size = GA_CONFIG['tournament_size']
+        self.w1 = GA_CONFIG['fitness_weight']['w1']
+        self.w2 = GA_CONFIG['fitness_weight']['w2']
+        self.w3 = GA_CONFIG['fitness_weight']['w3']
+        print(f"矩阵遗传算法初始化完成")
+        print(f"矩阵形状: {matrix_shape}")
+        print(f"总像素数: {self.total_pixels}")
+        print(f"使用设备: {self.device}")
+
+    def apply_symmetry(self, matrix: np.ndarray) -> np.ndarray:
+        pass  
+    def ensure_double_port(self,matrix):
+        matrix[9][0] = 1
+        matrix[9][18] = 1
+        return matrix
+    def create_random_matrix(self, method='random', density=0.5) -> np.ndarray:
+        """
+        创建随机二进制矩阵
+        
+        Args:
+            method: 创建方法 ('random', 'sparse', 'dense', 'pattern')
+            density: 1的密度 (仅用于random方法)
+        
+        Returns:
+            19×19的二进制矩阵
+        """
+        if method == 'random':
+            # 完全随机
+            # matrix = np.random.rand(self.height, self.width)
+            # matrix = (matrix < density).astype(np.float32)
+            matrix = np.random.randint(
+                low=0,          
+                high=2,         
+                size=(self.height, self.width),  
+                dtype=np.int32
+            )
+        elif method == 'sparse':
+            pass
+        matrix = self.ensure_double_port(matrix)
+        return np.ascontiguousarray(matrix)  # 确保返回连续数组
+    def create_individual(self):
+        """创建一个随机个体"""
+        individual = self.create_random_matrix('random', self.density)
+        return individual
+    
+    def create_population(self, population_size: int = None) -> List[np.ndarray]:
+        """创建初始种群"""
+        population_size = self.population_size
+        population = []
+        print(f"创建初始种群 (大小: {population_size})...")
+        
+        for i in tqdm(range(population_size), desc="创建种群"):
+            individual = self.create_individual()
+            population.append(individual)
+            
+        return population
+    
+    def matrix_to_tensor(self, matrix: np.ndarray) -> torch.Tensor:
+        """将numpy矩阵转换为模型输入张量"""
+        # 添加批次维度和通道维度
+        tensor = torch.FloatTensor(matrix).unsqueeze(0).unsqueeze(0)  # (1, 1, 19, 19)
+        return tensor.to(self.device)
+    
+    def predict_s_params(self, matrix: np.ndarray, frequency: float) -> Dict[str, float]:
+        """预测矩阵在指定频率下的S参数"""
+        # 归一化频率 (0-30GHz -> 0-1)
+        # print(frequency)
+        frequency_norm = (frequency - 100000000) / 2.99e10
+        # print(frequency_norm)
+        matrix = self.ensure_contiguous(matrix)
+        # 使用模型管理器进行预测
+        s_params = self.model_manager.predict_single_sample(matrix, frequency_norm)
+        # print(s_params)
+        return s_params
+    
+    def calculate_magnitude_db(self, real: float, imag: float) -> float:
+        """计算S参数的幅度(dB)"""
+        magnitude = np.sqrt(real**2 + imag**2)
+        if magnitude < 1e-12:  # 避免log(0)
+            return -100.0  # 非常小的dB值
+        return 20 * np.log10(magnitude)
+    
+    def calculate_phase_degrees(self, real: float, imag: float) -> float:
+        """计算S参数的相位(度)"""
+        return np.degrees(np.arctan2(imag, real))
+    
+    # def predict_performance(self, individual):
+    #     """使用神经网络预测个体性能"""
+    #     self.model.eval()
+    #     with torch.no_grad():
+    #         individual_normalized = self.X_scaler.transform([individual])
+    #         individual_tensor = torch.FloatTensor(individual_normalized)
+    #         device = next(self.model.parameters()).device
+    #         individual_tensor = individual_tensor.to(device)
+            
+    #         prediction_normalized = self.model(individual_tensor)
+        
+    #         prediction_cpu = prediction_normalized.cpu()
+    #         prediction = self.y_scaler.inverse_transform(prediction_cpu.numpy())
+    #         return prediction[0]
+    def print_model_first_10_params(self,model):
+        """打印模型前10个参数值"""
+        print("="*80)
+        print("模型参数前10个值检查")
+        print("="*80)
+        
+        all_params = []
+        
+        # 收集所有参数
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                data = param.data.cpu().numpy().flatten()
+                all_params.extend(data)
+        
+        print(f"模型总参数数量: {len(all_params):,}")
+        
+        if len(all_params) >= 500:
+            print(f"前10个参数值:")
+            for i, val in enumerate(all_params[:500]):
+                print(f"  参数[{i}] = {val:.8f}")
+            
+            print(f"\n参数统计:")
+            print(f"  最小值: {min(all_params[:500]):.8f}")
+            print(f"  最大值: {max(all_params[:500]):.8f}")
+            print(f"  平均值: {np.mean(all_params[:500]):.8f}")
+            print(f"  标准差: {np.std(all_params[:500]):.8f}")
+        else:
+            print(f"模型参数少于10个: {len(all_params)}个")
+    def fitness_function(self, matrix: np.ndarray, frequency: float, 
+                        target_params: Dict[str, Dict]) -> Tuple[float, Dict]:
+        """
+        计算适应度
+        
+        Args:
+            matrix: 二进制矩阵
+            frequency: 频率 (GHz)
+            target_params: 目标参数字典，例如:
+                {
+                    'S11': {'magnitude_db': -20, 'weight': 1.0},  # 目标-20dB
+                    'S21': {'magnitude_db': -1, 'weight': 0.8},   # 目标-1dB
+                    'S22': {'magnitude_db': -20, 'weight': 0.7},  # 目标-20dB
+                    'symmetry': {'weight': 0.3}  # 对称性权重
+                }
+        
+        Returns:
+            fitness: 适应度值 (0-1, 越高越好)
+            prediction_info: 预测信息字典
+        """
+        # 预测S参数
+        
+        s_params = self.predict_s_params(matrix, frequency)
+        
+        # 计算幅度(dB)
+        s11_mag_db = self.calculate_magnitude_db(s_params['S11_real'], s_params['S11_imag'])
+        s21_mag_db = self.calculate_magnitude_db(s_params['S21_real'], s_params['S21_imag'])
+        s12_mag_db = self.calculate_magnitude_db(s_params['S12_real'], s_params['S12_imag'])
+        s22_mag_db = self.calculate_magnitude_db(s_params['S22_real'], s_params['S22_imag'])
+        
+        # 计算相位(度)
+        s11_phase = self.calculate_phase_degrees(s_params['S11_real'], s_params['S11_imag'])
+        s21_phase = self.calculate_phase_degrees(s_params['S21_real'], s_params['S21_imag'])
+        
+        total_fitness = 0.0
+        total_weight = 0.0
+        
+        # 计算各项指标的适应度
+        fitness_components = {}
+        
+        # S11幅度适应度 (希望反射小)
+        if 'S11' in target_params:
+            target_s11 = target_params['S11']
+            if 'magnitude_db' in target_s11:
+                target_db = target_s11['magnitude_db']
+                weight = target_s11.get('weight', 1.0)
+                
+                # 误差越小越好
+                error = abs(s11_mag_db - target_db)
+                # 转换为适应度：误差为0时适应度为1，误差越大适应度越小
+                s11_fitness = 1.0 / (1.0 + error)
+                
+                total_fitness += s11_fitness * weight
+                total_weight += weight
+                fitness_components['S11_mag'] = s11_fitness
+        
+        # S21幅度适应度 (希望传输损耗小)
+        if 'S21' in target_params:
+            target_s21 = target_params['S21']
+            if 'magnitude_db' in target_s21:
+                target_db = target_s21['magnitude_db']
+                weight = target_s21.get('weight', 1.0)
+                
+                error = abs(s21_mag_db - target_db)
+                s21_fitness = 1.0 / (1.0 + error)
+                
+                total_fitness += s21_fitness * weight
+                total_weight += weight
+                fitness_components['S21_mag'] = s21_fitness
+        
+        # S22幅度适应度
+        if 'S22' in target_params:
+            target_s22 = target_params['S22']
+            if 'magnitude_db' in target_s22:
+                target_db = target_s22['magnitude_db']
+                weight = target_s22.get('weight', 1.0)
+                
+                error = abs(s22_mag_db - target_db)
+                s22_fitness = 1.0 / (1.0 + error)
+                
+                total_fitness += s22_fitness * weight
+                total_weight += weight
+                fitness_components['S22_mag'] = s22_fitness
+        
+        # 对称性适应度 (S11 ≈ S22, S21 ≈ S12)
+        if 'symmetry' in target_params:
+            weight = target_params['symmetry'].get('weight', 0.3)
+            
+            # S11和S22的对称性
+            s11_s22_diff = abs(s11_mag_db - s22_mag_db)
+            # S21和S12的对称性
+            s21_s12_diff = abs(s21_mag_db - s12_mag_db)
+            
+            symmetry_error = (s11_s22_diff + s21_s12_diff) / 2.0
+            symmetry_fitness = 1.0 / (1.0 + symmetry_error)
+            
+            total_fitness += symmetry_fitness * weight
+            total_weight += weight
+            fitness_components['symmetry'] = symmetry_fitness
+        
+        # 结构复杂度惩罚（可选，避免过于复杂的结构）
+        if 'complexity' in target_params:
+            weight = target_params['complexity'].get('weight', 0.1)
+            
+            # 计算矩阵复杂度：1的比例
+            density = np.mean(matrix)
+            # 理想密度可能在0.3-0.7之间
+            if density < 0.1 or density > 0.9:
+                complexity_penalty = 0.5
+            elif density < 0.2 or density > 0.8:
+                complexity_penalty = 0.8
+            else:
+                complexity_penalty = 1.0
+                
+            total_fitness += complexity_penalty * weight
+            total_weight += weight
+            fitness_components['complexity'] = complexity_penalty
+        
+        # 归一化适应度
+        # if total_weight > 0:
+        #     normalized_fitness = total_fitness / total_weight
+        # else:
+        #     normalized_fitness = 0.0
+
+        # 计算代价值
+        s21_predict = s_params['S21_real']+1j*s_params['S21_imag']
+        s22_predict = s_params['S22_real']+1j*s_params['S22_imag']
+        IL_passive = 1-abs(s21_predict)
+        Loss_penalty = 0
+        # individual_cost = self.w1*abs(s22_predict-target_params['gamma_opt']['origin_value']) + self.w2*IL_passive + self.w3*Loss_penalty
+        individual_cost = abs(target_params['s11_real']-s_params['S11_real'])+\
+                          abs(target_params['s21_real']-s_params['S21_real'])+\
+                          abs(target_params['s12_real']-s_params['S12_real'])+\
+                          abs(target_params['s22_real']-s_params['S22_real'])+\
+                          abs(target_params['s11_imag']-s_params['S11_imag'])+\
+                          abs(target_params['s21_imag']-s_params['S21_imag'])+\
+                          abs(target_params['s12_imag']-s_params['S12_imag'])+\
+                          abs(target_params['s22_imag']-s_params['S22_imag'])
+        individual_fitness = -individual_cost
+        # 端口代价值
+        if(matrix[9][0]!=1)and(matrix[9][18]!=1):
+            individual_fitness -= 50
+        # 收集预测信息
+        prediction_info = {
+            's_params': s_params,
+            'S11_mag_db': s11_mag_db,
+            'S21_mag_db': s21_mag_db,
+            'S12_mag_db': s12_mag_db,
+            'S22_mag_db': s22_mag_db,
+            'S11_phase_deg': s11_phase,
+            'S21_phase_deg': s21_phase,
+            'S_params_raw': s_params,
+            'fitness_components': fitness_components,
+            'matrix_density': np.mean(matrix)
+        }
+        
+        return individual_fitness, prediction_info
+    def ensure_contiguous(self, matrix):
+        """确保矩阵是连续数组"""
+        if isinstance(matrix, np.ndarray):
+            return np.ascontiguousarray(matrix)
+        elif isinstance(matrix, torch.Tensor):
+            return matrix.contiguous()
+        return matrix
+    def crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
+        """交叉操作：创建子代矩阵"""
+        parent1 = self.ensure_contiguous(parent1)
+        parent2 = self.ensure_contiguous(parent2)
+        child = np.zeros_like(parent1)
+        
+        # 随机选择交叉方式
+        crossover_type = random.choice(['uniform', 'single_point', 'two_point', 'block'])
+        
+        if crossover_type == 'uniform':
+            # 均匀交叉：每个像素随机从父代选择
+            for i in range(self.height):
+                for j in range(self.width):
+                    if random.random() < 0.5:
+                        child[i, j] = parent1[i, j]
+                    else:
+                        child[i, j] = parent2[i, j]
+                        
+        elif crossover_type == 'single_point':
+            # 单点交叉：选择一行或一列作为交叉点
+            if random.random() < 0.5:
+                # 水平交叉
+                crossover_point = random.randint(1, self.height-2)
+                child[:crossover_point, :] = parent1[:crossover_point, :]
+                child[crossover_point:, :] = parent2[crossover_point:, :]
+            else:
+                # 垂直交叉
+                crossover_point = random.randint(1, self.width-2)
+                child[:, :crossover_point] = parent1[:, :crossover_point]
+                child[:, crossover_point:] = parent2[:, crossover_point:]
+                
+        elif crossover_type == 'two_point':
+            # 两点交叉
+            point1 = random.randint(1, self.total_pixels // 3)
+            point2 = random.randint(2 * self.total_pixels // 3, self.total_pixels - 1)
+            
+            # 展平矩阵
+            flat1 = parent1.flatten()
+            flat2 = parent2.flatten()
+            flat_child = np.zeros_like(flat1)
+            
+            flat_child[:point1] = flat1[:point1]
+            flat_child[point1:point2] = flat2[point1:point2]
+            flat_child[point2:] = flat1[point2:]
+            
+            child = flat_child.reshape(self.height, self.width)
+            
+        elif crossover_type == 'block':
+            # 块交叉：交换一个子块
+            block_size = random.randint(3, 7)
+            h_start = random.randint(0, self.height - block_size)
+            w_start = random.randint(0, self.width - block_size)
+            
+            child = parent1.copy()
+            child[h_start:h_start+block_size, w_start:w_start+block_size] = \
+                parent2[h_start:h_start+block_size, w_start:w_start+block_size]
+        
+        # 二值化
+        child = (child > 0.5).astype(np.float32)
+        child = self.ensure_double_port(child)
+        return np.ascontiguousarray(child)  # 确保返回连续数组
+    
+    def mutate(self, matrix: np.ndarray, mutation_rate: float = None) -> np.ndarray:
+        """变异操作"""
+        if mutation_rate is None:
+            mutation_rate = self.mutation_rate
+            
+        mutated = matrix.copy()
+        
+        # 随机翻转像素
+        for i in range(self.height):
+            for j in range(self.width):
+                if random.random() < mutation_rate:
+                    mutated[i, j] = 1.0 - mutated[i, j]  # 翻转
+        
+        # 额外的变异操作（以较低概率）
+        if random.random() < 0.1:  # 30%概率进行额外变异
+            mutation_type = random.choice(['invert', 'shift', 'rotate', 'noise'])
+            
+            if mutation_type == 'invert':
+                # 整体反转
+                mutated = 1.0 - mutated
+                
+            elif mutation_type == 'shift':
+                # 平移
+                shift_h = random.randint(-2, 2)
+                shift_w = random.randint(-2, 2)
+                temp = np.zeros_like(mutated)
+                
+                for i in range(self.height):
+                    for j in range(self.width):
+                        new_i, new_j = i + shift_h, j + shift_w
+                        if 0 <= new_i < self.height and 0 <= new_j < self.width:
+                            temp[new_i, new_j] = mutated[i, j]
+                
+                mutated = temp
+                
+            elif mutation_type == 'rotate':
+                # 90度旋转
+                k = random.choice([1, 2, 3])  # 1:90°, 2:180°, 3:270°
+                mutated = np.rot90(mutated, k)
+                
+            elif mutation_type == 'noise':
+                # 添加随机噪声块
+                block_size = random.randint(2, 5)
+                h_start = random.randint(0, self.height - block_size-1)
+                w_start = random.randint(0, self.width - block_size-1)
+                
+                noise = np.random.rand(block_size, block_size) > 0.5
+                mutated[h_start:h_start+block_size, w_start:w_start+block_size] = \
+                    noise.astype(np.float32)
+        matrix = self.ensure_double_port(mutated)
+        return matrix
+    
+    def tournament_selection(self, population: List[np.ndarray], 
+                           fitness_scores: List[float], 
+                           tournament_size: int = 256) -> int:
+        """锦标赛选择"""
+        tournament_indices = random.sample(range(len(population)), tournament_size)
+        tournament_fitness = [fitness_scores[i] for i in tournament_indices]
+        winner_idx = tournament_indices[np.argmax(tournament_fitness)]
+        return winner_idx
+    
+    def optimize(self, target_freq: float, target_params: Dict[str, Dict],
+                population_size: int = None, generations: int = None,
+                mutation_rate: float = None, elite_size: int = None,
+                verbose: bool = True) -> Tuple[np.ndarray, Dict, float]:
+        """
+        遗传算法优化主函数
+        
+        Args:
+            target_freq: 目标频率 (GHz)
+            target_params: 目标参数配置
+            population_size: 种群大小
+            generations: 进化代数
+            mutation_rate: 变异率
+            elite_size: 精英个体数量
+            verbose: 是否显示详细信息
+        
+        Returns:
+            best_matrix: 最佳矩阵
+            best_info: 最佳个体的信息
+            best_fitness: 最佳适应度
+        """
+        # 设置参数
+        
+        population_size = population_size or self.population_size
+        generations = generations or self.generations
+        mutation_rate = mutation_rate or self.mutation_rate
+        crossover_rate = self.crossover_rate
+        elite_size = elite_size or self.elite_size
+        tournament_size = self.tournament_size
+        print(f"\n{'='*60}")
+        print("启动遗传算法优化")
+        print(f"{'='*60}")
+        print(f"目标频率: {target_freq} GHz")
+        print(f"目标参数: {target_params}")
+        print(f"种群大小: {population_size}")
+        print(f"进化代数: {generations}")
+        print(f"变异率: {mutation_rate}")
+        print(f"交叉率: {crossover_rate}")
+        print(f"精英数量: {elite_size}")
+        print(f"tournament_size: {tournament_size}")
+        print(f"{'='*60}")
+        self.target_freq = target_freq
+        # 创建初始种群
+        population = self.create_population(population_size)
+
+        # 初始化记录
+        best_matrix = None
+        best_fitness = -float('inf')
+        best_info = None
+        
+        fitness_history = []
+        best_fitness_history = []
+        
+        # 进化循环
+        for generation in tqdm(range(generations), desc="遗传演进", disable=not verbose):
+            # 计算适应度
+            fitness_scores = []
+            predictions_info = []
+            
+            for matrix in population:
+                fitness, info = self.fitness_function(matrix, target_freq, target_params)
+                fitness_scores.append(fitness)
+                predictions_info.append(info)
+            
+            # 更新最佳个体
+            current_best_idx = np.argmax(fitness_scores)
+            current_best_fitness = fitness_scores[current_best_idx]
+            
+            if current_best_fitness > best_fitness:
+                best_fitness = current_best_fitness
+                best_matrix = population[current_best_idx].copy()
+                best_info = predictions_info[current_best_idx]
+            # print("矩阵形状：")
+            # print(best_matrix.shape)
+            # print(best_matrix)
+            # 记录历史
+            avg_fitness = np.mean(fitness_scores)
+            fitness_history.append(avg_fitness)
+            best_fitness_history.append(best_fitness)
+            
+            # 选择精英
+            elite_indices = np.argsort(fitness_scores)[-elite_size:]
+            new_population = [population[i].copy() for i in elite_indices]
+            
+            # 生成新一代
+            while len(new_population) < population_size:
+                # 选择父代
+                parent1_idx = self.tournament_selection(population, fitness_scores, tournament_size)
+                parent2_idx = self.tournament_selection(population, fitness_scores, tournament_size)
+                
+                parent1 = population[parent1_idx]
+                parent2 = population[parent2_idx]
+                
+                # 交叉
+                if random.random() < self.crossover_rate:
+                    child = self.crossover(parent1, parent2)
+                else:
+                    child = random.choice([parent1, parent2]).copy()
+                
+                # 变异
+                child = self.mutate(child, mutation_rate)
+                
+                new_population.append(child)
+            
+            population = new_population
+            
+            # 打印进度
+            if verbose and (generation % 10 == 0 or generation == generations - 1):
+                print(f"代 {generation:3d}: "
+                      f"平均适应度 = {avg_fitness:.4f}, "
+                      f"最佳适应度 = {best_fitness:.4f}")
+                
+                if best_info is not None:
+                    print(f"      S11 = {best_info['S11_mag_db']:.2f} dB, "
+                          f"S21 = {best_info['S21_mag_db']:.2f} dB, "
+                          f"密度 = {best_info['matrix_density']:.3f}")
+                    # print(f"s_params ={best_info['s_params']:.6f}")
+                    print(f"s_params =\n")
+                    print(best_info['s_params'])
+        
+        # 输出最终结果
+        print(f"\n{'='*60}")
+        print("遗传算法优化完成！")
+        print(f"{'='*60}")
+        print(f"最佳适应度: {best_fitness:.4f}")
+        
+        if best_info is not None:
+            print(f"\n最佳个体的S参数 (在 {target_freq} GHz):")
+            print(f"  |S11| = {best_info['S11_mag_db']:.2f} dB")
+            print(f"  |S21| = {best_info['S21_mag_db']:.2f} dB")
+            print(f"  |S12| = {best_info['S12_mag_db']:.2f} dB")
+            print(f"  |S22| = {best_info['S22_mag_db']:.2f} dB")
+            print(f"  S11相位 = {best_info['S11_phase_deg']:.1f}°")
+            print(f"  S21相位 = {best_info['S21_phase_deg']:.1f}°")
+            print(f"  矩阵密度 = {best_info['matrix_density']:.3f}")
+        
+        return best_matrix, best_info, best_fitness, fitness_history, best_fitness_history
+    def visualize_results(self, best_matrix: np.ndarray, 
+                         fitness_history: List[float], 
+                         best_fitness_history: List[float]):
+        """可视化结果"""
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+        
+        # 1. 最佳矩阵可视化
+        axes[0, 0].imshow(best_matrix, cmap='binary', interpolation='nearest')
+        axes[0, 0].set_title(f'optimized matrix (density: {np.mean(best_matrix):.3f})')
+        axes[0, 0].set_xlabel('X')
+        axes[0, 0].set_ylabel('Y')
+        axes[0, 0].grid(True, alpha=0.3)
+        
+        # 2. 进化过程
+        axes[0, 1].plot(fitness_history, label='mean_fitness', alpha=0.7)
+        axes[0, 1].plot(best_fitness_history, label='best_fitness', linewidth=2)
+        axes[0, 1].set_xlabel('代数')
+        axes[0, 1].set_ylabel('fitness')
+        axes[0, 1].set_title('evolution_process')
+        axes[0, 1].legend()
+        axes[0, 1].grid(True, alpha=0.3)
+        
+        # 3. 矩阵统计
+        density = np.mean(best_matrix)
+        axes[1, 0].bar(['0', '1'], [1-density, density], color=['white', 'black'])
+        axes[1, 0].set_title('pixel_distribution')
+        axes[1, 0].set_ylabel('protortion')
+        axes[1, 0].set_ylim([0, 1])
+        
+        # 4. 适应度组件（如果可用）
+        # 这里需要从best_info中获取，暂时留空或显示其他信息
+        axes[1, 1].axis('off')
+        axes[1, 1].text(0.1, 0.5, f"best_fitness: {best_fitness_history[-1]:.4f}\n"
+                        f"final_density: {density:.3f}\n"
+                        f"final_evolution_num: {len(fitness_history)}", 
+                        fontsize=12, verticalalignment='center')
+        
+        plt.tight_layout()
+        plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+        # plt.show()
+        
+        # 单独保存最佳矩阵图像
+        plt.figure(figsize=(8, 8))
+        plt.imshow(best_matrix, cmap='binary', interpolation='nearest')
+        plt.title(f'Optimized Binary Matrix (Frequency: {self.target_freq} GHz)')
+        plt.colorbar(label='Value (0/1)')
+        plt.savefig('optimized_matrix.png', dpi=300, bbox_inches='tight')
+        # plt.show()
+        plt.close()

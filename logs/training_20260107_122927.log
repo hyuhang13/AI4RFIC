@@ -1,0 +1,598 @@
+2026-01-07 12:29:27 - INFO - 日志文件保存到: logs/training_20260107_122927.log
+2026-01-07 12:29:27 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-07 12:29:28 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2026-01-07 12:29:29 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/main.py:462: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path)
+
+2026-01-07 12:29:29 - INFO - odict_keys(['freq_embedding.0.weight', 'freq_embedding.0.bias', 'freq_embedding.1.weight', 'freq_embedding.1.bias', 'freq_embedding.1.running_mean', 'freq_embedding.1.running_var', 'freq_embedding.1.num_batches_tracked', 'freq_embedding.3.weight', 'freq_embedding.3.bias', 'freq_embedding.4.weight', 'freq_embedding.4.bias', 'freq_embedding.4.running_mean', 'freq_embedding.4.running_var', 'freq_embedding.4.num_batches_tracked', 'freq_embedding.6.weight', 'freq_embedding.6.bias', 'freq_embedding.7.weight', 'freq_embedding.7.bias', 'freq_embedding.7.running_mean', 'freq_embedding.7.running_var', 'freq_embedding.7.num_batches_tracked', 'conv_block1.0.weight', 'conv_block1.0.bias', 'conv_block1.1.weight', 'conv_block1.1.bias', 'conv_block1.1.running_mean', 'conv_block1.1.running_var', 'conv_block1.1.num_batches_tracked', 'conv_block1.3.weight', 'conv_block1.3.bias', 'conv_block1.4.weight', 'conv_block1.4.bias', 'conv_block1.4.running_mean', 'conv_block1.4.running_var', 'conv_block1.4.num_batches_tracked', 'conv_block2.0.weight', 'conv_block2.0.bias', 'conv_block2.1.weight', 'conv_block2.1.bias', 'conv_block2.1.running_mean', 'conv_block2.1.running_var', 'conv_block2.1.num_batches_tracked', 'conv_block2.3.weight', 'conv_block2.3.bias', 'conv_block2.4.weight', 'conv_block2.4.bias', 'conv_block2.4.running_mean', 'conv_block2.4.running_var', 'conv_block2.4.num_batches_tracked', 'conv_block3.0.weight', 'conv_block3.0.bias', 'conv_block3.1.weight', 'conv_block3.1.bias', 'conv_block3.1.running_mean', 'conv_block3.1.running_var', 'conv_block3.1.num_batches_tracked', 'conv_block3.3.weight', 'conv_block3.3.bias', 'conv_block3.4.weight', 'conv_block3.4.bias', 'conv_block3.4.running_mean', 'conv_block3.4.running_var', 'conv_block3.4.num_batches_tracked', 'conv_block3.6.weight', 'conv_block3.6.bias', 'conv_block3.7.weight', 'conv_block3.7.bias', 'conv_block3.7.running_mean', 'conv_block3.7.running_var', 'conv_block3.7.num_batches_tracked', 'fusion_module.0.weight', 'fusion_module.0.bias', 'fusion_module.1.weight', 'fusion_module.1.bias', 'fusion_module.1.running_mean', 'fusion_module.1.running_var', 'fusion_module.1.num_batches_tracked', 'fusion_module.4.weight', 'fusion_module.4.bias', 'fusion_module.5.weight', 'fusion_module.5.bias', 'fusion_module.5.running_mean', 'fusion_module.5.running_var', 'fusion_module.5.num_batches_tracked', 'fusion_module.8.weight', 'fusion_module.8.bias', 'fusion_module.9.weight', 'fusion_module.9.bias', 'fusion_module.9.running_mean', 'fusion_module.9.running_var', 'fusion_module.9.num_batches_tracked', 'fusion_module.12.weight', 'fusion_module.12.bias', 'fusion_module.13.weight', 'fusion_module.13.bias', 'fusion_module.13.running_mean', 'fusion_module.13.running_var', 'fusion_module.13.num_batches_tracked', 'fusion_module.15.weight', 'fusion_module.15.bias', 'fusion_module.16.weight', 'fusion_module.16.bias', 'fusion_module.16.running_mean', 'fusion_module.16.running_var', 'fusion_module.16.num_batches_tracked', 'fusion_module.18.weight', 'fusion_module.18.bias'])
+2026-01-07 12:29:29 - INFO - 
+==================================================
+2026-01-07 12:29:29 - INFO - 创建空白模型：
+2026-01-07 12:29:29 - INFO - 
+==================================================
+2026-01-07 12:29:29 - INFO - 
+==================================================
+2026-01-07 12:29:29 - INFO - 模型加载：
+2026-01-07 12:29:29 - INFO - 
+==================================================
+2026-01-07 12:29:29 - INFO - ModelManager初始化完成，使用设备: cuda
+2026-01-07 12:29:29 - INFO - 检查点目录: frequency_checkpoints/best_model.pth
+2026-01-07 12:29:29 - INFO - 
+============================================================
+2026-01-07 12:29:29 - INFO - 启动矩阵结构遗传优化
+2026-01-07 12:29:29 - INFO - ============================================================
+2026-01-07 12:29:29 - INFO - 矩阵遗传算法初始化完成
+2026-01-07 12:29:29 - INFO - 矩阵形状: (19, 19)
+2026-01-07 12:29:29 - INFO - 总像素数: 361
+2026-01-07 12:29:29 - INFO - 使用设备: cuda
+2026-01-07 12:29:29 - INFO - 
+============================================================
+2026-01-07 12:29:29 - INFO - 启动遗传算法优化
+2026-01-07 12:29:29 - INFO - ============================================================
+2026-01-07 12:29:29 - INFO - 目标频率: 10 GHz
+2026-01-07 12:29:29 - INFO - 目标参数: {'gamma_opt': {'origin_value': 1, 'magnitude_db': 1, 'weight': 1.0}, 's11_real': -0.0445877, 's11_imag': 0.0125595, 's21_real': 0.914061, 's21_imag': -0.241433, 's12_real': 0.914061, 's12_imag': -0.241433, 's22_real': -0.04327, 's22_imag': 0.0114308, 'S21': {'magnitude_db': 0, 'weight': 0}, 'S11': {'magnitude_db': 0, 'weight': 0}, 'S22': {'magnitude_db': 0, 'weight': 0}, 'symmetry': {'weight': 0.3}, 'complexity': {'weight': 0.1}}
+2026-01-07 12:29:29 - INFO - 种群大小: 1024
+2026-01-07 12:29:29 - INFO - 进化代数: 100
+2026-01-07 12:29:29 - INFO - 变异率: 0.1
+2026-01-07 12:29:29 - INFO - 交叉率: 0.8
+2026-01-07 12:29:29 - INFO - 精英数量: 5
+2026-01-07 12:29:29 - INFO - tournament_size: 256
+2026-01-07 12:29:29 - INFO - ============================================================
+2026-01-07 12:29:29 - INFO - 创建初始种群 (大小: 4096)...
+2026-01-07 12:29:29 - ERROR - 创建种群:   0%|          | 0/4096 [00:00<?, ?it/s]
+2026-01-07 12:29:29 - ERROR - 创建种群: 100%|##########| 4096/4096 [00:00<00:00, 192547.62it/s]
+2026-01-07 12:29:29 - ERROR - 遗传演进:   0%|          | 0/100 [00:00<?, ?it/s]
+2026-01-07 12:29:33 - INFO - 矩阵形状：
+2026-01-07 12:29:33 - INFO - (19, 19)
+2026-01-07 12:29:33 - INFO - 代   0: 平均适应度 = -6.2117, 最佳适应度 = -5.9594
+2026-01-07 12:29:33 - INFO -       S11 = 0.81 dB, S21 = 2.48 dB, 密度 = 0.507
+2026-01-07 12:29:33 - INFO - s_params =
+
+2026-01-07 12:29:33 - INFO - {'S11_real': np.float32(0.45837232), 'S11_imag': np.float32(-0.9973363), 'S21_real': np.float32(0.999989), 'S21_imag': np.float32(0.8786973), 'S12_real': np.float32(0.999989), 'S12_imag': np.float32(0.8786972), 'S22_real': np.float32(0.9844617), 'S22_imag': np.float32(-0.99527663)}
+2026-01-07 12:29:33 - ERROR - 遗传演进:   1%|1         | 1/100 [00:04<07:08,  4.33s/it]
+2026-01-07 12:29:34 - INFO - 矩阵形状：
+2026-01-07 12:29:34 - INFO - (19, 19)
+2026-01-07 12:29:34 - ERROR - 遗传演进:   2%|2         | 2/100 [00:05<04:01,  2.46s/it]
+2026-01-07 12:29:35 - INFO - 矩阵形状：
+2026-01-07 12:29:35 - INFO - (19, 19)
+2026-01-07 12:29:35 - ERROR - 遗传演进:   3%|3         | 3/100 [00:06<03:00,  1.86s/it]
+2026-01-07 12:29:36 - INFO - 矩阵形状：
+2026-01-07 12:29:36 - INFO - (19, 19)
+2026-01-07 12:29:37 - ERROR - 遗传演进:   4%|4         | 4/100 [00:07<02:31,  1.58s/it]
+2026-01-07 12:29:38 - INFO - 矩阵形状：
+2026-01-07 12:29:38 - INFO - (19, 19)
+2026-01-07 12:29:38 - ERROR - 遗传演进:   5%|5         | 5/100 [00:08<02:15,  1.42s/it]
+2026-01-07 12:29:39 - INFO - 矩阵形状：
+2026-01-07 12:29:39 - INFO - (19, 19)
+2026-01-07 12:29:39 - ERROR - 遗传演进:   6%|6         | 6/100 [00:10<02:05,  1.33s/it]
+2026-01-07 12:29:40 - INFO - 矩阵形状：
+2026-01-07 12:29:40 - INFO - (19, 19)
+2026-01-07 12:29:40 - ERROR - 遗传演进:   7%|7         | 7/100 [00:11<01:58,  1.27s/it]
+2026-01-07 12:29:41 - INFO - 矩阵形状：
+2026-01-07 12:29:41 - INFO - (19, 19)
+2026-01-07 12:29:41 - ERROR - 遗传演进:   8%|8         | 8/100 [00:12<01:53,  1.24s/it]
+2026-01-07 12:29:42 - INFO - 矩阵形状：
+2026-01-07 12:29:42 - INFO - (19, 19)
+2026-01-07 12:29:42 - ERROR - 遗传演进:   9%|9         | 9/100 [00:13<01:50,  1.21s/it]
+2026-01-07 12:29:43 - INFO - 矩阵形状：
+2026-01-07 12:29:43 - INFO - (19, 19)
+2026-01-07 12:29:44 - ERROR - 遗传演进:  10%|#         | 10/100 [00:14<01:47,  1.19s/it]
+2026-01-07 12:29:45 - INFO - 矩阵形状：
+2026-01-07 12:29:45 - INFO - (19, 19)
+2026-01-07 12:29:45 - INFO - 代  10: 平均适应度 = -6.0452, 最佳适应度 = -5.7099
+2026-01-07 12:29:45 - INFO -       S11 = 0.23 dB, S21 = 2.44 dB, 密度 = 0.540
+2026-01-07 12:29:45 - INFO - s_params =
+
+2026-01-07 12:29:45 - INFO - {'S11_real': np.float32(0.24388306), 'S11_imag': np.float32(-0.9972795), 'S21_real': np.float32(0.99999166), 'S21_imag': np.float32(0.8684221), 'S12_real': np.float32(0.99999166), 'S12_imag': np.float32(0.86842203), 'S22_real': np.float32(0.97027045), 'S22_imag': np.float32(-0.9950292)}
+2026-01-07 12:29:45 - ERROR - 遗传演进:  11%|#1        | 11/100 [00:15<01:45,  1.18s/it]
+2026-01-07 12:29:46 - INFO - 矩阵形状：
+2026-01-07 12:29:46 - INFO - (19, 19)
+2026-01-07 12:29:46 - ERROR - 遗传演进:  12%|#2        | 12/100 [00:17<01:43,  1.17s/it]
+2026-01-07 12:29:47 - INFO - 矩阵形状：
+2026-01-07 12:29:47 - INFO - (19, 19)
+2026-01-07 12:29:47 - ERROR - 遗传演进:  13%|#3        | 13/100 [00:18<01:41,  1.17s/it]
+2026-01-07 12:29:48 - INFO - 矩阵形状：
+2026-01-07 12:29:48 - INFO - (19, 19)
+2026-01-07 12:29:48 - ERROR - 遗传演进:  14%|#4        | 14/100 [00:19<01:39,  1.16s/it]
+2026-01-07 12:29:49 - INFO - 矩阵形状：
+2026-01-07 12:29:49 - INFO - (19, 19)
+2026-01-07 12:29:49 - ERROR - 遗传演进:  15%|#5        | 15/100 [00:20<01:38,  1.16s/it]
+2026-01-07 12:29:50 - INFO - 矩阵形状：
+2026-01-07 12:29:50 - INFO - (19, 19)
+2026-01-07 12:29:50 - ERROR - 遗传演进:  16%|#6        | 16/100 [00:21<01:36,  1.15s/it]
+2026-01-07 12:29:51 - INFO - 矩阵形状：
+2026-01-07 12:29:51 - INFO - (19, 19)
+2026-01-07 12:29:52 - ERROR - 遗传演进:  17%|#7        | 17/100 [00:22<01:35,  1.15s/it]
+2026-01-07 12:29:53 - INFO - 矩阵形状：
+2026-01-07 12:29:53 - INFO - (19, 19)
+2026-01-07 12:29:53 - ERROR - 遗传演进:  18%|#8        | 18/100 [00:23<01:34,  1.15s/it]
+2026-01-07 12:29:54 - INFO - 矩阵形状：
+2026-01-07 12:29:54 - INFO - (19, 19)
+2026-01-07 12:29:54 - ERROR - 遗传演进:  19%|#9        | 19/100 [00:25<01:33,  1.15s/it]
+2026-01-07 12:29:55 - INFO - 矩阵形状：
+2026-01-07 12:29:55 - INFO - (19, 19)
+2026-01-07 12:29:55 - ERROR - 遗传演进:  20%|##        | 20/100 [00:26<01:31,  1.15s/it]
+2026-01-07 12:29:56 - INFO - 矩阵形状：
+2026-01-07 12:29:56 - INFO - (19, 19)
+2026-01-07 12:29:56 - INFO - 代  20: 平均适应度 = -6.0286, 最佳适应度 = -5.7099
+2026-01-07 12:29:56 - INFO -       S11 = 0.23 dB, S21 = 2.44 dB, 密度 = 0.540
+2026-01-07 12:29:56 - INFO - s_params =
+
+2026-01-07 12:29:56 - INFO - {'S11_real': np.float32(0.24388306), 'S11_imag': np.float32(-0.9972795), 'S21_real': np.float32(0.99999166), 'S21_imag': np.float32(0.8684221), 'S12_real': np.float32(0.99999166), 'S12_imag': np.float32(0.86842203), 'S22_real': np.float32(0.97027045), 'S22_imag': np.float32(-0.9950292)}
+2026-01-07 12:29:56 - ERROR - 遗传演进:  21%|##1       | 21/100 [00:27<01:30,  1.15s/it]
+2026-01-07 12:29:57 - INFO - 矩阵形状：
+2026-01-07 12:29:57 - INFO - (19, 19)
+2026-01-07 12:29:57 - ERROR - 遗传演进:  22%|##2       | 22/100 [00:28<01:29,  1.15s/it]
+2026-01-07 12:29:58 - INFO - 矩阵形状：
+2026-01-07 12:29:58 - INFO - (19, 19)
+2026-01-07 12:29:58 - ERROR - 遗传演进:  23%|##3       | 23/100 [00:29<01:28,  1.15s/it]
+2026-01-07 12:29:59 - INFO - 矩阵形状：
+2026-01-07 12:29:59 - INFO - (19, 19)
+2026-01-07 12:30:00 - ERROR - 遗传演进:  24%|##4       | 24/100 [00:30<01:27,  1.15s/it]
+2026-01-07 12:30:01 - INFO - 矩阵形状：
+2026-01-07 12:30:01 - INFO - (19, 19)
+2026-01-07 12:30:01 - ERROR - 遗传演进:  25%|##5       | 25/100 [00:31<01:26,  1.15s/it]
+2026-01-07 12:30:02 - INFO - 矩阵形状：
+2026-01-07 12:30:02 - INFO - (19, 19)
+2026-01-07 12:30:02 - ERROR - 遗传演进:  26%|##6       | 26/100 [00:33<01:24,  1.15s/it]
+2026-01-07 12:30:03 - INFO - 矩阵形状：
+2026-01-07 12:30:03 - INFO - (19, 19)
+2026-01-07 12:30:03 - ERROR - 遗传演进:  27%|##7       | 27/100 [00:34<01:23,  1.15s/it]
+2026-01-07 12:30:04 - INFO - 矩阵形状：
+2026-01-07 12:30:04 - INFO - (19, 19)
+2026-01-07 12:30:04 - ERROR - 遗传演进:  28%|##8       | 28/100 [00:35<01:22,  1.15s/it]
+2026-01-07 12:30:05 - INFO - 矩阵形状：
+2026-01-07 12:30:05 - INFO - (19, 19)
+2026-01-07 12:30:05 - ERROR - 遗传演进:  29%|##9       | 29/100 [00:36<01:21,  1.15s/it]
+2026-01-07 12:30:06 - INFO - 矩阵形状：
+2026-01-07 12:30:06 - INFO - (19, 19)
+2026-01-07 12:30:07 - ERROR - 遗传演进:  30%|###       | 30/100 [00:37<01:20,  1.15s/it]
+2026-01-07 12:30:08 - INFO - 矩阵形状：
+2026-01-07 12:30:08 - INFO - (19, 19)
+2026-01-07 12:30:08 - INFO - 代  30: 平均适应度 = -6.0264, 最佳适应度 = -5.6472
+2026-01-07 12:30:08 - INFO -       S11 = 0.12 dB, S21 = 2.45 dB, 密度 = 0.562
+2026-01-07 12:30:08 - INFO - s_params =
+
+2026-01-07 12:30:08 - INFO - {'S11_real': np.float32(0.1817999), 'S11_imag': np.float32(-0.9972974), 'S21_real': np.float32(0.9999925), 'S21_imag': np.float32(0.87045693), 'S12_real': np.float32(0.9999925), 'S12_imag': np.float32(0.87045676), 'S22_real': np.float32(0.96555716), 'S22_imag': np.float32(-0.99504596)}
+2026-01-07 12:30:08 - ERROR - 遗传演进:  31%|###1      | 31/100 [00:38<01:19,  1.15s/it]
+2026-01-07 12:30:09 - INFO - 矩阵形状：
+2026-01-07 12:30:09 - INFO - (19, 19)
+2026-01-07 12:30:09 - ERROR - 遗传演进:  32%|###2      | 32/100 [00:39<01:18,  1.15s/it]
+2026-01-07 12:30:10 - INFO - 矩阵形状：
+2026-01-07 12:30:10 - INFO - (19, 19)
+2026-01-07 12:30:10 - ERROR - 遗传演进:  33%|###3      | 33/100 [00:41<01:17,  1.15s/it]
+2026-01-07 12:30:11 - INFO - 矩阵形状：
+2026-01-07 12:30:11 - INFO - (19, 19)
+2026-01-07 12:30:11 - ERROR - 遗传演进:  34%|###4      | 34/100 [00:42<01:15,  1.15s/it]
+2026-01-07 12:30:12 - INFO - 矩阵形状：
+2026-01-07 12:30:12 - INFO - (19, 19)
+2026-01-07 12:30:12 - ERROR - 遗传演进:  35%|###5      | 35/100 [00:43<01:14,  1.15s/it]
+2026-01-07 12:30:13 - INFO - 矩阵形状：
+2026-01-07 12:30:13 - INFO - (19, 19)
+2026-01-07 12:30:13 - ERROR - 遗传演进:  36%|###6      | 36/100 [00:44<01:13,  1.15s/it]
+2026-01-07 12:30:14 - INFO - 矩阵形状：
+2026-01-07 12:30:14 - INFO - (19, 19)
+2026-01-07 12:30:15 - ERROR - 遗传演进:  37%|###7      | 37/100 [00:45<01:12,  1.15s/it]
+2026-01-07 12:30:16 - INFO - 矩阵形状：
+2026-01-07 12:30:16 - INFO - (19, 19)
+2026-01-07 12:30:16 - ERROR - 遗传演进:  38%|###8      | 38/100 [00:46<01:11,  1.15s/it]
+2026-01-07 12:30:17 - INFO - 矩阵形状：
+2026-01-07 12:30:17 - INFO - (19, 19)
+2026-01-07 12:30:17 - ERROR - 遗传演进:  39%|###9      | 39/100 [00:48<01:09,  1.15s/it]
+2026-01-07 12:30:18 - INFO - 矩阵形状：
+2026-01-07 12:30:18 - INFO - (19, 19)
+2026-01-07 12:30:18 - ERROR - 遗传演进:  40%|####      | 40/100 [00:49<01:08,  1.15s/it]
+2026-01-07 12:30:19 - INFO - 矩阵形状：
+2026-01-07 12:30:19 - INFO - (19, 19)
+2026-01-07 12:30:19 - INFO - 代  40: 平均适应度 = -6.0263, 最佳适应度 = -5.6472
+2026-01-07 12:30:19 - INFO -       S11 = 0.12 dB, S21 = 2.45 dB, 密度 = 0.562
+2026-01-07 12:30:19 - INFO - s_params =
+
+2026-01-07 12:30:19 - INFO - {'S11_real': np.float32(0.1817999), 'S11_imag': np.float32(-0.9972974), 'S21_real': np.float32(0.9999925), 'S21_imag': np.float32(0.87045693), 'S12_real': np.float32(0.9999925), 'S12_imag': np.float32(0.87045676), 'S22_real': np.float32(0.96555716), 'S22_imag': np.float32(-0.99504596)}
+2026-01-07 12:30:19 - ERROR - 遗传演进:  41%|####1     | 41/100 [00:50<01:07,  1.15s/it]
+2026-01-07 12:30:20 - INFO - 矩阵形状：
+2026-01-07 12:30:20 - INFO - (19, 19)
+2026-01-07 12:30:20 - ERROR - 遗传演进:  42%|####2     | 42/100 [00:51<01:06,  1.15s/it]
+2026-01-07 12:30:21 - INFO - 矩阵形状：
+2026-01-07 12:30:21 - INFO - (19, 19)
+2026-01-07 12:30:21 - ERROR - 遗传演进:  43%|####3     | 43/100 [00:52<01:05,  1.15s/it]
+2026-01-07 12:30:22 - INFO - 矩阵形状：
+2026-01-07 12:30:22 - INFO - (19, 19)
+2026-01-07 12:30:23 - ERROR - 遗传演进:  44%|####4     | 44/100 [00:53<01:04,  1.15s/it]
+2026-01-07 12:30:24 - INFO - 矩阵形状：
+2026-01-07 12:30:24 - INFO - (19, 19)
+2026-01-07 12:30:24 - ERROR - 遗传演进:  45%|####5     | 45/100 [00:54<01:02,  1.14s/it]
+2026-01-07 12:30:25 - INFO - 矩阵形状：
+2026-01-07 12:30:25 - INFO - (19, 19)
+2026-01-07 12:30:25 - ERROR - 遗传演进:  46%|####6     | 46/100 [00:56<01:01,  1.14s/it]
+2026-01-07 12:30:26 - INFO - 矩阵形状：
+2026-01-07 12:30:26 - INFO - (19, 19)
+2026-01-07 12:30:26 - ERROR - 遗传演进:  47%|####6     | 47/100 [00:57<01:00,  1.14s/it]
+2026-01-07 12:30:27 - INFO - 矩阵形状：
+2026-01-07 12:30:27 - INFO - (19, 19)
+2026-01-07 12:30:27 - ERROR - 遗传演进:  48%|####8     | 48/100 [00:58<00:59,  1.14s/it]
+2026-01-07 12:30:28 - INFO - 矩阵形状：
+2026-01-07 12:30:28 - INFO - (19, 19)
+2026-01-07 12:30:28 - ERROR - 遗传演进:  49%|####9     | 49/100 [00:59<00:58,  1.14s/it]
+2026-01-07 12:30:29 - INFO - 矩阵形状：
+2026-01-07 12:30:29 - INFO - (19, 19)
+2026-01-07 12:30:29 - ERROR - 遗传演进:  50%|#####     | 50/100 [01:00<00:57,  1.14s/it]
+2026-01-07 12:30:30 - INFO - 矩阵形状：
+2026-01-07 12:30:30 - INFO - (19, 19)
+2026-01-07 12:30:31 - INFO - 代  50: 平均适应度 = -6.0340, 最佳适应度 = -5.6472
+2026-01-07 12:30:31 - INFO -       S11 = 0.12 dB, S21 = 2.45 dB, 密度 = 0.562
+2026-01-07 12:30:31 - INFO - s_params =
+
+2026-01-07 12:30:31 - INFO - {'S11_real': np.float32(0.1817999), 'S11_imag': np.float32(-0.9972974), 'S21_real': np.float32(0.9999925), 'S21_imag': np.float32(0.87045693), 'S12_real': np.float32(0.9999925), 'S12_imag': np.float32(0.87045676), 'S22_real': np.float32(0.96555716), 'S22_imag': np.float32(-0.99504596)}
+2026-01-07 12:30:31 - ERROR - 遗传演进:  51%|#####1    | 51/100 [01:01<00:55,  1.14s/it]
+2026-01-07 12:30:32 - INFO - 矩阵形状：
+2026-01-07 12:30:32 - INFO - (19, 19)
+2026-01-07 12:30:32 - ERROR - 遗传演进:  52%|#####2    | 52/100 [01:02<00:54,  1.14s/it]
+2026-01-07 12:30:33 - INFO - 矩阵形状：
+2026-01-07 12:30:33 - INFO - (19, 19)
+2026-01-07 12:30:33 - ERROR - 遗传演进:  53%|#####3    | 53/100 [01:04<00:54,  1.15s/it]
+2026-01-07 12:30:34 - INFO - 矩阵形状：
+2026-01-07 12:30:34 - INFO - (19, 19)
+2026-01-07 12:30:34 - ERROR - 遗传演进:  54%|#####4    | 54/100 [01:05<00:52,  1.15s/it]
+2026-01-07 12:30:35 - INFO - 矩阵形状：
+2026-01-07 12:30:35 - INFO - (19, 19)
+2026-01-07 12:30:35 - ERROR - 遗传演进:  55%|#####5    | 55/100 [01:06<00:51,  1.15s/it]
+2026-01-07 12:30:36 - INFO - 矩阵形状：
+2026-01-07 12:30:36 - INFO - (19, 19)
+2026-01-07 12:30:36 - ERROR - 遗传演进:  56%|#####6    | 56/100 [01:07<00:50,  1.15s/it]
+2026-01-07 12:30:37 - INFO - 矩阵形状：
+2026-01-07 12:30:37 - INFO - (19, 19)
+2026-01-07 12:30:37 - ERROR - 遗传演进:  57%|#####6    | 57/100 [01:08<00:49,  1.15s/it]
+2026-01-07 12:30:38 - INFO - 矩阵形状：
+2026-01-07 12:30:38 - INFO - (19, 19)
+2026-01-07 12:30:39 - ERROR - 遗传演进:  58%|#####8    | 58/100 [01:09<00:48,  1.15s/it]
+2026-01-07 12:30:40 - INFO - 矩阵形状：
+2026-01-07 12:30:40 - INFO - (19, 19)
+2026-01-07 12:30:40 - ERROR - 遗传演进:  59%|#####8    | 59/100 [01:10<00:46,  1.15s/it]
+2026-01-07 12:30:41 - INFO - 矩阵形状：
+2026-01-07 12:30:41 - INFO - (19, 19)
+2026-01-07 12:30:41 - ERROR - 遗传演进:  60%|######    | 60/100 [01:12<00:45,  1.15s/it]
+2026-01-07 12:30:42 - INFO - 矩阵形状：
+2026-01-07 12:30:42 - INFO - (19, 19)
+2026-01-07 12:30:42 - INFO - 代  60: 平均适应度 = -6.0283, 最佳适应度 = -5.6472
+2026-01-07 12:30:42 - INFO -       S11 = 0.12 dB, S21 = 2.45 dB, 密度 = 0.562
+2026-01-07 12:30:42 - INFO - s_params =
+
+2026-01-07 12:30:42 - INFO - {'S11_real': np.float32(0.1817999), 'S11_imag': np.float32(-0.9972974), 'S21_real': np.float32(0.9999925), 'S21_imag': np.float32(0.87045693), 'S12_real': np.float32(0.9999925), 'S12_imag': np.float32(0.87045676), 'S22_real': np.float32(0.96555716), 'S22_imag': np.float32(-0.99504596)}
+2026-01-07 12:30:42 - ERROR - 遗传演进:  61%|######1   | 61/100 [01:13<00:44,  1.15s/it]
+2026-01-07 12:30:43 - INFO - 矩阵形状：
+2026-01-07 12:30:43 - INFO - (19, 19)
+2026-01-07 12:30:43 - ERROR - 遗传演进:  62%|######2   | 62/100 [01:14<00:43,  1.15s/it]
+2026-01-07 12:30:44 - INFO - 矩阵形状：
+2026-01-07 12:30:44 - INFO - (19, 19)
+2026-01-07 12:30:44 - ERROR - 遗传演进:  63%|######3   | 63/100 [01:15<00:42,  1.15s/it]
+2026-01-07 12:30:45 - INFO - 矩阵形状：
+2026-01-07 12:30:45 - INFO - (19, 19)
+2026-01-07 12:30:45 - ERROR - 遗传演进:  64%|######4   | 64/100 [01:16<00:41,  1.15s/it]
+2026-01-07 12:30:46 - INFO - 矩阵形状：
+2026-01-07 12:30:46 - INFO - (19, 19)
+2026-01-07 12:30:47 - ERROR - 遗传演进:  65%|######5   | 65/100 [01:17<00:40,  1.15s/it]
+2026-01-07 12:30:48 - INFO - 矩阵形状：
+2026-01-07 12:30:48 - INFO - (19, 19)
+2026-01-07 12:30:48 - ERROR - 遗传演进:  66%|######6   | 66/100 [01:18<00:39,  1.15s/it]
+2026-01-07 12:30:49 - INFO - 矩阵形状：
+2026-01-07 12:30:49 - INFO - (19, 19)
+2026-01-07 12:30:49 - ERROR - 遗传演进:  67%|######7   | 67/100 [01:20<00:37,  1.15s/it]
+2026-01-07 12:30:50 - INFO - 矩阵形状：
+2026-01-07 12:30:50 - INFO - (19, 19)
+2026-01-07 12:30:50 - ERROR - 遗传演进:  68%|######8   | 68/100 [01:21<00:36,  1.15s/it]
+2026-01-07 12:30:51 - INFO - 矩阵形状：
+2026-01-07 12:30:51 - INFO - (19, 19)
+2026-01-07 12:30:51 - ERROR - 遗传演进:  69%|######9   | 69/100 [01:22<00:35,  1.15s/it]
+2026-01-07 12:30:52 - INFO - 矩阵形状：
+2026-01-07 12:30:52 - INFO - (19, 19)
+2026-01-07 12:30:52 - ERROR - 遗传演进:  70%|#######   | 70/100 [01:23<00:34,  1.15s/it]
+2026-01-07 12:30:53 - INFO - 矩阵形状：
+2026-01-07 12:30:53 - INFO - (19, 19)
+2026-01-07 12:30:54 - INFO - 代  70: 平均适应度 = -5.9998, 最佳适应度 = -5.6178
+2026-01-07 12:30:54 - INFO -       S11 = 0.09 dB, S21 = 2.42 dB, 密度 = 0.582
+2026-01-07 12:30:54 - INFO - s_params =
+
+2026-01-07 12:30:54 - INFO - {'S11_real': np.float32(0.16472127), 'S11_imag': np.float32(-0.99727136), 'S21_real': np.float32(0.9999916), 'S21_imag': np.float32(0.8646778), 'S12_real': np.float32(0.9999916), 'S12_imag': np.float32(0.86467767), 'S22_real': np.float32(0.9647961), 'S22_imag': np.float32(-0.9951223)}
+2026-01-07 12:30:54 - ERROR - 遗传演进:  71%|#######1  | 71/100 [01:24<00:33,  1.15s/it]
+2026-01-07 12:30:55 - INFO - 矩阵形状：
+2026-01-07 12:30:55 - INFO - (19, 19)
+2026-01-07 12:30:55 - ERROR - 遗传演进:  72%|#######2  | 72/100 [01:25<00:32,  1.14s/it]
+2026-01-07 12:30:56 - INFO - 矩阵形状：
+2026-01-07 12:30:56 - INFO - (19, 19)
+2026-01-07 12:30:56 - ERROR - 遗传演进:  73%|#######3  | 73/100 [01:26<00:30,  1.14s/it]
+2026-01-07 12:30:57 - INFO - 矩阵形状：
+2026-01-07 12:30:57 - INFO - (19, 19)
+2026-01-07 12:30:57 - ERROR - 遗传演进:  74%|#######4  | 74/100 [01:28<00:29,  1.14s/it]
+2026-01-07 12:30:58 - INFO - 矩阵形状：
+2026-01-07 12:30:58 - INFO - (19, 19)
+2026-01-07 12:30:58 - ERROR - 遗传演进:  75%|#######5  | 75/100 [01:29<00:28,  1.14s/it]
+2026-01-07 12:30:59 - INFO - 矩阵形状：
+2026-01-07 12:30:59 - INFO - (19, 19)
+2026-01-07 12:30:59 - ERROR - 遗传演进:  76%|#######6  | 76/100 [01:30<00:27,  1.14s/it]
+2026-01-07 12:31:00 - INFO - 矩阵形状：
+2026-01-07 12:31:00 - INFO - (19, 19)
+2026-01-07 12:31:00 - ERROR - 遗传演进:  77%|#######7  | 77/100 [01:31<00:26,  1.14s/it]
+2026-01-07 12:31:01 - INFO - 矩阵形状：
+2026-01-07 12:31:01 - INFO - (19, 19)
+2026-01-07 12:31:02 - ERROR - 遗传演进:  78%|#######8  | 78/100 [01:32<00:25,  1.14s/it]
+2026-01-07 12:31:02 - INFO - 矩阵形状：
+2026-01-07 12:31:02 - INFO - (19, 19)
+2026-01-07 12:31:03 - ERROR - 遗传演进:  79%|#######9  | 79/100 [01:33<00:23,  1.14s/it]
+2026-01-07 12:31:04 - INFO - 矩阵形状：
+2026-01-07 12:31:04 - INFO - (19, 19)
+2026-01-07 12:31:04 - ERROR - 遗传演进:  80%|########  | 80/100 [01:34<00:22,  1.14s/it]
+2026-01-07 12:31:05 - INFO - 矩阵形状：
+2026-01-07 12:31:05 - INFO - (19, 19)
+2026-01-07 12:31:05 - INFO - 代  80: 平均适应度 = -5.9954, 最佳适应度 = -5.6075
+2026-01-07 12:31:05 - INFO -       S11 = 0.08 dB, S21 = 2.42 dB, 密度 = 0.562
+2026-01-07 12:31:05 - INFO - s_params =
+
+2026-01-07 12:31:05 - INFO - {'S11_real': np.float32(0.1570632), 'S11_imag': np.float32(-0.9972634), 'S21_real': np.float32(0.99999183), 'S21_imag': np.float32(0.8638355), 'S12_real': np.float32(0.99999183), 'S12_imag': np.float32(0.86383545), 'S22_real': np.float32(0.96390104), 'S22_imag': np.float32(-0.99504215)}
+2026-01-07 12:31:05 - ERROR - 遗传演进:  81%|########1 | 81/100 [01:36<00:21,  1.14s/it]
+2026-01-07 12:31:06 - INFO - 矩阵形状：
+2026-01-07 12:31:06 - INFO - (19, 19)
+2026-01-07 12:31:06 - ERROR - 遗传演进:  82%|########2 | 82/100 [01:37<00:20,  1.14s/it]
+2026-01-07 12:31:07 - INFO - 矩阵形状：
+2026-01-07 12:31:07 - INFO - (19, 19)
+2026-01-07 12:31:07 - ERROR - 遗传演进:  83%|########2 | 83/100 [01:38<00:19,  1.14s/it]
+2026-01-07 12:31:08 - INFO - 矩阵形状：
+2026-01-07 12:31:08 - INFO - (19, 19)
+2026-01-07 12:31:08 - ERROR - 遗传演进:  84%|########4 | 84/100 [01:39<00:18,  1.14s/it]
+2026-01-07 12:31:09 - INFO - 矩阵形状：
+2026-01-07 12:31:09 - INFO - (19, 19)
+2026-01-07 12:31:09 - ERROR - 遗传演进:  85%|########5 | 85/100 [01:40<00:17,  1.14s/it]
+2026-01-07 12:31:10 - INFO - 矩阵形状：
+2026-01-07 12:31:10 - INFO - (19, 19)
+2026-01-07 12:31:11 - ERROR - 遗传演进:  86%|########6 | 86/100 [01:41<00:16,  1.14s/it]
+2026-01-07 12:31:12 - INFO - 矩阵形状：
+2026-01-07 12:31:12 - INFO - (19, 19)
+2026-01-07 12:31:12 - ERROR - 遗传演进:  87%|########7 | 87/100 [01:42<00:14,  1.14s/it]
+2026-01-07 12:31:13 - INFO - 矩阵形状：
+2026-01-07 12:31:13 - INFO - (19, 19)
+2026-01-07 12:31:13 - ERROR - 遗传演进:  88%|########8 | 88/100 [01:44<00:13,  1.14s/it]
+2026-01-07 12:31:14 - INFO - 矩阵形状：
+2026-01-07 12:31:14 - INFO - (19, 19)
+2026-01-07 12:31:14 - ERROR - 遗传演进:  89%|########9 | 89/100 [01:45<00:12,  1.14s/it]
+2026-01-07 12:31:15 - INFO - 矩阵形状：
+2026-01-07 12:31:15 - INFO - (19, 19)
+2026-01-07 12:31:15 - ERROR - 遗传演进:  90%|######### | 90/100 [01:46<00:11,  1.14s/it]
+2026-01-07 12:31:16 - INFO - 矩阵形状：
+2026-01-07 12:31:16 - INFO - (19, 19)
+2026-01-07 12:31:16 - INFO - 代  90: 平均适应度 = -5.9961, 最佳适应度 = -5.6075
+2026-01-07 12:31:16 - INFO -       S11 = 0.08 dB, S21 = 2.42 dB, 密度 = 0.562
+2026-01-07 12:31:16 - INFO - s_params =
+
+2026-01-07 12:31:16 - INFO - {'S11_real': np.float32(0.1570632), 'S11_imag': np.float32(-0.9972634), 'S21_real': np.float32(0.99999183), 'S21_imag': np.float32(0.8638355), 'S12_real': np.float32(0.99999183), 'S12_imag': np.float32(0.86383545), 'S22_real': np.float32(0.96390104), 'S22_imag': np.float32(-0.99504215)}
+2026-01-07 12:31:16 - ERROR - 遗传演进:  91%|#########1| 91/100 [01:47<00:10,  1.15s/it]
+2026-01-07 12:31:17 - INFO - 矩阵形状：
+2026-01-07 12:31:17 - INFO - (19, 19)
+2026-01-07 12:31:18 - ERROR - 遗传演进:  92%|#########2| 92/100 [01:48<00:09,  1.15s/it]
+2026-01-07 12:31:18 - INFO - 矩阵形状：
+2026-01-07 12:31:18 - INFO - (19, 19)
+2026-01-07 12:31:19 - ERROR - 遗传演进:  93%|#########3| 93/100 [01:49<00:08,  1.15s/it]
+2026-01-07 12:31:20 - INFO - 矩阵形状：
+2026-01-07 12:31:20 - INFO - (19, 19)
+2026-01-07 12:31:20 - ERROR - 遗传演进:  94%|#########3| 94/100 [01:50<00:06,  1.15s/it]
+2026-01-07 12:31:21 - INFO - 矩阵形状：
+2026-01-07 12:31:21 - INFO - (19, 19)
+2026-01-07 12:31:21 - ERROR - 遗传演进:  95%|#########5| 95/100 [01:52<00:05,  1.15s/it]
+2026-01-07 12:31:22 - INFO - 矩阵形状：
+2026-01-07 12:31:22 - INFO - (19, 19)
+2026-01-07 12:31:22 - ERROR - 遗传演进:  96%|#########6| 96/100 [01:53<00:04,  1.15s/it]
+2026-01-07 12:31:23 - INFO - 矩阵形状：
+2026-01-07 12:31:23 - INFO - (19, 19)
+2026-01-07 12:31:23 - ERROR - 遗传演进:  97%|#########7| 97/100 [01:54<00:03,  1.15s/it]
+2026-01-07 12:31:24 - INFO - 矩阵形状：
+2026-01-07 12:31:24 - INFO - (19, 19)
+2026-01-07 12:31:24 - ERROR - 遗传演进:  98%|#########8| 98/100 [01:55<00:02,  1.15s/it]
+2026-01-07 12:31:25 - INFO - 矩阵形状：
+2026-01-07 12:31:25 - INFO - (19, 19)
+2026-01-07 12:31:26 - ERROR - 遗传演进:  99%|#########9| 99/100 [01:56<00:01,  1.15s/it]
+2026-01-07 12:31:27 - INFO - 矩阵形状：
+2026-01-07 12:31:27 - INFO - (19, 19)
+2026-01-07 12:31:27 - INFO - 代  99: 平均适应度 = -5.9975, 最佳适应度 = -5.6075
+2026-01-07 12:31:27 - INFO -       S11 = 0.08 dB, S21 = 2.42 dB, 密度 = 0.562
+2026-01-07 12:31:27 - INFO - s_params =
+
+2026-01-07 12:31:27 - INFO - {'S11_real': np.float32(0.1570632), 'S11_imag': np.float32(-0.9972634), 'S21_real': np.float32(0.99999183), 'S21_imag': np.float32(0.8638355), 'S12_real': np.float32(0.99999183), 'S12_imag': np.float32(0.86383545), 'S22_real': np.float32(0.96390104), 'S22_imag': np.float32(-0.99504215)}
+2026-01-07 12:31:27 - ERROR - 遗传演进: 100%|##########| 100/100 [01:57<00:00,  1.14s/it]
+2026-01-07 12:31:27 - ERROR - 遗传演进: 100%|##########| 100/100 [01:57<00:00,  1.18s/it]
+2026-01-07 12:31:27 - INFO - 
+============================================================
+2026-01-07 12:31:27 - INFO - 遗传算法优化完成！
+2026-01-07 12:31:27 - INFO - ============================================================
+2026-01-07 12:31:27 - INFO - 最佳适应度: -5.6075
+2026-01-07 12:31:27 - INFO - 
+最佳个体的S参数 (在 10 GHz):
+2026-01-07 12:31:27 - INFO -   |S11| = 0.08 dB
+2026-01-07 12:31:27 - INFO -   |S21| = 2.42 dB
+2026-01-07 12:31:27 - INFO -   |S12| = 2.42 dB
+2026-01-07 12:31:27 - INFO -   |S22| = 2.83 dB
+2026-01-07 12:31:27 - INFO -   S11相位 = -81.0°
+2026-01-07 12:31:27 - INFO -   S21相位 = 40.8°
+2026-01-07 12:31:27 - INFO -   矩阵密度 = 0.562
+2026-01-07 12:31:27 - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-01-07 12:31:27 - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20248 (\N{CJK UNIFIED IDEOGRAPH-4F18}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 21270 (\N{CJK UNIFIED IDEOGRAPH-5316}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 24471 (\N{CJK UNIFIED IDEOGRAPH-5F97}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 21040 (\N{CJK UNIFIED IDEOGRAPH-5230}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 30340 (\N{CJK UNIFIED IDEOGRAPH-7684}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 30697 (\N{CJK UNIFIED IDEOGRAPH-77E9}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 38453 (\N{CJK UNIFIED IDEOGRAPH-9635}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 23494 (\N{CJK UNIFIED IDEOGRAPH-5BC6}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 24230 (\N{CJK UNIFIED IDEOGRAPH-5EA6}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20195 (\N{CJK UNIFIED IDEOGRAPH-4EE3}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 25968 (\N{CJK UNIFIED IDEOGRAPH-6570}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 36866 (\N{CJK UNIFIED IDEOGRAPH-9002}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 24212 (\N{CJK UNIFIED IDEOGRAPH-5E94}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 36827 (\N{CJK UNIFIED IDEOGRAPH-8FDB}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 36807 (\N{CJK UNIFIED IDEOGRAPH-8FC7}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 31243 (\N{CJK UNIFIED IDEOGRAPH-7A0B}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 24179 (\N{CJK UNIFIED IDEOGRAPH-5E73}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 22343 (\N{CJK UNIFIED IDEOGRAPH-5747}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 26368 (\N{CJK UNIFIED IDEOGRAPH-6700}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20339 (\N{CJK UNIFIED IDEOGRAPH-4F73}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 27604 (\N{CJK UNIFIED IDEOGRAPH-6BD4}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20363 (\N{CJK UNIFIED IDEOGRAPH-4F8B}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20687 (\N{CJK UNIFIED IDEOGRAPH-50CF}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 32032 (\N{CJK UNIFIED IDEOGRAPH-7D20}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20540 (\N{CJK UNIFIED IDEOGRAPH-503C}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 20998 (\N{CJK UNIFIED IDEOGRAPH-5206}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 24067 (\N{CJK UNIFIED IDEOGRAPH-5E03}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 32456 (\N{CJK UNIFIED IDEOGRAPH-7EC8}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:583: UserWarning: Glyph 24635 (\N{CJK UNIFIED IDEOGRAPH-603B}) missing from font(s) DejaVu Sans.
+  plt.tight_layout()
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20248 (\N{CJK UNIFIED IDEOGRAPH-4F18}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 21270 (\N{CJK UNIFIED IDEOGRAPH-5316}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 24471 (\N{CJK UNIFIED IDEOGRAPH-5F97}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 21040 (\N{CJK UNIFIED IDEOGRAPH-5230}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 30340 (\N{CJK UNIFIED IDEOGRAPH-7684}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 30697 (\N{CJK UNIFIED IDEOGRAPH-77E9}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 38453 (\N{CJK UNIFIED IDEOGRAPH-9635}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 23494 (\N{CJK UNIFIED IDEOGRAPH-5BC6}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 24230 (\N{CJK UNIFIED IDEOGRAPH-5EA6}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 36866 (\N{CJK UNIFIED IDEOGRAPH-9002}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 24212 (\N{CJK UNIFIED IDEOGRAPH-5E94}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 36827 (\N{CJK UNIFIED IDEOGRAPH-8FDB}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 36807 (\N{CJK UNIFIED IDEOGRAPH-8FC7}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 31243 (\N{CJK UNIFIED IDEOGRAPH-7A0B}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20195 (\N{CJK UNIFIED IDEOGRAPH-4EE3}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 25968 (\N{CJK UNIFIED IDEOGRAPH-6570}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 24179 (\N{CJK UNIFIED IDEOGRAPH-5E73}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 22343 (\N{CJK UNIFIED IDEOGRAPH-5747}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 26368 (\N{CJK UNIFIED IDEOGRAPH-6700}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20339 (\N{CJK UNIFIED IDEOGRAPH-4F73}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 27604 (\N{CJK UNIFIED IDEOGRAPH-6BD4}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20363 (\N{CJK UNIFIED IDEOGRAPH-4F8B}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20687 (\N{CJK UNIFIED IDEOGRAPH-50CF}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 32032 (\N{CJK UNIFIED IDEOGRAPH-7D20}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20540 (\N{CJK UNIFIED IDEOGRAPH-503C}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 20998 (\N{CJK UNIFIED IDEOGRAPH-5206}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 24067 (\N{CJK UNIFIED IDEOGRAPH-5E03}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 32456 (\N{CJK UNIFIED IDEOGRAPH-7EC8}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:27 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py:584: UserWarning: Glyph 24635 (\N{CJK UNIFIED IDEOGRAPH-603B}) missing from font(s) DejaVu Sans.
+  plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+
+2026-01-07 12:31:28 - INFO - 
+优化结果已保存:
+2026-01-07 12:31:28 - INFO -   - 数据文件: optimization_results_20260107_123128.pkl
+2026-01-07 12:31:28 - INFO -   - 矩阵文件: optimized_matrix_20260107_123128.txt
+2026-01-07 12:31:28 - INFO -   - 图像文件: optimized_matrix_20260107_123128.png
+2026-01-07 12:31:28 - INFO - 
+程序运行完成，日志已保存到: logs/training_20260107_122927.log
+2026-01-07 12:31:28 - INFO - ============================================================

@@ -1,0 +1,371 @@
+2026-01-07 16:34:47 - INFO - 日志文件保存到: logs/training_20260107_163447.log
+2026-01-07 16:34:47 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-07 16:34:48 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2026-01-07 16:34:49 - INFO - === 训练神经网络仿真器 ===
+2026-01-07 16:34:49 - INFO - 使用模型类型: advanced
+2026-01-07 16:34:49 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2026-01-07 16:34:49 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-30T04:24:48', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2026-01-07 16:34:49 - INFO - train_dataset
+2026-01-07 16:34:49 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2026-01-07 16:35:19 - INFO - val_dataset
+2026-01-07 16:35:19 - INFO - /root/aicp-data/saved_datasets/v1/val_dataset.pkl
+2026-01-07 16:35:27 - INFO - test_dataset
+2026-01-07 16:35:27 - INFO - /root/aicp-data/saved_datasets/v1/test_dataset.pkl
+2026-01-07 16:35:32 - INFO - 数据集已从 /root/aicp-data/saved_datasets/v1 加载
+2026-01-07 16:35:32 - INFO - 训练集大小: 21000000
+2026-01-07 16:35:32 - INFO - 验证集大小: 6000000
+2026-01-07 16:35:32 - INFO - 测试集大小: 3000000
+2026-01-07 16:35:32 - INFO - 加载的data_loaders键: ['train_loader', 'val_loader', 'test_loader']
+2026-01-07 16:35:32 - INFO - 加载的datasets键: ['train_dataset', 'val_dataset', 'test_dataset']
+2026-01-07 16:35:32 - INFO - 训练集批次数量: 20508
+2026-01-07 16:35:32 - INFO - 验证集批次数量: 5860
+2026-01-07 16:35:32 - INFO - 测试集批次数量: 2930
+2026-01-07 16:35:32 - INFO - 
+============================================================
+2026-01-07 16:35:32 - INFO - 步骤5: 创建神经网络...
+2026-01-07 16:35:32 - INFO - ============================================================
+2026-01-07 16:35:32 - INFO - 使用Cnn网络
+2026-01-07 16:35:32 - INFO - 模型总参数: 11,094,600
+2026-01-07 16:35:32 - INFO - 可训练参数: 11,094,600
+2026-01-07 16:35:32 - INFO - 
+============================================================
+2026-01-07 16:35:32 - INFO - 步骤6: 训练...
+2026-01-07 16:35:32 - INFO - ============================================================
+2026-01-07 16:35:32 - INFO - ModelManager初始化完成，使用设备: cuda
+2026-01-07 16:35:32 - INFO - 检查点目录: ./frequency_checkpoints
+2026-01-07 16:35:32 - ERROR - /home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+
+2026-01-07 16:35:32 - INFO - 训练组件设置完成:
+2026-01-07 16:35:32 - INFO - 使用优化器: AdamW
+2026-01-07 16:35:32 - INFO - 损失函数: 加权MSE (权重: None)
+2026-01-07 16:35:32 - INFO - 使用调度器: ReduceLROnPlateau
+2026-01-07 16:35:32 - INFO - 初始学习率: 0.001
+2026-01-07 16:35:32 - INFO - 从检查点恢复训练: ./frequency_checkpoints/checkpoint_epoch_399.pth
+2026-01-07 16:35:32 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/utils.py:43: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(checkpoint_path)
+
+2026-01-07 16:35:32 - INFO - 从 epoch 400 继续训练
+2026-01-07 16:35:32 - INFO - 
+开始训练，总共 400 个epochs
+2026-01-07 16:35:32 - INFO - ================================================================================
+2026-01-07 16:35:32 - INFO - ================================================================================
+2026-01-07 16:35:32 - INFO - 训练完成！最佳验证损失: 0.000000
+2026-01-07 16:35:32 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:814: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  self.model.load_state_dict(torch.load(best_model_path))
+
+2026-01-07 16:35:32 - INFO - 已加载最佳模型
+2026-01-07 16:35:32 - INFO - 
+============================================================
+2026-01-07 16:35:32 - INFO - 步骤7: 在测试集上评估模型性能...
+2026-01-07 16:35:32 - INFO - ============================================================
+2026-01-07 16:35:32 - INFO - ================================================================================
+2026-01-07 16:35:32 - INFO - 模型参数前10个值检查
+2026-01-07 16:35:32 - INFO - ================================================================================
+2026-01-07 16:35:33 - INFO - 模型总参数数量: 11,094,600
+2026-01-07 16:35:33 - INFO - 前10个参数值:
+2026-01-07 16:35:33 - INFO -   参数[0] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[1] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[2] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[3] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[4] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[5] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[6] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[7] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[8] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[9] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[10] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[11] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[12] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[13] = -0.21231136
+2026-01-07 16:35:33 - INFO -   参数[14] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[15] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[16] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[17] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[18] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[19] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[20] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[21] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[22] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[23] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[24] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[25] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[26] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[27] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[28] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[29] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[30] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[31] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[32] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[33] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[34] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[35] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[36] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[37] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[38] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[39] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[40] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[41] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[42] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[43] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[44] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[45] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[46] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[47] = 0.00000000
+2026-01-07 16:35:33 - INFO -   参数[48] = -0.00000000
+2026-01-07 16:35:33 - INFO -   参数[49] = 0.00000000
+2026-01-07 16:35:33 - INFO - 
+参数统计:
+2026-01-07 16:35:33 - INFO -   最小值: -0.21231136
+2026-01-07 16:35:33 - INFO -   最大值: 0.00000000
+2026-01-07 16:35:33 - INFO -   平均值: -0.00424623
+2026-01-07 16:35:33 - INFO -   标准差: 0.02972359
+2026-01-07 16:35:34 - ERROR - Traceback (most recent call last):
+
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 495, in <module>
+
+2026-01-07 16:35:34 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 288, in train_neural_network
+
+2026-01-07 16:35:34 - ERROR - predictions, targets, frequencies, test_metrics = model_manager.evaluate_model(
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/train.py", line 318, in evaluate_model
+
+2026-01-07 16:35:34 - ERROR - predictions = self.model(matrices, frequencies)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+
+2026-01-07 16:35:34 - ERROR - return self._call_impl(*args, **kwargs)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+
+2026-01-07 16:35:34 - ERROR - return forward_call(*args, **kwargs)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/model.py", line 178, in forward
+
+2026-01-07 16:35:34 - ERROR - freq_feat = self.freq_embedding(frequency)  # (batch, 512)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+
+2026-01-07 16:35:34 - ERROR - return self._call_impl(*args, **kwargs)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+
+2026-01-07 16:35:34 - ERROR - return forward_call(*args, **kwargs)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+
+2026-01-07 16:35:34 - ERROR - input = module(input)
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - ^
+2026-01-07 16:35:34 - ERROR - KeyboardInterrupt

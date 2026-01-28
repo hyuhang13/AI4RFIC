@@ -1,0 +1,66 @@
+2025-12-29 15:59:39 - INFO - 日志文件保存到: logs/training_20251229_155939.log
+2025-12-29 15:59:39 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2025-12-29 15:59:42 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2025-12-29 15:59:43 - INFO - === 训练神经网络仿真器 ===
+2025-12-29 15:59:43 - INFO - 使用模型类型: advanced
+2025-12-29 15:59:43 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2025-12-29 15:59:43 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-29T06:52:54', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2025-12-29 15:59:43 - INFO - train_dataset
+2025-12-29 15:59:43 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2025-12-29 16:00:13 - INFO - val_dataset
+2025-12-29 16:00:13 - INFO - /root/aicp-data/saved_datasets/v1/val_dataset.pkl
+2025-12-29 16:00:18 - ERROR - Traceback (most recent call last):
+
+2025-12-29 16:00:18 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 427, in <module>
+
+2025-12-29 16:00:18 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2025-12-29 16:00:18 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 108, in train_neural_network
+
+2025-12-29 16:00:18 - ERROR - data_loaders, datasets, metadata = DatasetSaver.load_dataset(
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/dataset_io.py", line 117, in load_dataset
+
+2025-12-29 16:00:18 - ERROR - dataset_data = pickle.load(f)
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR - ^
+2025-12-29 16:00:18 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/storage.py", line 519, in _load_from_bytes
+
+2025-12-29 16:00:18 - ERROR - def _load_from_bytes(b):
+2025-12-29 16:00:18 - ERROR - KeyboardInterrupt

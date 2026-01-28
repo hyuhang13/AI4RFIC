@@ -1,0 +1,238 @@
+2026-01-04 15:02:03 - INFO - 日志文件保存到: logs/training_20260104_150203.log
+2026-01-04 15:02:03 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-04 15:02:05 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2026-01-04 15:02:06 - INFO - === 训练神经网络仿真器 ===
+2026-01-04 15:02:06 - INFO - 使用模型类型: advanced
+2026-01-04 15:02:06 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2026-01-04 15:02:06 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-30T04:24:48', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2026-01-04 15:02:06 - INFO - train_dataset
+2026-01-04 15:02:06 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2026-01-04 15:02:41 - INFO - val_dataset
+2026-01-04 15:02:41 - INFO - /root/aicp-data/saved_datasets/v1/val_dataset.pkl
+2026-01-04 15:02:49 - INFO - test_dataset
+2026-01-04 15:02:49 - INFO - /root/aicp-data/saved_datasets/v1/test_dataset.pkl
+2026-01-04 15:02:54 - INFO - 数据集已从 /root/aicp-data/saved_datasets/v1 加载
+2026-01-04 15:02:54 - INFO - 训练集大小: 21000000
+2026-01-04 15:02:54 - INFO - 验证集大小: 6000000
+2026-01-04 15:02:54 - INFO - 测试集大小: 3000000
+2026-01-04 15:02:54 - INFO - 加载的data_loaders键: ['train_loader', 'val_loader', 'test_loader']
+2026-01-04 15:02:54 - INFO - 加载的datasets键: ['train_dataset', 'val_dataset', 'test_dataset']
+2026-01-04 15:02:54 - INFO - 训练集批次数量: 20508
+2026-01-04 15:02:54 - INFO - 验证集批次数量: 5860
+2026-01-04 15:02:54 - INFO - 测试集批次数量: 2930
+2026-01-04 15:02:54 - INFO - 
+============================================================
+2026-01-04 15:02:54 - INFO - 步骤5: 创建神经网络...
+2026-01-04 15:02:54 - INFO - ============================================================
+2026-01-04 15:02:54 - INFO - 使用Cnn网络
+2026-01-04 15:02:54 - INFO - 模型总参数: 11,094,600
+2026-01-04 15:02:54 - INFO - 可训练参数: 11,094,600
+2026-01-04 15:02:54 - INFO - 
+============================================================
+2026-01-04 15:02:54 - INFO - 步骤6: 训练...
+2026-01-04 15:02:54 - INFO - ============================================================
+2026-01-04 15:02:54 - INFO - ModelManager初始化完成，使用设备: cuda
+2026-01-04 15:02:54 - INFO - 检查点目录: ./frequency_checkpoints
+2026-01-04 15:02:54 - ERROR - /home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+
+2026-01-04 15:02:54 - INFO - 训练组件设置完成:
+2026-01-04 15:02:54 - INFO - 使用优化器: AdamW
+2026-01-04 15:02:54 - INFO - 损失函数: 加权MSE (权重: None)
+2026-01-04 15:02:54 - INFO - 使用调度器: ReduceLROnPlateau
+2026-01-04 15:02:54 - INFO - 初始学习率: 0.001
+2026-01-04 15:02:54 - INFO - 从检查点恢复训练: ./frequency_checkpoints/checkpoint_epoch_399.pth
+2026-01-04 15:02:54 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/utils.py:43: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(checkpoint_path)
+
+2026-01-04 15:02:55 - INFO - 从 epoch 400 继续训练
+2026-01-04 15:02:55 - INFO - 
+开始训练，总共 400 个epochs
+2026-01-04 15:02:55 - INFO - ================================================================================
+2026-01-04 15:02:55 - INFO - ================================================================================
+2026-01-04 15:02:55 - INFO - 训练完成！最佳验证损失: 0.000000
+2026-01-04 15:02:55 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:797: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  self.model.load_state_dict(torch.load(best_model_path))
+
+2026-01-04 15:02:55 - INFO - 已加载最佳模型
+2026-01-04 15:02:55 - INFO - 
+============================================================
+2026-01-04 15:02:55 - INFO - 步骤7: 在测试集上评估模型性能...
+2026-01-04 15:02:55 - INFO - ============================================================
+2026-01-04 15:03:28 - INFO - 训练历史图已保存到: plots/training_history.png
+2026-01-04 15:03:28 - INFO - ???????????????????????????????????2
+2026-01-04 15:03:28 - INFO - ???????????????????????????????????1
+2026-01-04 15:03:30 - INFO - ???????????????????????????????????4
+2026-01-04 15:15:37 - INFO - 散点对比图已保存到: plots/scatter_comparison.png
+2026-01-04 15:15:37 - INFO - ???????????????????????????????????5
+2026-01-04 15:15:37 - INFO - ???????????????????????????????????3
+2026-01-04 15:15:40 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:973: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.tight_layout()
+
+2026-01-04 15:15:48 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:976: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+2026-01-04 15:22:40 - INFO - dB对比图已保存到: plots/db_comparison.png
+2026-01-04 15:22:40 - INFO - ???????????????????????????????????dB对比图生成完成
+2026-01-04 15:22:44 - INFO - 残差分布图已保存到: plots/residual_distribution.png
+2026-01-04 15:24:20 - INFO - 频率分析图已保存到: plots/frequency_analysis.png
+2026-01-04 15:24:20 - INFO - 频率分析图生成完成
+2026-01-04 15:24:20 - INFO - 开始生成可视化报告...
+2026-01-04 15:24:20 - INFO - 1. 生成训练历史图...
+2026-01-04 15:24:20 - INFO - ???????????????????????????????????2
+2026-01-04 15:24:21 - INFO - 2. 生成散点对比图...
+2026-01-04 15:24:23 - INFO - ???????????????????????????????????4
+2026-01-04 15:24:23 - INFO - ???????????????????????????????????5
+2026-01-04 15:32:49 - INFO - 3. 生成残差分布图...
+2026-01-04 15:32:53 - INFO - 4. 生成频率分析图...
+2026-01-04 15:34:00 - INFO - 5. 生成汇总报告...
+2026-01-04 15:34:01 - INFO - 汇总报告已保存到: plots/comprehensive_report/summary_report.txt
+2026-01-04 15:34:01 - INFO - ================================================================================
+模型训练与评估汇总报告
+================================================================================
+
+生成时间: 2026-01-04 15:34:00
+
+----------------------------------------
+训练过程信息
+----------------------------------------
+总训练轮数: 400
+最终训练损失: 0.000002
+最终验证损失: 0.000000
+最佳验证损失: 0.000000
+
+----------------------------------------
+整体测试性能
+----------------------------------------
+R² 分数: 0.999985
+平均绝对误差 (MAE): 0.000438
+均方根误差 (RMSE): 0.000613
+
+----------------------------------------
+各S参数详细性能
+----------------------------------------
+
+S11_real:
+  R²: 0.999998
+  MAE: 0.000490
+  平均相对误差: 1.31%
+
+S11_imag:
+  R²: 0.999965
+  MAE: 0.000588
+  平均相对误差: 7.36%
+
+S21_real:
+  R²: 0.999999
+  MAE: 0.000329
+  平均相对误差: 600.82%
+
+S21_imag:
+  R²: 0.999978
+  MAE: 0.000339
+  平均相对误差: 240.27%
+
+S12_real:
+  R²: 0.999999
+  MAE: 0.000329
+  平均相对误差: 600.82%
+
+S12_imag:
+  R²: 0.999978
+  MAE: 0.000339
+  平均相对误差: 240.27%
+
+S22_real:
+  R²: 0.999997
+  MAE: 0.000505
+  平均相对误差: 1.56%
+
+S22_imag:
+  R²: 0.999965
+  MAE: 0.000587
+  平均相对误差: 7.78%
+2026-01-04 15:34:01 - INFO - 可视化报告生成完成!
+2026-01-04 15:34:01 - INFO - 
+============================================================
+2026-01-04 15:34:01 - INFO - 评估测试集中所有样本的误差
+2026-01-04 15:34:01 - INFO - ============================================================
+2026-01-04 15:34:32 - ERROR - Traceback (most recent call last):
+
+2026-01-04 15:34:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 436, in <module>
+
+2026-01-04 15:34:32 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2026-01-04 15:34:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 294, in train_neural_network
+
+2026-01-04 15:34:32 - ERROR - sample_errors, all_predictions, all_targets = model_manager.evaluate_all_test_samples(test_loader)
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/train.py", line 615, in evaluate_all_test_samples
+
+2026-01-04 15:34:32 - ERROR - total_db_error += db_error
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - ^
+2026-01-04 15:34:32 - ERROR - UnboundLocalError
+2026-01-04 15:34:32 - ERROR - : 
+2026-01-04 15:34:32 - ERROR - cannot access local variable 'total_db_error' where it is not associated with a value

@@ -1,0 +1,360 @@
+2025-12-31 17:36:20 - INFO - 日志文件保存到: logs/training_20251231_173620.log
+2025-12-31 17:36:20 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2025-12-31 17:36:21 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2025-12-31 17:36:22 - INFO - === 训练神经网络仿真器 ===
+2025-12-31 17:36:22 - INFO - 使用模型类型: advanced
+2025-12-31 17:36:22 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2025-12-31 17:36:22 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-30T04:24:48', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2025-12-31 17:36:22 - INFO - train_dataset
+2025-12-31 17:36:22 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2025-12-31 17:36:52 - INFO - val_dataset
+2025-12-31 17:36:52 - INFO - /root/aicp-data/saved_datasets/v1/val_dataset.pkl
+2025-12-31 17:37:00 - INFO - test_dataset
+2025-12-31 17:37:00 - INFO - /root/aicp-data/saved_datasets/v1/test_dataset.pkl
+2025-12-31 17:37:05 - INFO - 数据集已从 /root/aicp-data/saved_datasets/v1 加载
+2025-12-31 17:37:05 - INFO - 训练集大小: 21000000
+2025-12-31 17:37:05 - INFO - 验证集大小: 6000000
+2025-12-31 17:37:05 - INFO - 测试集大小: 3000000
+2025-12-31 17:37:05 - INFO - 加载的data_loaders键: ['train_loader', 'val_loader', 'test_loader']
+2025-12-31 17:37:05 - INFO - 加载的datasets键: ['train_dataset', 'val_dataset', 'test_dataset']
+2025-12-31 17:37:05 - INFO - 训练集批次数量: 20508
+2025-12-31 17:37:05 - INFO - 验证集批次数量: 5860
+2025-12-31 17:37:05 - INFO - 测试集批次数量: 2930
+2025-12-31 17:37:05 - INFO - 
+============================================================
+2025-12-31 17:37:05 - INFO - 步骤5: 创建神经网络...
+2025-12-31 17:37:05 - INFO - ============================================================
+2025-12-31 17:37:05 - INFO - 使用Cnn网络
+2025-12-31 17:37:05 - INFO - 模型总参数: 11,094,600
+2025-12-31 17:37:05 - INFO - 可训练参数: 11,094,600
+2025-12-31 17:37:05 - INFO - 
+============================================================
+2025-12-31 17:37:05 - INFO - 步骤6: 训练...
+2025-12-31 17:37:05 - INFO - ============================================================
+2025-12-31 17:37:05 - INFO - ModelManager初始化完成，使用设备: cuda
+2025-12-31 17:37:05 - INFO - 检查点目录: ./frequency_checkpoints
+2025-12-31 17:37:05 - ERROR - /home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+
+2025-12-31 17:37:05 - INFO - 训练组件设置完成:
+2025-12-31 17:37:05 - INFO - 使用优化器: AdamW
+2025-12-31 17:37:05 - INFO - 损失函数: 加权MSE (权重: None)
+2025-12-31 17:37:05 - INFO - 使用调度器: ReduceLROnPlateau
+2025-12-31 17:37:05 - INFO - 初始学习率: 0.001
+2025-12-31 17:37:05 - INFO - 从检查点恢复训练: ./frequency_checkpoints/checkpoint_epoch_0.pth
+2025-12-31 17:37:05 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/utils.py:43: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(checkpoint_path)
+
+2025-12-31 17:37:05 - INFO - 从 epoch 1 继续训练
+2025-12-31 17:37:05 - INFO - 
+开始训练，总共 400 个epochs
+2025-12-31 17:37:05 - INFO - ================================================================================
+2025-12-31 17:49:07 - INFO - Epoch 1: 保存最佳模型 (损失: 0.001776)
+2025-12-31 18:01:10 - INFO - Epoch 2: 保存最佳模型 (损失: 0.000560)
+2025-12-31 18:13:13 - INFO - Epoch 3: 保存最佳模型 (损失: 0.000338)
+2025-12-31 18:25:17 - INFO - Epoch 4: 保存最佳模型 (损失: 0.000196)
+2025-12-31 19:25:30 - INFO - Epoch 9: 保存最佳模型 (损失: 0.000170)
+2025-12-31 21:02:02 - INFO - Epoch 17: 保存最佳模型 (损失: 0.000159)
+2025-12-31 21:38:13 - INFO - Epoch 20: 保存最佳模型 (损失: 0.000125)
+2025-12-31 21:38:13 - INFO - Epoch   20: Train Loss = 0.000217, Val Loss = 0.000125, LR = 8.00e-04
+2025-12-31 22:02:20 - INFO - Epoch 22: 保存最佳模型 (损失: 0.000048)
+2025-12-31 23:38:46 - INFO - Epoch 30: 保存最佳模型 (损失: 0.000032)
+2026-01-01 01:27:13 - INFO - Epoch 39: 保存最佳模型 (损失: 0.000030)
+2026-01-01 01:39:16 - INFO - Epoch 40: 保存最佳模型 (损失: 0.000019)
+2026-01-01 01:39:16 - INFO - Epoch   40: Train Loss = 0.000113, Val Loss = 0.000019, LR = 5.12e-04
+2026-01-01 03:27:43 - INFO - Epoch 49: 保存最佳模型 (损失: 0.000013)
+2026-01-01 03:39:46 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_50.pth (Epoch 50)
+2026-01-01 03:39:46 - INFO - ./frequency_checkpoints/checkpoint_epoch_50.pth
+2026-01-01 05:40:21 - INFO - Epoch   60: Train Loss = 0.000085, Val Loss = 0.000062, LR = 3.28e-04
+2026-01-01 06:04:27 - INFO - Epoch 62: 保存最佳模型 (损失: 0.000009)
+2026-01-01 06:16:31 - INFO - Epoch 63: 保存最佳模型 (损失: 0.000008)
+2026-01-01 06:40:39 - INFO - Epoch 65: 保存最佳模型 (损失: 0.000007)
+2026-01-01 08:53:18 - INFO - Epoch 76: 保存最佳模型 (损失: 0.000005)
+2026-01-01 09:41:31 - INFO - Epoch   80: Train Loss = 0.000053, Val Loss = 0.000050, LR = 2.10e-04
+2026-01-01 11:42:04 - INFO - Epoch 90: 保存最佳模型 (损失: 0.000004)
+2026-01-01 12:06:10 - INFO - Epoch 92: 保存最佳模型 (损失: 0.000004)
+2026-01-01 13:30:31 - INFO - Epoch 99: 保存最佳模型 (损失: 0.000003)
+2026-01-01 13:42:34 - INFO - Epoch  100: Train Loss = 0.000014, Val Loss = 0.000003, LR = 1.07e-04
+2026-01-01 13:42:34 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_100.pth (Epoch 100)
+2026-01-01 13:42:34 - INFO - ./frequency_checkpoints/checkpoint_epoch_100.pth
+2026-01-01 14:06:40 - INFO - Epoch 102: 保存最佳模型 (损失: 0.000003)
+2026-01-01 16:55:25 - INFO - Epoch 116: 保存最佳模型 (损失: 0.000002)
+2026-01-01 17:07:29 - INFO - Epoch 117: 保存最佳模型 (损失: 0.000001)
+2026-01-01 17:43:39 - INFO - Epoch  120: Train Loss = 0.000006, Val Loss = 0.000002, LR = 6.87e-05
+2026-01-01 18:31:54 - INFO - Epoch 124: 保存最佳模型 (损失: 0.000001)
+2026-01-01 18:56:01 - INFO - Epoch 126: 保存最佳模型 (损失: 0.000001)
+2026-01-01 19:08:05 - INFO - Epoch 127: 保存最佳模型 (损失: 0.000001)
+2026-01-01 21:44:48 - INFO - Epoch  140: Train Loss = 0.000004, Val Loss = 0.000001, LR = 3.52e-05
+2026-01-01 21:56:52 - INFO - Epoch 141: 保存最佳模型 (损失: 0.000001)
+2026-01-01 22:57:11 - INFO - Epoch 146: 保存最佳模型 (损失: 0.000001)
+2026-01-01 23:09:15 - INFO - Epoch 147: 保存最佳模型 (损失: 0.000001)
+2026-01-01 23:33:23 - INFO - Epoch 149: 保存最佳模型 (损失: 0.000001)
+2026-01-01 23:45:26 - INFO - Epoch 150: 保存最佳模型 (损失: 0.000001)
+2026-01-01 23:45:26 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_150.pth (Epoch 150)
+2026-01-01 23:45:26 - INFO - ./frequency_checkpoints/checkpoint_epoch_150.pth
+2026-01-02 01:21:58 - INFO - Epoch 158: 保存最佳模型 (损失: 0.000001)
+2026-01-02 01:46:08 - INFO - Epoch  160: Train Loss = 0.000004, Val Loss = 0.000001, LR = 2.81e-05
+2026-01-02 02:10:14 - INFO - Epoch 162: 保存最佳模型 (损失: 0.000001)
+2026-01-02 02:46:25 - INFO - Epoch 165: 保存最佳模型 (损失: 0.000001)
+2026-01-02 04:59:00 - INFO - Epoch 176: 保存最佳模型 (损失: 0.000001)
+2026-01-02 05:47:14 - INFO - Epoch  180: Train Loss = 0.000003, Val Loss = 0.000001, LR = 2.25e-05
+2026-01-02 06:35:28 - INFO - Epoch 184: 保存最佳模型 (损失: 0.000001)
+2026-01-02 06:47:32 - INFO - Epoch 185: 保存最佳模型 (损失: 0.000001)
+2026-01-02 07:11:38 - INFO - Epoch 187: 保存最佳模型 (损失: 0.000001)
+2026-01-02 07:23:41 - INFO - Epoch 188: 保存最佳模型 (损失: 0.000001)
+2026-01-02 08:48:06 - INFO - Epoch 195: 保存最佳模型 (损失: 0.000001)
+2026-01-02 09:24:17 - INFO - Epoch 198: 保存最佳模型 (损失: 0.000001)
+2026-01-02 09:36:21 - INFO - Epoch 199: 保存最佳模型 (损失: 0.000001)
+2026-01-02 09:48:23 - INFO - Epoch  200: Train Loss = 0.000003, Val Loss = 0.000001, LR = 1.44e-05
+2026-01-02 09:48:23 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_200.pth (Epoch 200)
+2026-01-02 09:48:23 - INFO - ./frequency_checkpoints/checkpoint_epoch_200.pth
+2026-01-02 11:00:44 - INFO - Epoch 206: 保存最佳模型 (损失: 0.000001)
+2026-01-02 11:36:55 - INFO - Epoch 209: 保存最佳模型 (损失: 0.000001)
+2026-01-02 12:49:17 - INFO - Epoch 215: 保存最佳模型 (损失: 0.000001)
+2026-01-02 13:01:22 - INFO - Epoch 216: 保存最佳模型 (损失: 0.000001)
+2026-01-02 13:49:35 - INFO - Epoch  220: Train Loss = 0.000003, Val Loss = 0.000001, LR = 1.15e-05
+2026-01-02 14:37:51 - INFO - Epoch 224: 保存最佳模型 (损失: 0.000000)
+2026-01-02 15:14:01 - INFO - Epoch 227: 保存最佳模型 (损失: 0.000000)
+2026-01-02 17:02:32 - INFO - Epoch 236: 保存最佳模型 (损失: 0.000000)
+2026-01-02 17:50:44 - INFO - Epoch  240: Train Loss = 0.000002, Val Loss = 0.000001, LR = 7.38e-06
+2026-01-02 19:27:17 - INFO - Epoch 248: 保存最佳模型 (损失: 0.000000)
+2026-01-02 19:51:25 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_250.pth (Epoch 250)
+2026-01-02 19:51:25 - INFO - ./frequency_checkpoints/checkpoint_epoch_250.pth
+2026-01-02 20:03:28 - INFO - Epoch 251: 保存最佳模型 (损失: 0.000000)
+2026-01-02 21:52:04 - INFO - Epoch  260: Train Loss = 0.000002, Val Loss = 0.000001, LR = 4.72e-06
+2026-01-02 22:52:24 - INFO - Epoch 265: 保存最佳模型 (损失: 0.000000)
+2026-01-03 00:40:58 - INFO - Epoch 274: 保存最佳模型 (损失: 0.000000)
+2026-01-03 01:53:19 - INFO - Epoch  280: Train Loss = 0.000002, Val Loss = 0.000000, LR = 2.42e-06
+2026-01-03 03:05:41 - INFO - Epoch 286: 保存最佳模型 (损失: 0.000000)
+2026-01-03 05:54:33 - INFO - Epoch  300: Train Loss = 0.000002, Val Loss = 0.000000, LR = 1.55e-06
+2026-01-03 05:54:33 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_300.pth (Epoch 300)
+2026-01-03 05:54:33 - INFO - ./frequency_checkpoints/checkpoint_epoch_300.pth
+2026-01-03 09:55:54 - INFO - Epoch  320: Train Loss = 0.000002, Val Loss = 0.000000, LR = 7.92e-07
+2026-01-03 13:57:07 - INFO - Epoch  340: Train Loss = 0.000002, Val Loss = 0.000000, LR = 3.25e-07
+2026-01-03 15:57:45 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_350.pth (Epoch 350)
+2026-01-03 15:57:45 - INFO - ./frequency_checkpoints/checkpoint_epoch_350.pth
+2026-01-03 17:58:24 - INFO - Epoch  360: Train Loss = 0.000002, Val Loss = 0.000000, LR = 1.66e-07
+2026-01-03 18:22:30 - INFO - Epoch 362: 保存最佳模型 (损失: 0.000000)
+2026-01-03 21:59:36 - INFO - Epoch  380: Train Loss = 0.000002, Val Loss = 0.000000, LR = 8.51e-08
+2026-01-03 22:35:47 - INFO - Epoch 383: 保存最佳模型 (损失: 0.000000)
+2026-01-04 01:48:39 - INFO - Epoch  399: Train Loss = 0.000002, Val Loss = 0.000000, LR = 5.44e-08
+2026-01-04 01:48:39 - INFO - 检查点已保存: ./frequency_checkpoints/checkpoint_epoch_399.pth (Epoch 399)
+2026-01-04 01:48:39 - INFO - ./frequency_checkpoints/checkpoint_epoch_399.pth
+2026-01-04 01:48:39 - INFO - ================================================================================
+2026-01-04 01:48:39 - INFO - 训练完成！最佳验证损失: 0.000000
+2026-01-04 01:48:39 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:671: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  self.model.load_state_dict(torch.load(best_model_path))
+
+2026-01-04 01:48:39 - INFO - 已加载最佳模型
+2026-01-04 01:48:39 - INFO - 
+============================================================
+2026-01-04 01:48:39 - INFO - 步骤7: 在测试集上评估模型性能...
+2026-01-04 01:48:39 - INFO - ============================================================
+2026-01-04 01:49:12 - INFO - 训练历史图已保存到: plots/training_history.png
+2026-01-04 01:49:12 - INFO - ???????????????????????????????????2
+2026-01-04 01:49:12 - INFO - ???????????????????????????????????1
+2026-01-04 01:49:14 - INFO - ???????????????????????????????????4
+2026-01-04 02:01:15 - INFO - 散点对比图已保存到: plots/scatter_comparison.png
+2026-01-04 02:01:15 - INFO - ???????????????????????????????????5
+2026-01-04 02:01:15 - INFO - ???????????????????????????????????3
+2026-01-04 02:01:20 - INFO - 残差分布图已保存到: plots/residual_distribution.png
+2026-01-04 02:02:55 - INFO - 频率分析图已保存到: plots/frequency_analysis.png
+2026-01-04 02:02:55 - INFO - 开始生成可视化报告...
+2026-01-04 02:02:55 - INFO - 1. 生成训练历史图...
+2026-01-04 02:02:55 - INFO - ???????????????????????????????????2
+2026-01-04 02:02:55 - INFO - 2. 生成散点对比图...
+2026-01-04 02:02:57 - INFO - ???????????????????????????????????4
+2026-01-04 02:02:57 - INFO - ???????????????????????????????????5
+2026-01-04 02:11:15 - INFO - 3. 生成残差分布图...
+2026-01-04 02:11:19 - INFO - 4. 生成频率分析图...
+2026-01-04 02:12:26 - INFO - 5. 生成汇总报告...
+2026-01-04 02:12:27 - INFO - 汇总报告已保存到: plots/comprehensive_report/summary_report.txt
+2026-01-04 02:12:27 - INFO - ================================================================================
+模型训练与评估汇总报告
+================================================================================
+
+生成时间: 2026-01-04 02:12:26
+
+----------------------------------------
+训练过程信息
+----------------------------------------
+总训练轮数: 400
+最终训练损失: 0.000002
+最终验证损失: 0.000000
+最佳验证损失: 0.000000
+
+----------------------------------------
+整体测试性能
+----------------------------------------
+R² 分数: 0.999985
+平均绝对误差 (MAE): 0.000438
+均方根误差 (RMSE): 0.000613
+
+----------------------------------------
+各S参数详细性能
+----------------------------------------
+
+S11_real:
+  R²: 0.999998
+  MAE: 0.000490
+  平均相对误差: 1.31%
+
+S11_imag:
+  R²: 0.999965
+  MAE: 0.000588
+  平均相对误差: 7.36%
+
+S21_real:
+  R²: 0.999999
+  MAE: 0.000329
+  平均相对误差: 600.82%
+
+S21_imag:
+  R²: 0.999978
+  MAE: 0.000339
+  平均相对误差: 240.27%
+
+S12_real:
+  R²: 0.999999
+  MAE: 0.000329
+  平均相对误差: 600.82%
+
+S12_imag:
+  R²: 0.999978
+  MAE: 0.000339
+  平均相对误差: 240.27%
+
+S22_real:
+  R²: 0.999997
+  MAE: 0.000505
+  平均相对误差: 1.56%
+
+S22_imag:
+  R²: 0.999965
+  MAE: 0.000587
+  平均相对误差: 7.78%
+2026-01-04 02:12:27 - INFO - 可视化报告生成完成!
+2026-01-04 02:12:27 - INFO - 
+============================================================
+2026-01-04 02:12:27 - INFO - 评估测试集中所有样本的误差
+2026-01-04 02:12:27 - INFO - ============================================================
+2026-01-04 02:13:25 - INFO - 
+============================================================
+2026-01-04 02:13:25 - INFO - 测试集误差统计分析
+2026-01-04 02:13:25 - INFO - ============================================================
+2026-01-04 02:13:45 - INFO - 
+S11_real 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 231606.95%
+2026-01-04 02:13:45 - INFO -   平均误差: 1.31%
+2026-01-04 02:13:45 - INFO -   中位数误差: 0.07%
+2026-01-04 02:13:45 - INFO -   误差标准差: 159.12%
+2026-01-04 02:13:45 - INFO -   95%分位数: 1.89%
+2026-01-04 02:13:45 - INFO - 
+S11_imag 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 753497.50%
+2026-01-04 02:13:45 - INFO -   平均误差: 7.36%
+2026-01-04 02:13:45 - INFO -   中位数误差: 0.84%
+2026-01-04 02:13:45 - INFO -   误差标准差: 688.69%
+2026-01-04 02:13:45 - INFO -   95%分位数: 13.29%
+2026-01-04 02:13:45 - INFO - 
+S21_real 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 11697789.00%
+2026-01-04 02:13:45 - INFO -   平均误差: 600.83%
+2026-01-04 02:13:45 - INFO -   中位数误差: 4.08%
+2026-01-04 02:13:45 - INFO -   误差标准差: 22968.83%
+2026-01-04 02:13:45 - INFO -   95%分位数: 130.31%
+2026-01-04 02:13:45 - INFO - 
+S21_imag 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 5704798.50%
+2026-01-04 02:13:45 - INFO -   平均误差: 240.27%
+2026-01-04 02:13:45 - INFO -   中位数误差: 1.04%
+2026-01-04 02:13:45 - INFO -   误差标准差: 13545.75%
+2026-01-04 02:13:45 - INFO -   95%分位数: 56.17%
+2026-01-04 02:13:45 - INFO - 
+S12_real 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 11695991.00%
+2026-01-04 02:13:45 - INFO -   平均误差: 600.83%
+2026-01-04 02:13:45 - INFO -   中位数误差: 4.08%
+2026-01-04 02:13:45 - INFO -   误差标准差: 22968.50%
+2026-01-04 02:13:45 - INFO -   95%分位数: 130.31%
+2026-01-04 02:13:45 - INFO - 
+S12_imag 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 5704887.50%
+2026-01-04 02:13:45 - INFO -   平均误差: 240.28%
+2026-01-04 02:13:45 - INFO -   中位数误差: 1.04%
+2026-01-04 02:13:45 - INFO -   误差标准差: 13545.97%
+2026-01-04 02:13:45 - INFO -   95%分位数: 56.17%
+2026-01-04 02:13:45 - INFO - 
+S22_real 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 133901.33%
+2026-01-04 02:13:45 - INFO -   平均误差: 1.56%
+2026-01-04 02:13:45 - INFO -   中位数误差: 0.07%
+2026-01-04 02:13:45 - INFO -   误差标准差: 147.81%
+2026-01-04 02:13:45 - INFO -   95%分位数: 2.03%
+2026-01-04 02:13:45 - INFO - 
+S22_imag 误差统计:
+2026-01-04 02:13:45 - INFO -   最小误差: 0.00%
+2026-01-04 02:13:45 - INFO -   最大误差: 1105762.75%
+2026-01-04 02:13:45 - INFO -   平均误差: 7.78%
+2026-01-04 02:13:45 - INFO -   中位数误差: 0.87%
+2026-01-04 02:13:45 - INFO -   误差标准差: 962.51%
+2026-01-04 02:13:45 - INFO -   95%分位数: 12.88%
+2026-01-04 02:13:47 - INFO - 
+============================================================
+2026-01-04 02:13:47 - INFO - 样本误差极值分析
+2026-01-04 02:13:47 - INFO - ============================================================
+2026-01-04 02:13:47 - INFO - 
+🎯 最佳预测样本 (索引: 2643691):
+2026-01-04 02:13:47 - INFO -   平均相对误差: 0.02%
+2026-01-04 02:13:47 - INFO -   频率: 18.6 GHz
+2026-01-04 02:13:47 - INFO - 
+⚠️ 最差预测样本 (索引: 2795970):
+2026-01-04 02:13:47 - INFO -   平均相对误差: 2924223.75%
+2026-01-04 02:13:47 - INFO -   频率: 10.0 GHz
+2026-01-04 02:14:32 - INFO - 误差分布图已保存到: error_distribution.png
+2026-01-04 02:14:32 - INFO - 最终模型已保存: final_frequency_model.pth
+2026-01-04 02:14:32 - INFO - 最佳验证损失: 0.000000
+2026-01-04 02:18:23 - INFO - ##############
+
+2026-01-04 02:18:23 - INFO - 
+================================================================================
+2026-01-04 02:18:23 - INFO - 神经网络模型训练总结
+2026-01-04 02:18:23 - INFO - ================================================================================
+2026-01-04 02:18:23 - INFO - 
+📈 训练过程:
+2026-01-04 02:18:23 - INFO -   训练轮数: 400
+2026-01-04 02:18:23 - INFO -   最终训练损失: 0.000002
+2026-01-04 02:18:23 - INFO -   最终验证损失: 0.000000
+2026-01-04 02:18:23 - INFO -   最佳验证损失: 0.000000
+2026-01-04 02:18:23 - INFO - 
+📊 训练集评估结果:
+2026-01-04 02:18:23 - INFO -   整体R²: 1.0000
+2026-01-04 02:18:23 - INFO -   整体MAE: 0.000420
+2026-01-04 02:18:23 - INFO -   整体RMSE: 0.000597
+2026-01-04 02:18:23 - INFO - 
+📊 测试集评估结果:
+2026-01-04 02:18:23 - INFO -   整体R²: 1.0000
+2026-01-04 02:18:23 - INFO -   整体MAE: 0.000438
+2026-01-04 02:18:23 - INFO -   整体RMSE: 0.000613
+2026-01-04 02:18:23 - INFO - 
+🎯 各S参数表现对比:
+2026-01-04 02:18:23 - INFO -   S11_real: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S11_imag: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S21_real: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S21_imag: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S12_real: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S12_imag: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S22_real: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO -   S22_imag: 训练集R²=1.0000, 测试集R²=1.0000
+2026-01-04 02:18:23 - INFO - 
+================================================================================
+2026-01-04 02:18:28 - INFO - 
+程序运行完成，日志已保存到: logs/training_20251231_173620.log
+2026-01-04 02:18:28 - INFO - ============================================================

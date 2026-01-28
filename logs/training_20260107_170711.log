@@ -1,0 +1,317 @@
+2026-01-07 17:07:11 - INFO - 日志文件保存到: logs/training_20260107_170711.log
+2026-01-07 17:07:11 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-07 17:07:12 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2026-01-07 17:07:15 - INFO - === 训练神经网络仿真器 ===
+2026-01-07 17:07:15 - INFO - 使用模型类型: advanced
+2026-01-07 17:07:15 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2026-01-07 17:07:15 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-30T04:24:48', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2026-01-07 17:07:15 - INFO - train_dataset
+2026-01-07 17:07:15 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2026-01-07 17:07:44 - INFO - val_dataset
+2026-01-07 17:07:44 - INFO - /root/aicp-data/saved_datasets/v1/val_dataset.pkl
+2026-01-07 17:07:53 - INFO - test_dataset
+2026-01-07 17:07:53 - INFO - /root/aicp-data/saved_datasets/v1/test_dataset.pkl
+2026-01-07 17:07:57 - INFO - 数据集已从 /root/aicp-data/saved_datasets/v1 加载
+2026-01-07 17:07:57 - INFO - 训练集大小: 21000000
+2026-01-07 17:07:57 - INFO - 验证集大小: 6000000
+2026-01-07 17:07:57 - INFO - 测试集大小: 3000000
+2026-01-07 17:07:57 - INFO - 加载的data_loaders键: ['train_loader', 'val_loader', 'test_loader']
+2026-01-07 17:07:57 - INFO - 加载的datasets键: ['train_dataset', 'val_dataset', 'test_dataset']
+2026-01-07 17:07:57 - INFO - 训练集批次数量: 20508
+2026-01-07 17:07:57 - INFO - 验证集批次数量: 5860
+2026-01-07 17:07:57 - INFO - 测试集批次数量: 2930
+2026-01-07 17:07:57 - INFO - 
+============================================================
+2026-01-07 17:07:57 - INFO - 步骤5: 创建神经网络...
+2026-01-07 17:07:57 - INFO - ============================================================
+2026-01-07 17:07:57 - INFO - 使用Cnn网络
+2026-01-07 17:07:57 - INFO - 模型总参数: 11,094,600
+2026-01-07 17:07:57 - INFO - 可训练参数: 11,094,600
+2026-01-07 17:07:57 - INFO - 
+============================================================
+2026-01-07 17:07:57 - INFO - 步骤6: 训练...
+2026-01-07 17:07:57 - INFO - ============================================================
+2026-01-07 17:07:57 - INFO - ModelManager初始化完成，使用设备: cuda
+2026-01-07 17:07:57 - INFO - 检查点目录: ./frequency_checkpoints
+2026-01-07 17:07:57 - ERROR - /home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+
+2026-01-07 17:07:57 - INFO - 训练组件设置完成:
+2026-01-07 17:07:57 - INFO - 使用优化器: AdamW
+2026-01-07 17:07:57 - INFO - 损失函数: 加权MSE (权重: None)
+2026-01-07 17:07:57 - INFO - 使用调度器: ReduceLROnPlateau
+2026-01-07 17:07:57 - INFO - 初始学习率: 0.001
+2026-01-07 17:07:57 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:842: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  self.model.load_state_dict(torch.load(best_model_path))
+
+2026-01-07 17:07:57 - INFO - 已加载最佳模型
+2026-01-07 17:07:57 - INFO - 
+============================================================
+2026-01-07 17:07:57 - INFO - 步骤7: 在测试集上评估模型性能...
+2026-01-07 17:07:57 - INFO - ============================================================
+2026-01-07 17:07:57 - INFO - ================================================================================
+2026-01-07 17:07:57 - INFO - 模型参数前10个值检查
+2026-01-07 17:07:57 - INFO - ================================================================================
+2026-01-07 17:07:58 - INFO - 模型总参数数量: 11,094,600
+2026-01-07 17:07:58 - INFO - 前10个参数值:
+2026-01-07 17:07:58 - INFO -   参数[0] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[1] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[2] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[3] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[4] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[5] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[6] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[7] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[8] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[9] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[10] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[11] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[12] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[13] = -0.21231136
+2026-01-07 17:07:58 - INFO -   参数[14] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[15] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[16] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[17] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[18] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[19] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[20] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[21] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[22] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[23] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[24] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[25] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[26] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[27] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[28] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[29] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[30] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[31] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[32] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[33] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[34] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[35] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[36] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[37] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[38] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[39] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[40] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[41] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[42] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[43] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[44] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[45] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[46] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[47] = 0.00000000
+2026-01-07 17:07:58 - INFO -   参数[48] = -0.00000000
+2026-01-07 17:07:58 - INFO -   参数[49] = 0.00000000
+2026-01-07 17:07:58 - INFO - 
+参数统计:
+2026-01-07 17:07:58 - INFO -   最小值: -0.21231136
+2026-01-07 17:07:58 - INFO -   最大值: 0.00000000
+2026-01-07 17:07:58 - INFO -   平均值: -0.00424623
+2026-01-07 17:07:58 - INFO -   标准差: 0.02972359
+2026-01-07 17:08:28 - INFO - [[-3.97796258e-02  1.39507186e-03  9.43667948e-01 -1.30515277e-01
+   9.43667948e-01 -1.30515292e-01 -3.83958891e-02  2.08824873e-04]
+ [-3.58694308e-02 -9.72002745e-05  9.49331045e-01 -1.11816585e-01
+   9.49331045e-01 -1.11816593e-01 -3.47767510e-02 -1.28295203e-03]
+ [ 8.65740538e-01 -1.73257336e-01 -2.03391351e-03  6.84893969e-03
+  -2.03391537e-03  6.84893597e-03  9.96729016e-01 -2.25271098e-02]
+ [-4.09546383e-02 -1.69655518e-03  9.21198428e-01 -2.36510187e-01
+   9.21198368e-01 -2.36510202e-01 -4.44201715e-02  1.23659836e-03]
+ [ 8.19821417e-01 -2.29422763e-01 -2.46621668e-04  7.40766758e-03
+  -2.46620737e-04  7.40766758e-03  9.99002337e-01 -1.43250488e-02]
+ [ 7.29726553e-01 -4.37025398e-01  8.47342052e-03  3.39332819e-02
+   8.47341679e-03  3.39332782e-02  9.92925763e-01 -6.39308393e-02]
+ [-2.85322983e-02 -1.66918151e-02  9.62692738e-01 -7.63024837e-02
+   9.62692738e-01 -7.63024911e-02 -2.90877949e-02 -1.60500072e-02]
+ [ 9.97337282e-01 -2.20518522e-02 -1.18208525e-03  6.23360788e-03
+  -1.18208898e-03  6.23360416e-03  8.54360223e-01 -1.92141309e-01]
+ [ 9.94544387e-01 -5.50527908e-02  6.34915894e-03  2.56214570e-02
+   6.34915335e-03  2.56214496e-02  6.99774742e-01 -4.70452011e-01]
+ [ 9.95498836e-01 -4.98814732e-02  4.80157835e-03  2.73445230e-02
+   4.80159698e-03  2.73445304e-02  7.58766174e-01 -3.94353211e-01]]
+2026-01-07 17:08:31 - INFO - ******************************************************
+2026-01-07 17:08:31 - INFO - 训练历史图已保存到: plots/training_history.png
+2026-01-07 17:08:31 - INFO - ???????????????????????????????????2
+2026-01-07 17:08:31 - INFO - ???????????????????????????????????1
+2026-01-07 17:08:33 - INFO - ???????????????????????????????????4
+2026-01-07 17:08:33 - ERROR - Traceback (most recent call last):
+
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 495, in <module>
+
+2026-01-07 17:08:33 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 297, in train_neural_network
+
+2026-01-07 17:08:33 - ERROR - model_manager.plot_scatter_comparison(predictions, targets, frequencies,
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/train.py", line 1106, in plot_scatter_comparison
+
+2026-01-07 17:08:33 - ERROR - plt.savefig(save_path, dpi=300, bbox_inches='tight')
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/pyplot.py", line 1251, in savefig
+
+2026-01-07 17:08:33 - ERROR - res = fig.savefig(*args, **kwargs)  # type: ignore[func-returns-value]
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/figure.py", line 3490, in savefig
+
+2026-01-07 17:08:33 - ERROR - self.canvas.print_figure(fname, **kwargs)
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2186, in print_figure
+
+2026-01-07 17:08:33 - ERROR - result = print_method(
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2042, in <lambda>
+
+2026-01-07 17:08:33 - ERROR - print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 481, in print_png
+
+2026-01-07 17:08:33 - ERROR - self._print_pil(filename_or_obj, "png", pil_kwargs, metadata)
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 429, in _print_pil
+
+2026-01-07 17:08:33 - ERROR - FigureCanvasAgg.draw(self)
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 377, in draw
+
+2026-01-07 17:08:33 - ERROR - self.renderer = self.get_renderer()
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 392, in get_renderer
+
+2026-01-07 17:08:33 - ERROR - self.renderer = RendererAgg(w, h, self.figure.dpi)
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 69, in __init__
+
+2026-01-07 17:08:33 - ERROR - self._renderer = _RendererAgg(int(width), int(height), dpi)
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - ^
+2026-01-07 17:08:33 - ERROR - KeyboardInterrupt

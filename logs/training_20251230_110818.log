@@ -1,0 +1,215 @@
+2025-12-30 11:08:18 - INFO - 日志文件保存到: logs/training_20251230_110818.log
+2025-12-30 11:08:18 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2025-12-30 11:08:21 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2025-12-30 11:08:23 - INFO - === 训练神经网络仿真器 ===
+2025-12-30 11:08:23 - INFO - 使用模型类型: advanced
+2025-12-30 11:08:23 - INFO - 执行完整的数据预处理流程...
+2025-12-30 11:08:23 - INFO - 加载和预处理数据...
+2025-12-30 11:08:23 - INFO - 正在加载二进制矩阵...
+2025-12-30 11:08:27 - INFO - 矩阵数据形状: (100000, 1, 19, 19)
+2025-12-30 11:08:27 - INFO - 正在加载S参数...
+2025-12-30 11:08:27 - ERROR - Traceback (most recent call last):
+
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 427, in <module>
+
+2025-12-30 11:08:27 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=False, dataset_version='v1')
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 131, in train_neural_network
+
+2025-12-30 11:08:27 - ERROR - preprocessor.load_and_clean_data()
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/data_preprocessor.py", line 138, in load_and_clean_data
+
+2025-12-30 11:08:27 - ERROR - self.s_params = self._load_s_params()
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/data_preprocessor.py", line 68, in _load_s_params
+
+2025-12-30 11:08:27 - ERROR - df = pd.read_csv(self.s_param_file)
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+
+2025-12-30 11:08:27 - ERROR - return _read(filepath_or_buffer, kwds)
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+
+2025-12-30 11:08:27 - ERROR - parser = TextFileReader(filepath_or_buffer, **kwds)
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+
+2025-12-30 11:08:27 - ERROR - self._engine = self._make_engine(f, self.engine)
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+
+2025-12-30 11:08:27 - ERROR - self.handles = get_handle(
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/pandas/io/common.py", line 873, in get_handle
+
+2025-12-30 11:08:27 - ERROR - handle = open(
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - ^
+2025-12-30 11:08:27 - ERROR - FileNotFoundError
+2025-12-30 11:08:27 - ERROR - : 
+2025-12-30 11:08:27 - ERROR - [Errno 2] No such file or directory: 'dataset/dataset_agg_cleaned.csv'

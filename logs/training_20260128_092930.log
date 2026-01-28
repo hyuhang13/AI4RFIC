@@ -1,0 +1,128 @@
+2026-01-28 09:29:30 - INFO - 日志文件保存到: logs/training_20260128_092930.log
+2026-01-28 09:29:30 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-28 09:29:32 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 测试S参数曲线: 
+2026-01-28 09:37:42 - INFO - === 训练神经网络仿真器 ===
+2026-01-28 09:37:42 - INFO - 使用模型类型: advanced
+2026-01-28 09:37:42 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2026-01-28 09:37:42 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-30T04:24:48', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2026-01-28 09:37:42 - INFO - train_dataset
+2026-01-28 09:37:42 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2026-01-28 09:38:22 - ERROR - Traceback (most recent call last):
+
+2026-01-28 09:38:22 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 553, in <module>
+
+2026-01-28 09:38:22 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2026-01-28 09:38:22 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 137, in train_neural_network
+
+2026-01-28 09:38:22 - ERROR - data_loaders, datasets, metadata = DatasetSaver.load_dataset(
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/dataset_io.py", line 117, in load_dataset
+
+2026-01-28 09:38:22 - ERROR - dataset_data = pickle.load(f)
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/storage.py", line 520, in _load_from_bytes
+
+2026-01-28 09:38:22 - ERROR - return torch.load(io.BytesIO(b), weights_only=False)
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/serialization.py", line 1384, in load
+
+2026-01-28 09:38:22 - ERROR - return _legacy_load(
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR - ^
+2026-01-28 09:38:22 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/serialization.py", line 1647, in _legacy_load
+
+2026-01-28 09:38:22 - ERROR - typed_storage._untyped_storage._set_from_file(
+2026-01-28 09:38:22 - ERROR - KeyboardInterrupt

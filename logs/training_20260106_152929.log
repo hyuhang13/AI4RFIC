@@ -1,0 +1,254 @@
+2026-01-06 15:29:29 - INFO - 日志文件保存到: logs/training_20260106_152929.log
+2026-01-06 15:29:29 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-06 15:29:30 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2026-01-06 15:29:31 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/main.py:453: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(model_path)
+
+2026-01-06 15:29:31 - INFO - odict_keys(['freq_embedding.0.weight', 'freq_embedding.0.bias', 'freq_embedding.1.weight', 'freq_embedding.1.bias', 'freq_embedding.1.running_mean', 'freq_embedding.1.running_var', 'freq_embedding.1.num_batches_tracked', 'freq_embedding.3.weight', 'freq_embedding.3.bias', 'freq_embedding.4.weight', 'freq_embedding.4.bias', 'freq_embedding.4.running_mean', 'freq_embedding.4.running_var', 'freq_embedding.4.num_batches_tracked', 'freq_embedding.6.weight', 'freq_embedding.6.bias', 'freq_embedding.7.weight', 'freq_embedding.7.bias', 'freq_embedding.7.running_mean', 'freq_embedding.7.running_var', 'freq_embedding.7.num_batches_tracked', 'conv_block1.0.weight', 'conv_block1.0.bias', 'conv_block1.1.weight', 'conv_block1.1.bias', 'conv_block1.1.running_mean', 'conv_block1.1.running_var', 'conv_block1.1.num_batches_tracked', 'conv_block1.3.weight', 'conv_block1.3.bias', 'conv_block1.4.weight', 'conv_block1.4.bias', 'conv_block1.4.running_mean', 'conv_block1.4.running_var', 'conv_block1.4.num_batches_tracked', 'conv_block2.0.weight', 'conv_block2.0.bias', 'conv_block2.1.weight', 'conv_block2.1.bias', 'conv_block2.1.running_mean', 'conv_block2.1.running_var', 'conv_block2.1.num_batches_tracked', 'conv_block2.3.weight', 'conv_block2.3.bias', 'conv_block2.4.weight', 'conv_block2.4.bias', 'conv_block2.4.running_mean', 'conv_block2.4.running_var', 'conv_block2.4.num_batches_tracked', 'conv_block3.0.weight', 'conv_block3.0.bias', 'conv_block3.1.weight', 'conv_block3.1.bias', 'conv_block3.1.running_mean', 'conv_block3.1.running_var', 'conv_block3.1.num_batches_tracked', 'conv_block3.3.weight', 'conv_block3.3.bias', 'conv_block3.4.weight', 'conv_block3.4.bias', 'conv_block3.4.running_mean', 'conv_block3.4.running_var', 'conv_block3.4.num_batches_tracked', 'conv_block3.6.weight', 'conv_block3.6.bias', 'conv_block3.7.weight', 'conv_block3.7.bias', 'conv_block3.7.running_mean', 'conv_block3.7.running_var', 'conv_block3.7.num_batches_tracked', 'fusion_module.0.weight', 'fusion_module.0.bias', 'fusion_module.1.weight', 'fusion_module.1.bias', 'fusion_module.1.running_mean', 'fusion_module.1.running_var', 'fusion_module.1.num_batches_tracked', 'fusion_module.4.weight', 'fusion_module.4.bias', 'fusion_module.5.weight', 'fusion_module.5.bias', 'fusion_module.5.running_mean', 'fusion_module.5.running_var', 'fusion_module.5.num_batches_tracked', 'fusion_module.8.weight', 'fusion_module.8.bias', 'fusion_module.9.weight', 'fusion_module.9.bias', 'fusion_module.9.running_mean', 'fusion_module.9.running_var', 'fusion_module.9.num_batches_tracked', 'fusion_module.12.weight', 'fusion_module.12.bias', 'fusion_module.13.weight', 'fusion_module.13.bias', 'fusion_module.13.running_mean', 'fusion_module.13.running_var', 'fusion_module.13.num_batches_tracked', 'fusion_module.15.weight', 'fusion_module.15.bias', 'fusion_module.16.weight', 'fusion_module.16.bias', 'fusion_module.16.running_mean', 'fusion_module.16.running_var', 'fusion_module.16.num_batches_tracked', 'fusion_module.18.weight', 'fusion_module.18.bias'])
+2026-01-06 15:29:31 - INFO - 
+==================================================
+2026-01-06 15:29:31 - INFO - 创建空白模型：
+2026-01-06 15:29:31 - INFO - 
+==================================================
+2026-01-06 15:29:32 - INFO - 
+==================================================
+2026-01-06 15:29:32 - INFO - 模型加载：
+2026-01-06 15:29:32 - INFO - 
+==================================================
+2026-01-06 15:29:32 - INFO - ModelManager初始化完成，使用设备: cuda
+2026-01-06 15:29:32 - INFO - 检查点目录: frequency_checkpoints/best_model.pth
+2026-01-06 15:29:32 - INFO - 
+============================================================
+2026-01-06 15:29:32 - INFO - 启动矩阵结构遗传优化
+2026-01-06 15:29:32 - INFO - ============================================================
+2026-01-06 15:29:32 - INFO - 矩阵遗传算法初始化完成
+2026-01-06 15:29:32 - INFO - 矩阵形状: (19, 19)
+2026-01-06 15:29:32 - INFO - 总像素数: 361
+2026-01-06 15:29:32 - INFO - 使用设备: cuda
+2026-01-06 15:29:32 - INFO - 
+============================================================
+2026-01-06 15:29:32 - INFO - 启动遗传算法优化
+2026-01-06 15:29:32 - INFO - ============================================================
+2026-01-06 15:29:32 - INFO - 目标频率: 10 GHz
+2026-01-06 15:29:32 - INFO - 目标参数: {'gamma_opt': {'origin_value': 1, 'magnitude_db': 1, 'weight': 1.0}, 'S21': {'magnitude_db': 0, 'weight': 0}, 'S11': {'magnitude_db': 0, 'weight': 0}, 'S22': {'magnitude_db': 0, 'weight': 0}, 'symmetry': {'weight': 0.3}, 'complexity': {'weight': 0.1}}
+2026-01-06 15:29:32 - INFO - 种群大小: 1024
+2026-01-06 15:29:32 - INFO - 进化代数: 100
+2026-01-06 15:29:32 - INFO - 变异率: 0.1
+2026-01-06 15:29:32 - INFO - 交叉率: 0.8
+2026-01-06 15:29:32 - INFO - 精英数量: 5
+2026-01-06 15:29:32 - INFO - tournament_size: 256
+2026-01-06 15:29:32 - INFO - ============================================================
+2026-01-06 15:29:32 - INFO - 创建初始种群 (大小: 4096)...
+2026-01-06 15:29:32 - ERROR - 创建种群:   0%|          | 0/4096 [00:00<?, ?it/s]
+2026-01-06 15:29:32 - ERROR - 创建种群: 100%|##########| 4096/4096 [00:00<00:00, 205020.16it/s]
+2026-01-06 15:29:32 - ERROR - 遗传演进:   0%|          | 0/100 [00:00<?, ?it/s]
+2026-01-06 15:29:32 - INFO - Sample Input:
+
+2026-01-06 15:29:32 - INFO - tensor([[0., 1., 0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 1., 1.,
+         1.],
+        [0., 1., 0., 1., 1., 1., 1., 1., 1., 1., 1., 0., 0., 1., 1., 1., 0., 1.,
+         0.],
+        [0., 0., 0., 0., 1., 1., 1., 1., 1., 0., 1., 1., 0., 1., 0., 1., 0., 1.,
+         1.],
+        [0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 0., 1., 1., 1., 1., 0., 1., 0.,
+         1.],
+        [1., 1., 0., 1., 0., 1., 0., 1., 0., 0., 1., 0., 1., 1., 1., 1., 1., 1.,
+         1.],
+        [1., 1., 1., 1., 0., 0., 1., 1., 1., 1., 1., 1., 1., 1., 0., 1., 0., 1.,
+         1.],
+        [0., 1., 0., 1., 1., 0., 1., 0., 1., 0., 0., 1., 1., 0., 1., 1., 1., 0.,
+         0.],
+        [0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 0., 0., 0., 0., 1., 0.,
+         0.],
+        [0., 0., 0., 1., 0., 1., 0., 1., 0., 0., 1., 1., 1., 0., 1., 0., 0., 1.,
+         1.],
+        [1., 0., 1., 1., 1., 0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 1., 0., 0.,
+         1.],
+        [0., 0., 0., 0., 0., 1., 1., 1., 0., 0., 0., 1., 0., 0., 1., 0., 1., 1.,
+         1.],
+        [0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 1., 1., 1., 1., 0.,
+         1.],
+        [0., 0., 1., 1., 1., 1., 1., 1., 1., 1., 0., 1., 1., 0., 1., 0., 0., 1.,
+         0.],
+        [0., 0., 0., 1., 0., 1., 0., 0., 0., 0., 1., 1., 0., 0., 1., 0., 0., 0.,
+         1.],
+        [1., 1., 0., 0., 1., 1., 1., 1., 0., 1., 0., 1., 0., 1., 1., 1., 1., 0.,
+         1.],
+        [0., 0., 0., 0., 1., 0., 0., 0., 1., 1., 1., 1., 0., 0., 1., 0., 0., 0.,
+         1.],
+        [1., 0., 1., 1., 1., 1., 1., 0., 1., 0., 0., 1., 0., 0., 0., 1., 1., 0.,
+         1.],
+        [1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 0., 1., 1., 0., 0., 1., 1., 0.,
+         1.],
+        [0., 1., 0., 0., 0., 1., 1., 0., 1., 0., 0., 1., 1., 0., 1., 1., 0., 0.,
+         1.]])
+2026-01-06 15:29:32 - INFO - tensor([[10.]])
+2026-01-06 15:29:32 - INFO - 处理后矩阵形状: torch.Size([1, 1, 19, 19])
+2026-01-06 15:29:32 - INFO - 处理后频率形状: torch.Size([1, 1])
+2026-01-06 15:29:32 - INFO - Predict:s_param_dict
+
+2026-01-06 15:29:32 - INFO - {'S11_real': np.float32(0.730662), 'S11_imag': np.float32(-0.9969195), 'S21_real': np.float32(0.999973), 'S21_imag': np.float32(0.89421916), 'S12_real': np.float32(0.999973), 'S12_imag': np.float32(0.89421904), 'S22_real': np.float32(0.9924726), 'S22_imag': np.float32(-0.9958496)}
+2026-01-06 15:29:32 - ERROR - 遗传演进:   0%|          | 0/100 [00:00<?, ?it/s]
+2026-01-06 15:29:32 - ERROR - Traceback (most recent call last):
+
+2026-01-06 15:29:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 468, in <module>
+
+2026-01-06 15:29:32 - ERROR - best_matrix, best_info, best_fitness = run_genetic_optimization(manager, target_freq=TARGET_CONFIG['target_freq'], 
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 360, in run_genetic_optimization
+
+2026-01-06 15:29:32 - ERROR - best_matrix, best_info, best_fitness, fitness_history, best_fitness_history = ga.optimize(
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py", line 446, in optimize
+
+2026-01-06 15:29:32 - ERROR - fitness, info = self.fitness_function(matrix, target_freq, target_params)
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/optimization_algorithm.py", line 249, in fitness_function
+
+2026-01-06 15:29:32 - ERROR - individual_cost = w1*abs(s22_predict-target_params['gamma_opt']['origin_value']) + w2*IL_passive + w3*Loss_penalty
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - ^
+2026-01-06 15:29:32 - ERROR - NameError
+2026-01-06 15:29:32 - ERROR - : 
+2026-01-06 15:29:32 - ERROR - name 'w1' is not defined

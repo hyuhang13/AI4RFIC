@@ -1,0 +1,309 @@
+2026-01-07 15:37:10 - INFO - 日志文件保存到: logs/training_20260107_153710.log
+2026-01-07 15:37:10 - INFO - 选择模型类型 (1: CnnNet, 2: ResidualNet): 
+2026-01-07 15:37:11 - INFO - 选择运行模式 (1: 仅训练神经网络, 2: 仅运行遗传算法, 3: 完整流程): 
+2026-01-07 15:37:13 - INFO - === 训练神经网络仿真器 ===
+2026-01-07 15:37:13 - INFO - 使用模型类型: advanced
+2026-01-07 15:37:13 - INFO - 使用缓存的预处理数据集: /root/aicp-data/saved_datasets/v1
+2026-01-07 15:37:13 - INFO - {'data_loaders': {'train_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'val_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}, 'test_loader': {'batch_size': 1024, 'shuffle': False, 'num_workers': 4, 'pin_memory': True, 'drop_last': False}}, 'datasets': {'train_dataset': '/root/aicp-data/saved_datasets/v1/train_dataset.pkl', 'val_dataset': '/root/aicp-data/saved_datasets/v1/val_dataset.pkl', 'test_dataset': '/root/aicp-data/saved_datasets/v1/test_dataset.pkl'}, 'metadata': {'timestamp': '2025-12-30T04:24:48', 'dataset_sizes': {'train': 21000000, 'val': 6000000, 'test': 3000000}}}
+2026-01-07 15:37:13 - INFO - train_dataset
+2026-01-07 15:37:13 - INFO - /root/aicp-data/saved_datasets/v1/train_dataset.pkl
+2026-01-07 15:37:43 - INFO - val_dataset
+2026-01-07 15:37:43 - INFO - /root/aicp-data/saved_datasets/v1/val_dataset.pkl
+2026-01-07 15:37:51 - INFO - test_dataset
+2026-01-07 15:37:51 - INFO - /root/aicp-data/saved_datasets/v1/test_dataset.pkl
+2026-01-07 15:37:55 - INFO - 数据集已从 /root/aicp-data/saved_datasets/v1 加载
+2026-01-07 15:37:55 - INFO - 训练集大小: 21000000
+2026-01-07 15:37:55 - INFO - 验证集大小: 6000000
+2026-01-07 15:37:55 - INFO - 测试集大小: 3000000
+2026-01-07 15:37:55 - INFO - 加载的data_loaders键: ['train_loader', 'val_loader', 'test_loader']
+2026-01-07 15:37:55 - INFO - 加载的datasets键: ['train_dataset', 'val_dataset', 'test_dataset']
+2026-01-07 15:37:55 - INFO - 训练集批次数量: 20508
+2026-01-07 15:37:55 - INFO - 验证集批次数量: 5860
+2026-01-07 15:37:55 - INFO - 测试集批次数量: 2930
+2026-01-07 15:37:55 - INFO - 
+============================================================
+2026-01-07 15:37:55 - INFO - 步骤5: 创建神经网络...
+2026-01-07 15:37:55 - INFO - ============================================================
+2026-01-07 15:37:56 - INFO - 使用Cnn网络
+2026-01-07 15:37:56 - INFO - 模型总参数: 11,094,600
+2026-01-07 15:37:56 - INFO - 可训练参数: 11,094,600
+2026-01-07 15:37:56 - INFO - 
+============================================================
+2026-01-07 15:37:56 - INFO - 步骤6: 训练...
+2026-01-07 15:37:56 - INFO - ============================================================
+2026-01-07 15:37:56 - INFO - ModelManager初始化完成，使用设备: cuda
+2026-01-07 15:37:56 - INFO - 检查点目录: ./frequency_checkpoints
+2026-01-07 15:37:56 - ERROR - /home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+
+2026-01-07 15:37:56 - INFO - 训练组件设置完成:
+2026-01-07 15:37:56 - INFO - 使用优化器: AdamW
+2026-01-07 15:37:56 - INFO - 损失函数: 加权MSE (权重: None)
+2026-01-07 15:37:56 - INFO - 使用调度器: ReduceLROnPlateau
+2026-01-07 15:37:56 - INFO - 初始学习率: 0.001
+2026-01-07 15:37:56 - INFO - 从检查点恢复训练: ./frequency_checkpoints/checkpoint_epoch_399.pth
+2026-01-07 15:37:56 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/utils.py:43: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(checkpoint_path)
+
+2026-01-07 15:37:56 - INFO - 从 epoch 400 继续训练
+2026-01-07 15:37:56 - INFO - 
+开始训练，总共 400 个epochs
+2026-01-07 15:37:56 - INFO - ================================================================================
+2026-01-07 15:37:56 - INFO - ================================================================================
+2026-01-07 15:37:56 - INFO - 训练完成！最佳验证损失: 0.000000
+2026-01-07 15:37:56 - ERROR - /home/hhabu/work_src/DL_IOMN_src/example/train.py:814: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  self.model.load_state_dict(torch.load(best_model_path))
+
+2026-01-07 15:37:56 - INFO - 已加载最佳模型
+2026-01-07 15:37:56 - INFO - 
+============================================================
+2026-01-07 15:37:56 - INFO - 步骤7: 在测试集上评估模型性能...
+2026-01-07 15:37:56 - INFO - ============================================================
+2026-01-07 15:38:29 - INFO - ******************************************************
+2026-01-07 15:38:29 - INFO - {'dataset': '测试集', 'overall': {'R2': 0.9999849200248718, 'MAE': 0.00043788569746538997, 'RMSE': np.float64(0.0006131861660251027), 'MSE': 3.7599727420456475e-07}, 'per_output': {'S11_real': {'R2': 0.9999975562095642, 'MAE': 0.0004898809129372239, 'RMSE': np.float64(0.0006924333127375393), 'MSE': 4.794638925886829e-07, 'Mean_Relative_Error': np.float32(1.3056248)}, 'S11_imag': {'R2': 0.9999651312828064, 'MAE': 0.0005876582581549883, 'RMSE': np.float64(0.0007846322113170347), 'MSE': 6.156477070362598e-07, 'Mean_Relative_Error': np.float32(7.356168)}, 'S21_real': {'R2': 0.9999988675117493, 'MAE': 0.00032855558674782515, 'RMSE': np.float64(0.00044460168522879735), 'MSE': 1.9767065850828658e-07, 'Mean_Relative_Error': np.float32(600.81683)}, 'S21_imag': {'R2': 0.9999778270721436, 'MAE': 0.0003393306105863303, 'RMSE': np.float64(0.00045722957275933234), 'MSE': 2.0905888220568158e-07, 'Mean_Relative_Error': np.float32(240.2682)}, 'S12_real': {'R2': 0.9999988675117493, 'MAE': 0.0003285552957095206, 'RMSE': np.float64(0.00044460123774496465), 'MSE': 1.9767026060435455e-07, 'Mean_Relative_Error': np.float32(600.81573)}, 'S12_imag': {'R2': 0.9999778270721436, 'MAE': 0.00033933104714378715, 'RMSE': np.float64(0.00045723034976739824), 'MSE': 2.0905959274841734e-07, 'Mean_Relative_Error': np.float32(240.27214)}, 'S22_real': {'R2': 0.9999974966049194, 'MAE': 0.0005045420257374644, 'RMSE': np.float64(0.0007012936910589594), 'MSE': 4.918128411190992e-07, 'Mean_Relative_Error': np.float32(1.564014)}, 'S22_imag': {'R2': 0.9999653100967407, 'MAE': 0.0005874692578800023, 'RMSE': np.float64(0.0007855231166114754), 'MSE': 6.170465667310054e-07, 'Mean_Relative_Error': np.float32(7.77652)}}, 'frequency_based': {'freq_group_0': {'R2': 0.9999849200248718, 'MAE': 0.00043788569746538997, 'RMSE': np.float64(0.0006131861660251027), 'sample_count': np.int64(3000000)}}, 'db_metrics': {'S11': {'db_mae': np.float32(0.018606778), 'db_rmse': np.float32(0.07350217), 'db_corr': np.float64(0.9999330290536873), 'phase_mae': np.float32(0.24311455), 'phase_rmse': np.float32(0.7969897), 'magnitude_r2': 0.9999973177909851, 'phase_r2': 0.9560620784759521, 'large_signal_db_error': np.float32(0.005475497), 'large_signal_count': np.int64(2450557), 'small_signal_db_error': np.float32(0.6159839), 'small_signal_count': np.int64(20611)}, 'S21': {'db_mae': np.float32(0.46737266), 'db_rmse': np.float32(2.1269708), 'db_corr': np.float64(0.9840862858050511), 'phase_mae': np.float32(6.8412066), 'phase_rmse': np.float32(25.518297), 'magnitude_r2': 0.9999986886978149, 'phase_r2': 0.5101044178009033, 'large_signal_db_error': np.float32(0.008605128), 'large_signal_count': np.int64(1120449), 'small_signal_db_error': np.float32(1.3431668), 'small_signal_count': np.int64(993231)}, 'S12': {'db_mae': np.float32(0.4673726), 'db_rmse': np.float32(2.126972), 'db_corr': np.float64(0.9840862711860415), 'phase_mae': np.float32(6.8412085), 'phase_rmse': np.float32(25.518316), 'magnitude_r2': 0.9999986886978149, 'phase_r2': 0.5101040601730347, 'large_signal_db_error': np.float32(0.008605126), 'large_signal_count': np.int64(1120449), 'small_signal_db_error': np.float32(1.3431664), 'small_signal_count': np.int64(993231)}, 'S22': {'db_mae': np.float32(0.018012362), 'db_rmse': np.float32(0.07308337), 'db_corr': np.float64(0.9999318815547606), 'phase_mae': np.float32(0.2385562), 'phase_rmse': np.float32(0.6875098), 'magnitude_r2': 0.9999973177909851, 'phase_r2': 0.9547073245048523, 'large_signal_db_error': np.float32(0.005525677), 'large_signal_count': np.int64(2449434), 'small_signal_db_error': np.float32(0.5917337), 'small_signal_count': np.int64(20612)}}}
+2026-01-07 15:38:30 - INFO - 训练历史图已保存到: plots/training_history.png
+2026-01-07 15:38:30 - INFO - ???????????????????????????????????2
+2026-01-07 15:38:30 - INFO - ???????????????????????????????????1
+2026-01-07 15:38:31 - INFO - ???????????????????????????????????4
+2026-01-07 15:38:51 - ERROR - Traceback (most recent call last):
+
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 477, in <module>
+
+2026-01-07 15:38:51 - ERROR - train_neural_network(model_type_name, create_report=True,use_cached_dataset=True, dataset_version='v1')
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/main.py", line 269, in train_neural_network
+
+2026-01-07 15:38:51 - ERROR - model_manager.plot_scatter_comparison(predictions, targets, frequencies,
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/work_src/DL_IOMN_src/example/train.py", line 1078, in plot_scatter_comparison
+
+2026-01-07 15:38:51 - ERROR - plt.savefig(save_path, dpi=300, bbox_inches='tight')
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/pyplot.py", line 1251, in savefig
+
+2026-01-07 15:38:51 - ERROR - res = fig.savefig(*args, **kwargs)  # type: ignore[func-returns-value]
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/figure.py", line 3490, in savefig
+
+2026-01-07 15:38:51 - ERROR - self.canvas.print_figure(fname, **kwargs)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2186, in print_figure
+
+2026-01-07 15:38:51 - ERROR - result = print_method(
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2042, in <lambda>
+
+2026-01-07 15:38:51 - ERROR - print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 481, in print_png
+
+2026-01-07 15:38:51 - ERROR - self._print_pil(filename_or_obj, "png", pil_kwargs, metadata)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 429, in _print_pil
+
+2026-01-07 15:38:51 - ERROR - FigureCanvasAgg.draw(self)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/backends/backend_agg.py", line 382, in draw
+
+2026-01-07 15:38:51 - ERROR - self.figure.draw(self.renderer)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+
+2026-01-07 15:38:51 - ERROR - result = draw(artist, renderer, *args, **kwargs)
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+
+2026-01-07 15:38:51 - ERROR - return draw(artist, renderer)
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/figure.py", line 3257, in draw
+
+2026-01-07 15:38:51 - ERROR - mimage._draw_list_compositing_images(
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+
+2026-01-07 15:38:51 - ERROR - a.draw(renderer)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+
+2026-01-07 15:38:51 - ERROR - return draw(artist, renderer)
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/axes/_base.py", line 3226, in draw
+
+2026-01-07 15:38:51 - ERROR - mimage._draw_list_compositing_images(
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+
+2026-01-07 15:38:51 - ERROR - a.draw(renderer)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+
+2026-01-07 15:38:51 - ERROR - return draw(artist, renderer)
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/collections.py", line 1008, in draw
+
+2026-01-07 15:38:51 - ERROR - super().draw(renderer)
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+
+2026-01-07 15:38:51 - ERROR - return draw(artist, renderer)
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR - ^
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/collections.py", line 430, in draw
+
+2026-01-07 15:38:51 - ERROR - renderer.draw_path_collection(
+2026-01-07 15:38:51 - ERROR -   File "/home/hhabu/miniconda/envs/myenv/lib/python3.11/site-packages/matplotlib/path.py", line 211, in vertices
+
+2026-01-07 15:38:51 - ERROR - @property
+2026-01-07 15:38:51 - ERROR - KeyboardInterrupt
