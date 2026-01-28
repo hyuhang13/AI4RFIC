@@ -1,0 +1,3 @@
+import numpy as np
+s_params = {'S11_real': np.float32(-0.019660145), 'S11_imag': np.float32(0.053234268), 'S21_real': np.float32(0.9128583), 'S21_imag': np.float32(-0.2640782), 'S12_real': np.float32(0.9128583), 'S12_imag': np.float32(-0.26407817), 'S22_real': np.float32(-0.020940889), 'S22_imag': np.float32(0.055838753)}
+print(f"{s_params['S11_real']}  {s_params['S11_imag']}  {s_params['S21_real']}  {s_params['S21_imag']}  {s_params['S12_real']}  {s_params['S12_imag']}  {s_params['S22_real']}  {s_params['S22_imag']}  ")
