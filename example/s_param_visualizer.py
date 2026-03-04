@@ -609,10 +609,10 @@ class SParamVisualizer:
         
         # 2. 使用相同的频率点进行预测
         predictions = self.predict_s_params_for_frequencies(ground_truth['frequencies_hz'])
-        
+        print(list(predictions.items())[:10])
         # 3. 计算幅度和相位
         predictions = self.calculate_magnitude_and_phase(predictions)
-        
+        # print(list(predictions.items())[:10])
         # 4. 计算误差
         errors = self.calculate_errors(predictions, ground_truth)
         

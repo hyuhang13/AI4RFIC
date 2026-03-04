@@ -1,0 +1,36 @@
+[project]
+name = "ai4rfic"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11, <3.12"
+dependencies = [
+    "bottleneck>=1.6.0",
+    "joblib>=1.5.3",
+    "matplotlib>=3.10.8",
+    "numexpr>=2.14.1",
+    "numpy>=2.4.2",
+    "pandas>=3.0.0",
+    "pillow>=12.1.0",
+    "pyqt6>=6.10.2",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.17.0",
+    "seaborn>=0.13.2",
+    "sympy>=1.13.1",
+    "torch",       # 确保是比较新的版本
+    "torchaudio",  # 音频库版本号通常跟随 torch
+    "torchvision", # 视觉库版本号目前是 0.20.x
+    "tqdm>=4.67.3",
+    "typing-extensions>=4.15.0",
+]
+[[tool.uv.index]]
+name = "pytorch-nightly"
+url = "https://download.pytorch.org/whl/nightly/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-nightly" }
+torchvision = { index = "pytorch-nightly" }
+torchaudio = { index = "pytorch-nightly" }
+[tool.uv]
+environments = ["sys_platform == 'win32'"]

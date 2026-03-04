@@ -22,6 +22,7 @@ from dataset_io import DatasetSaver
 from dataset_package import MultiModalDataset
 from config import TARGET_CONFIG
 from s_param_visualizer import SParamVisualizer
+import json
 # 设置日志记录
 def setup_logging(log_file='training_log.txt'):
     """设置日志记录，同时输出到控制台和文件"""
@@ -379,60 +380,93 @@ def train_neural_network(model_type='advanced', create_report=True,use_cached_da
 
     model_manager.print_evaluation_results(test_metrics)
     
-def run_genetic_optimization(model_manager, target_freq=15.0, 
-                                   target_gamma_opt = 1,
-                                   target_s_params = None,
-                                   population_size=1024, generations=100):
+def run_genetic_optimization(model_manager, 
+                             freq_sweep_bool=None,
+                             real_csv=None, imag_csv=None,
+                             freq_start=None, freq_stop=None, freq_step=None,
+                             target_freq=15.0, target_gamma_opt = 1,target_s_params = None,
+                             population_size=1024, generations=100):
     """
-    运行矩阵遗传算法优化的主函数接口
+    多频点/单频点优化入口
+    Args:
+        model_manager: 已训练的模型管理器
+        real_csv: 实部CSV文件路径，两列：频率(Hz), 实部值
+        imag_csv: 虚部CSV文件路径，两列：频率(Hz), 虚部值
+        freq_start: 起始频率(Hz)，None则使用全部数据
+        freq_stop: 终止频率(Hz)
+        freq_step: 步长(Hz)，None则使用全部数据点，否则按步长抽取
+        target_freq: 单频点模式下的频率(Hz)
+        target_gamma_opt: 单频点模式下的目标反射系数（复数）
+        ...
     """
     log_print(f"\n{'='*60}")
     log_print("启动矩阵结构遗传优化")
     log_print(f"{'='*60}")
     # 3. 直接查看特定层的权重值
-    print("********************************")
-    print_model_first_10_params(model_manager.model)
-    # 创建遗传算法实例
-    ga = GeneticAlgorithm(model_manager, matrix_shape=(19, 19))
-    
-    # 设置目标参数
-    target_params = {
-        'gamma_opt': {
-            'origin_value': target_gamma_opt,  # 目标S11幅度(dB)
-            'magnitude_db': target_gamma_opt,  # 目标S11幅度(dB)
-            'weight': 1.0  # 权重
-        },
-        's11_real': target_s_params['s11_real'],
-        's11_imag': target_s_params['s11_imag'],
-        's21_real': target_s_params['s21_real'],
-        's21_imag': target_s_params['s21_imag'],
-        's12_real': target_s_params['s12_real'],
-        's12_imag': target_s_params['s12_imag'],
-        's22_real': target_s_params['s22_real'],
-        's22_imag': target_s_params['s22_imag'],
-        'S21': {
-            'magnitude_db':0,
-            'weight':0
-        },
-        'S11': {
-            'magnitude_db':0,
-            'weight':0
-        },
-        'S22': {
-            'magnitude_db':0,
-            'weight':0
-        },
-        'symmetry': {
-            'weight': 0.3  # 对称性权重
-        },
-        'complexity': {
-            'weight': 0.1  # 复杂度权重
+    # print("********************************")
+    # print_model_first_10_params(model_manager.model)
+    # 创建输出目录
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = f"genetic_results/result_{timestamp}"
+    os.makedirs(output_dir, exist_ok=True)
+    log_print(f"输出目录: {output_dir}")
+
+    if real_csv and imag_csv and freq_sweep_bool:
+        # ----- 读取阻抗数据并转换为反射系数 -----
+        data_real = np.loadtxt(real_csv, delimiter=',', skiprows=1)  # 用户数据用tab分隔，有表头
+        data_imag = np.loadtxt(imag_csv, delimiter=',', skiprows=1)
+        freqs_hz = data_real[:, 0]               # 频率(Hz)
+        real = data_real[:, 1]
+        imag = data_imag[:, 1]
+        if freq_start is not None and freq_stop is not None:
+            mask = (freqs_hz >= freq_start) & (freqs_hz <= freq_stop)
+            freqs_hz = freqs_hz[mask]
+            real = real[mask]
+            imag = imag[mask]
+            if len(freqs_hz) == 0:
+                raise ValueError("指定频率范围内无数据点")
+        # 如果指定了步长，进行等间隔采样
+        if freq_step is not None and len(freqs_hz) > 1:
+            delta = freqs_hz[1] - freqs_hz[0]    # 原始数据间隔
+            step_indices = max(1, int(round(freq_step / delta)))
+            indices = np.arange(0, len(freqs_hz), step_indices)
+            freqs_hz = freqs_hz[indices]
+            real = real[indices]
+            imag = imag[indices]
+        # 计算复数阻抗和反射系数（参考阻抗 Z0 = 50 Ω）
+        Z_opt = real - 1j * imag
+        Z0 = 50.0
+        #此处的Zopt可以进行妥协，这里先用共轭匹配阻抗进行代替
+        gamma_opt = (Z_opt - Z0) / (Z_opt + Z0)
+
+        # 构造目标参数字典
+        target_params = {
+            'gamma_opt_list': gamma_opt.tolist()
         }
-    }
+
+        # 频率列表（Hz）传递给optimize
+        freqs = freqs_hz
+        print(f"多频点优化: {len(freqs)} 个频点，范围 {freqs[0]/1e9:.2f} - {freqs[-1]/1e9:.2f} GHz")
+        print(f"目标反射系数示例: {gamma_opt[0]:.4f} ...")
+    else:
+        # ----- 单频点模式 -----
+        if target_freq is None or target_gamma_opt is None:
+            raise ValueError("单频点模式必须提供 target_freq 和 target_gamma_opt")
+        freqs = [target_freq]
+        gamma_opt = [target_gamma_opt]
+        target_params = {'gamma_opt_list': gamma_opt}
+        print(f"单频点优化: {target_freq:.2f} GHz, gamma_opt = {target_gamma_opt}")
+
+    # 创建遗传算法实例
+    ga = GeneticAlgorithm(model_manager, 
+                          matrix_shape=(19, 19),
+                          target_real_csv=real_csv,
+                          target_imag_csv=imag_csv,
+                          freq_sweep_bool=freq_sweep_bool)
     
     # 运行优化
     best_matrix, best_info, best_fitness, fitness_history, best_fitness_history = ga.optimize(
-        target_freq=target_freq,
+        target_freq=freqs,
         target_params=target_params,
         population_size=population_size,
         generations=generations,
@@ -440,70 +474,97 @@ def run_genetic_optimization(model_manager, target_freq=15.0,
     )
     # ga.print_matrix(best_matrix)
     # 可视化结果
-    ga.visualize_results(best_matrix, fitness_history, best_fitness_history)
+    ga.visualize_results(best_matrix, 
+                         best_info, 
+                         fitness_history, 
+                         best_fitness_history, 
+                         port_for_impedance='s22',
+                         output_dir=output_dir)
     
     # 保存结果
-    save_optimization_results(best_matrix, best_info, best_fitness, target_freq)
+    save_optimization_results(best_matrix, best_info, best_fitness, freqs, output_dir=output_dir)
     
     return best_matrix, best_info, best_fitness
 
+
 def save_optimization_results(matrix: np.ndarray, info: Dict, 
-                            fitness: float, target_freq: float):
+                            fitness: float, target_freq: float,
+                            output_dir: Optional[str] = None):
     """保存优化结果"""
     import pickle
     import datetime
-    
+    # 确保目录存在
+    os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+
+    # 处理目标频率（转换为GHz以便保存）
+    if isinstance(target_freq, (list, tuple, np.ndarray)):
+        freq_ghz_list = [f / 1e9 for f in target_freq]
+        freq_str = f"{freq_ghz_list[0]:.2f}-{freq_ghz_list[-1]:.2f} GHz"
+    else:
+        freq_ghz_list = target_freq / 1e9
+        freq_str = f"{freq_ghz_list:.2f} GHz"
+
+    # 提取多频点预测结果
+    multi_preds = info.get('multi_freq_predictions', [])
+    if not multi_preds:
+        log_print("警告: info 中没有 multi_freq_predictions，无法保存频点详情")
+        return
+
+    # 构建保存的数据结构（简洁版）
     results = {
-        'optimized_matrix': matrix,
+        'optimized_matrix': matrix.tolist(),
         'fitness': fitness,
-        'target_frequency_ghz': target_freq,
-        's_params': {
-            'S11_real': info['s_params']['S11_real'],
-            'S11_imag': info['s_params']['S11_imag'],
-            'S21_real': info['s_params']['S21_real'],
-            'S21_imag': info['s_params']['S21_imag'],
-            'S12_real': info['s_params']['S12_real'],
-            'S12_imag': info['s_params']['S12_imag'],
-            'S22_real': info['s_params']['S22_real'],
-            'S22_imag': info['s_params']['S22_imag']
-        },
-        # 's_parameters': {
-        #     'S11_mag_db': info['S11_mag_db'],
-        #     'S21_mag_db': info['S21_mag_db'],
-        #     'S12_mag_db': info['S12_mag_db'],
-        #     'S22_mag_db': info['S22_mag_db'],
-        #     'S11_phase_deg': info['S11_phase_deg'],
-        #     'S21_phase_deg': info['S21_phase_deg'],
-        # },
-        # 'raw_s_params': info['S_params_raw'],
-        'matrix_density': info['matrix_density'],
+        'target_frequency_ghz': freq_ghz_list,
+        'avg_cost': info.get('avg_cost', None),
+        'matrix_density': info.get('matrix_density', np.mean(matrix)),
         'timestamp': timestamp,
-        'fitness_components': info.get('fitness_components', {})
+        'num_freq_points': len(multi_preds),
+        # 直接保存原始预测列表（包含 freq, s_params, cost）
+        'freq_predictions': multi_preds,
     }
-    print('预测结果：')
-    print(results)
-    # # 保存为pickle文件
-    # results_file = f'optimization_results_{timestamp}.pkl'
-    # with open(results_file, 'wb') as f:
-    #     pickle.dump(results, f)
-    
+
+    log_print('优化结果汇总:')
+    log_print(f"  目标频率: {freq_str}")
+    log_print(f"  频点数: {len(multi_preds)}")
+    log_print(f"  最佳适应度: {fitness:.4f}")
+    log_print(f"  平均代价: {results['avg_cost']:.4f}")
+    log_print(f"  矩阵密度: {results['matrix_density']:.3f}")
+
+    # 保存为JSON文件
+    json_file = os.path.join(output_dir, f'optimization_results_{timestamp}.json')
+    with open(json_file, 'w') as f:
+        # 处理numpy类型转换为Python原生类型
+        def convert(obj):
+            if isinstance(obj, np.integer):
+                return int(obj)
+            elif isinstance(obj, np.floating):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, complex):
+                return {'real': obj.real, 'imag': obj.imag}
+            else:
+                return obj
+        json.dump(results, f, indent=2, default=convert)
+
     # 保存矩阵为文本文件
-    matrix_file = f'optimized_matrix_{timestamp}.txt'
+    matrix_file = os.path.join(output_dir, f'optimized_matrix_{timestamp}.txt')
     np.savetxt(matrix_file, matrix, fmt='%d', delimiter=',')
-    
-    # 保存矩阵为图像
+
+    # 保存矩阵图像
     plt.figure(figsize=(6, 6))
     plt.imshow(matrix, cmap='binary', interpolation='nearest')
-    plt.title(f'Optimized Matrix @ {target_freq} GHz')
+    plt.title(f'Optimized Matrix ({freq_str})')
     plt.colorbar(label='Value (0/1)')
-    plt.savefig(f'optimized_matrix_{timestamp}.png', dpi=300, bbox_inches='tight')
-    
+    plt.savefig(os.path.join(output_dir, f'optimized_matrix_{timestamp}.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+
     log_print(f"\n优化结果已保存:")
-    # log_print(f"  - 数据文件: {results_file}")
+    log_print(f"  - JSON文件: {json_file}")
     log_print(f"  - 矩阵文件: {matrix_file}")
-    log_print(f"  - 图像文件: optimized_matrix_{timestamp}.png")
+
+    log_print(f"  - 图像文件: {os.path.join(output_dir, f'optimized_matrix_{timestamp}.png')}")
 
 
 # 使用示例函数
@@ -570,13 +631,25 @@ if __name__ == "__main__":
             model.load_state_dict(checkpoint)
             model = model.to(DEVICE)
             manager = ModelManager(model, checkpoint_dir=model_path)
+            # 多频点优化：读取阻抗CSV，使用所有频点
+            best_matrix, best_info, best_fitness = run_genetic_optimization(
+                manager,
+                freq_sweep_bool=TARGET_CONFIG['target_freq'][3],
+                real_csv='zm11_real.csv',      # 实部文件
+                imag_csv='zm11_imag.csv',      # 虚部文件
+                freq_start=TARGET_CONFIG['target_freq'][0],                # 起始频率 100 MHz
+                freq_stop=TARGET_CONFIG['target_freq'][1],                  # 终止频率 370 MHz
+                freq_step=TARGET_CONFIG['target_freq'][2],                 # 可选，步长 10 MHz（与原始数据一致）
+                population_size=1024,
+                generations=100
+            )
             # manager.best_val_loss = checkpoint.get('best_val_loss', float('inf'))
             # best_matrix, best_prediction, best_fitness = run_genetic_optimization(model,TARGET_CONFIG['target_freq',])
-            best_matrix, best_info, best_fitness = run_genetic_optimization(manager, target_freq=TARGET_CONFIG['target_freq'], 
-                                   target_gamma_opt = TARGET_CONFIG['target_gamma_opt'],
-                                   target_s_params = TARGET_CONFIG['target_s_params'],
-                                   population_size=1024, 
-                                   generations=100)
+            # best_matrix, best_info, best_fitness = run_genetic_optimization(manager, target_freq=TARGET_CONFIG['target_freq'], 
+            #                        target_gamma_opt = TARGET_CONFIG['target_gamma_opt'],
+            #                        target_s_params = TARGET_CONFIG['target_s_params'],
+            #                        population_size=1024, 
+            #                        generations=100)
 
         except FileNotFoundError:
             log_print(f"错误: 未找到训练好的模型 {model_path}，请先运行模式1训练神经网络")
@@ -598,8 +671,27 @@ if __name__ == "__main__":
         model = model.to(DEVICE)
         manager = ModelManager(model, checkpoint_dir=model_path)
         # # 定义矩阵（示例：随机矩阵）
-        test_matrix = [[0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0], [0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1], [1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1], [0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0], [1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1], [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1], [0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1], [0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1], [0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0], [0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0], [1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1]]
-
+        test_matrix = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
         # test_matrix = np.random.randint(
         #         low=0,          
         #         high=2,         

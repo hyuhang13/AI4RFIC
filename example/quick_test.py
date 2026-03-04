@@ -1,287 +1,91 @@
+import json
+import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
-import os
+from scipy import interpolate
 
-def process_and_merge_two_files_interactive():
-    """
-    交互式处理并合并两个CSV文件
-    
-    功能：
-    1. 删除每个ID的第一行（频率为0的行）
-    2. 删除第二个文件的表头行（因为第一个文件已有表头）
-    3. 为第二个文件的ID列加上指定的偏移量
-    4. 将处理后的两个文件垂直拼接
-    """
-    print("=" * 60)
-    print("CSV文件合并工具 - 交互式版本")
-    print("=" * 60)
-    
-    # 获取第一个文件
-    while True:
-        file1 = input("\n请输入第一个CSV文件路径: ").strip()
-        if os.path.exists(file1):
-            break
-        print(f"文件不存在: {file1}")
-    
-    # 获取第二个文件
-    while True:
-        file2 = input("请输入第二个CSV文件路径: ").strip()
-        if os.path.exists(file2):
-            break
-        print(f"文件不存在: {file2}")
-    
-    # 选择输出文件名
-    default_output = f"merged_{os.path.basename(file1).split('.')[0]}_{os.path.basename(file2).split('.')[0]}.csv"
-    output_file = input(f"请输入输出文件名 (默认: {default_output}): ").strip()
-    if not output_file:
-        output_file = default_output
-    
-    # 选择偏移量
-    while True:
-        offset_input = input("请输入第二个文件的ID偏移量 (默认: 5000): ").strip()
-        if not offset_input:
-            id_offset = 5000
-            break
-        try:
-            id_offset = int(offset_input)
-            if id_offset > 0:
-                break
-            else:
-                print("偏移量必须是正整数")
-        except ValueError:
-            print("请输入有效的整数")
-    
-    # 开始处理
-    print("\n" + "=" * 60)
-    print("开始处理并合并CSV文件...")
-    print(f"文件1: {file1}")
-    print(f"文件2: {file2}")
-    print(f"输出文件: {output_file}")
-    print(f"第二个文件的ID偏移量: +{id_offset}")
-    print("=" * 60)
-    
-    try:
-        # 步骤1: 读取第一个文件
-        print("\n1. 读取文件1...")
-        df1 = pd.read_csv(file1)
-        print(f"   文件1读取成功，行数: {len(df1)}")
-        print(f"   列名: {list(df1.columns)}")
-        
-        # 如果第一列没有列名或不是ID，重命名
-        if df1.columns[0] == '' or pd.isna(df1.columns[0]) or df1.columns[0] != 'ID':
-            original_name = df1.columns[0] if df1.columns[0] != '' else '空列名'
-            print(f"   第一列名为'{original_name}'，重命名为'ID'")
-            df1 = df1.rename(columns={df1.columns[0]: 'ID'})
-        
-        # 步骤2: 读取第二个文件，跳过表头行
-        print("\n2. 读取文件2（跳过表头行）...")
-        # 获取第一个文件的列名，用于读取第二个文件
-        column_names = list(df1.columns)
-        print(f"   使用列名: {column_names}")
-        
-        # 读取第二个文件，跳过第一行（表头），使用第一个文件的列名
-        df2 = pd.read_csv(file2, header=None, skiprows=1, names=column_names)
-        print(f"   文件2读取成功，行数: {len(df2)}")
-        
-        # 检查文件2的第一行（原文件的第二行）
-        print(f"   文件2第一行数据（原文件第二行）:")
-        print(df2.head(1))
-        
-        # 步骤3: 删除每个ID的第一行
-        print("\n3. 删除每个ID的第一行（频率为0的行）...")
-        
-        def remove_first_row_per_id(df):
-            """删除每个ID的第一行"""
-            # 标记每个ID的第一行
-            df['is_first_of_id'] = df['ID'] != df['ID'].shift(1)
-            
-            # 删除标记为True的行（每个ID的第一行）
-            df_filtered = df[~df['is_first_of_id']].copy()
-            
-            # 删除临时列
-            df_filtered = df_filtered.drop(columns=['is_first_of_id'])
-            
-            return df_filtered
-        
-        # 处理文件1
-        df1_filtered = remove_first_row_per_id(df1)
-        removed_rows_1 = len(df1) - len(df1_filtered)
-        print(f"   文件1删除后行数: {len(df1_filtered)}，删除了 {removed_rows_1} 行")
-        
-        # 处理文件2
-        df2_filtered = remove_first_row_per_id(df2)
-        removed_rows_2 = len(df2) - len(df2_filtered)
-        print(f"   文件2删除后行数: {len(df2_filtered)}，删除了 {removed_rows_2} 行")
-        
-        # 步骤4: 为第二个文件的ID列加上偏移量
-        print(f"\n4. 为文件2的ID列加上偏移量 {id_offset}...")
-        df2_filtered['ID'] = df2_filtered['ID'] + id_offset
-        
-        # 检查ID范围
-        id1_min, id1_max = df1_filtered['ID'].min(), df1_filtered['ID'].max()
-        id2_min, id2_max = df2_filtered['ID'].min(), df2_filtered['ID'].max()
-        print(f"   文件1 ID范围: {id1_min} 到 {id1_max}")
-        print(f"   文件2 ID范围: {id2_min} 到 {id2_max}")
-        
-        # 步骤5: 垂直拼接两个文件
-        print("\n5. 垂直拼接两个文件...")
-        merged_df = pd.concat([df1_filtered, df2_filtered], ignore_index=True)
-        print(f"   合并后总行数: {len(merged_df)}")
-        
-        # 步骤6: 保存结果
-        print(f"\n6. 保存到文件: {output_file}")
-        merged_df.to_csv(output_file, index=False)
-        
-        # 验证结果
-        print("\n" + "=" * 60)
-        print("处理完成！验证结果:")
-        print("=" * 60)
-        
-        # 检查ID的连续性
-        unique_ids = sorted(merged_df['ID'].unique())
-        print(f"唯一ID数量: {len(unique_ids)}")
-        
-        # 显示每个文件的ID分布
-        df1_ids = df1_filtered['ID'].unique()
-        df2_ids = df2_filtered['ID'].unique()
-        print(f"文件1 ID数量: {len(df1_ids)}，示例: {sorted(df1_ids[:5])}...")
-        print(f"文件2 ID数量: {len(df2_ids)}，示例: {sorted(df2_ids[:5])}...")
-        
-        # 检查ID是否连续
-        id_gaps = []
-        for i in range(1, len(unique_ids)):
-            if unique_ids[i] - unique_ids[i-1] > 1:
-                id_gaps.append((unique_ids[i-1], unique_ids[i]))
-        
-        if id_gaps:
-            print(f"警告: 发现ID不连续的地方:")
-            for gap in id_gaps[:5]:  # 只显示前5个
-                print(f"  {gap[0]} 到 {gap[1]} (间隔: {gap[1] - gap[0] - 1})")
-            if len(id_gaps) > 5:
-                print(f"  ... 还有 {len(id_gaps) - 5} 个不连续处")
-        else:
-            print("ID连续: ✓")
-        
-        # 检查每个ID的行数
-        print("\n每个ID的行数统计:")
-        id_counts = merged_df.groupby('ID').size()
-        
-        # 找出行数不正常的ID
-        expected_rows = None
-        abnormal_ids = []
-        
-        for id_val, count in id_counts.items():
-            if expected_rows is None:
-                expected_rows = count
-            elif count != expected_rows:
-                abnormal_ids.append((id_val, count))
-        
-        if abnormal_ids:
-            print(f"警告: 发现 {len(abnormal_ids)} 个ID的行数异常:")
-            for id_val, count in abnormal_ids[:10]:  # 只显示前10个
-                print(f"  ID {id_val}: {count} 行 (期望: {expected_rows} 行)")
-            if len(abnormal_ids) > 10:
-                print(f"  ... 还有 {len(abnormal_ids) - 10} 个异常ID")
-        else:
-            print(f"所有ID都有 {expected_rows} 行: ✓")
-        
-        # 显示样本数据
-        print(f"\n合并后的样本数据:")
-        print("前5行:")
-        print(merged_df.head())
-        
-        print(f"\n中间5行:")
-        middle_idx = len(merged_df) // 2
-        print(merged_df.iloc[middle_idx:middle_idx+5])
-        
-        print(f"\n最后5行:")
-        print(merged_df.tail())
-        
-        # 统计信息
-        print(f"\n统计信息:")
-        print(f"原始文件1行数: {len(df1)}")
-        print(f"原始文件2行数: {len(df2)}")
-        print(f"删除每个ID第一行后文件1行数: {len(df1_filtered)}")
-        print(f"删除每个ID第一行后文件2行数: {len(df2_filtered)}")
-        print(f"最终合并行数: {len(merged_df)}")
-        print(f"总删除行数: {removed_rows_1 + removed_rows_2}")
-        
-        return merged_df
-        
-    except Exception as e:
-        print(f"\n处理过程中出错: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
+# ==================== 配置参数 ====================
+Z0 = 50.0                          # 参考阻抗（欧姆）
+freq_unit_csv = 'Hz'               # CSV文件中频率的单位，可选 'Hz' 或 'GHz'
+json_file =  'genetic_results/result_20260303_195827/optimization_results_20260303_201548.json'              # JSON数据文件路径
+csv_real = 'zm11_real.csv'          # 阻抗实部文件路径
+csv_imag = 'zm11_imag.csv'          # 阻抗虚部文件路径
 
-def preview_file(file_path):
-    """预览文件内容"""
-    print(f"\n预览文件: {file_path}")
-    print("-" * 60)
-    
-    try:
-        # 读取前几行
-        with open(file_path, 'r') as f:
-            lines = []
-            for i in range(10):  # 读取前10行
-                line = f.readline()
-                if not line:
-                    break
-                lines.append(line)
-        
-        print("文件前10行:")
-        for i, line in enumerate(lines, 1):
-            print(f"{i:2}: {line.rstrip()}")
-            
-    except Exception as e:
-        print(f"预览失败: {e}")
+# ==================== 读取JSON数据 ====================
+with open(json_file, 'r') as f:
+    data = json.load(f)
 
-def main():
-    """主函数"""
-    print("CSV文件合并工具")
-    print("=" * 60)
-    print("注意事项:")
-    print("1. 第一个文件的表头会被保留")
-    print("2. 第二个文件的表头会被删除")
-    print("3. 每个ID的第一行（频率为0的行）会被删除")
-    print("4. 第二个文件的ID会加上指定的偏移量")
-    print("=" * 60)
-    
-    while True:
-        print("\n请选择操作:")
-        print("1. 合并两个CSV文件")
-        print("2. 预览文件内容")
-        print("3. 退出")
-        
-        choice = input("请输入选择 (1/2/3): ").strip()
-        
-        if choice == '1':
-            merged_df = process_and_merge_two_files_interactive()
-            
-            # 询问是否要继续
-            if merged_df is not None:
-                continue_option = input("\n是否继续合并其他文件？(y/n): ").strip().lower()
-                if continue_option != 'y':
-                    print("程序结束")
-                    break
-            else:
-                retry_option = input("\n合并失败，是否重试？(y/n): ").strip().lower()
-                if retry_option != 'y':
-                    print("程序结束")
-                    break
-        
-        elif choice == '2':
-            file_path = input("请输入要预览的CSV文件路径: ").strip()
-            if os.path.exists(file_path):
-                preview_file(file_path)
-            else:
-                print(f"文件不存在: {file_path}")
-        
-        elif choice == '3':
-            print("程序结束")
-            break
-        
-        else:
-            print("无效的选择，请重新输入")
+freq_json = np.array([p['freq'] for p in data['freq_predictions']])  # 单位 Hz
+s22_real_json = np.array([p['s_params']['S22_real'] for p in data['freq_predictions']])
+s22_imag_json = np.array([p['s_params']['S22_imag'] for p in data['freq_predictions']])
 
-if __name__ == "__main__":
-    main()
+# ==================== 读取CSV阻抗数据 ====================
+# 跳过第一行标题，指定列名
+df_real = pd.read_csv(csv_real, skiprows=1, names=['freq', 'real'])
+df_imag = pd.read_csv(csv_imag, skiprows=1, names=['freq', 'imag'])
+
+# 转换为浮点数（确保）
+freq_csv = df_real['freq'].astype(float).values
+if not np.allclose(freq_csv, df_imag['freq'].astype(float).values):
+    raise ValueError("实部和虚部文件的频率不一致，请检查")
+
+z_real = df_real['real'].astype(float).values
+z_imag = df_imag['imag'].astype(float).values
+
+# 构建复阻抗
+z_csv = z_real - 1j * z_imag
+
+# 频率单位转换：统一为 Hz
+if freq_unit_csv.upper() == 'GHZ':
+    freq_csv_hz = freq_csv * 1e9
+else:  # Hz
+    freq_csv_hz = freq_csv
+
+# ==================== 阻抗 -> S参数转换 ====================
+# 默认将CSV阻抗视为 Z22（输出端口阻抗）转换为 S22
+s22_csv = (z_csv - Z0) / (z_csv + Z0)
+s22_real_csv = np.real(s22_csv)
+s22_imag_csv = np.imag(s22_csv)
+
+# 如果实际应为 Z11（输入阻抗）转换为 S11，请取消下面两行注释并注释上面两行
+# s11_csv = (z_csv - Z0) / (z_csv + Z0)
+# s22_real_csv = np.real(s11_csv)   # 注意此时变量名仍是 s22，可根据需要修改
+# s22_imag_csv = np.imag(s11_csv)
+
+# ==================== 插值JSON数据（可选） ====================
+# 使用线性插值获得与CSV相同频率点上的值，便于直接对比
+freq_interp = freq_csv_hz
+interp_real = interpolate.interp1d(freq_json, s22_real_json, kind='linear', 
+                                    fill_value='extrapolate')
+interp_imag = interpolate.interp1d(freq_json, s22_imag_json, kind='linear', 
+                                    fill_value='extrapolate')
+s22_real_interp = interp_real(freq_interp)
+s22_imag_interp = interp_imag(freq_interp)
+
+# ==================== 绘图 ====================
+plt.figure(figsize=(12, 5))
+
+# 实部子图
+plt.subplot(1, 2, 1)
+plt.plot(freq_csv_hz/1e9, s22_real_csv, 'b-', label='From CSV (Z22 -> S22)')
+plt.plot(freq_json/1e9, s22_real_json, 'ro', label='JSON points (S22)')
+plt.plot(freq_csv_hz/1e9, s22_real_interp, 'r--', label='JSON interpolated', alpha=0.7)
+plt.xlabel('Frequency (GHz)')
+plt.ylabel('S22 Real Part')
+plt.title('S22 Real Part Comparison')
+plt.legend()
+plt.grid(True)
+
+# 虚部子图
+plt.subplot(1, 2, 2)
+plt.plot(freq_csv_hz/1e9, s22_imag_csv, 'b-', label='From CSV (Z22 -> S22)')
+plt.plot(freq_json/1e9, s22_imag_json, 'ro', label='JSON points (S22)')
+plt.plot(freq_csv_hz/1e9, s22_imag_interp, 'r--', label='JSON interpolated', alpha=0.7)
+plt.xlabel('Frequency (GHz)')
+plt.ylabel('S22 Imag Part')
+plt.title('S22 Imag Part Comparison')
+plt.legend()
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()

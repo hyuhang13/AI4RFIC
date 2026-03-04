@@ -23,12 +23,12 @@ GA_CONFIG = {
             'generations': 100,
             'mutation_rate': 0.1,
             'elite_size': 5,
-            'tournament_size': 256,
+            'tournament_size': 128,
             'crossover_rate' :0.8,
             'fitness_weight': {
-                'w1': 0.8,
-                'w2': 0.2,
-                'w3': 0.1
+                'w1': 1,
+                'w2': 1,
+                'w3': 0
             }
         }
 # 优化目标配置  7	22000000000	-0.0445877	0.0125595	0.914061	-0.241433	0.914061	-0.241433	-0.04327	0.0114308
@@ -38,7 +38,7 @@ GA_CONFIG = {
 #-0.04327	0.0114308
 # -0.0191442,0.053485,0.914802,-0.263989,0.914802,-0.263989,-0.0208617,0.0557113
 TARGET_CONFIG = {
-    'target_freq': 22000000000,
+    'target_freq': [10e9,10e9,1e9,1],#freq_start, freq_end, freq_step = 1GHz,freq_sweep_bool
     'target_gamma_opt': 1,
     'target_s_params': {
         's11_real': -0.0191442,
@@ -51,6 +51,7 @@ TARGET_CONFIG = {
         's22_imag': 0.0557113
     }
 }
+
 # 训练配置
 TRAIN_CONFIG = {
     'batch_size': 1024,

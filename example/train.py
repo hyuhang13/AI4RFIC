@@ -641,13 +641,13 @@ class ModelManager:
         matrix = matrix.to(self.device)
         frequency = frequency.to(self.device)
         test = (matrix, frequency)
-        print(test)
+        # print(test)
         with torch.no_grad():
             predictions = self.model(matrix, frequency)
         
         # 转换为numpy数组并解析为字典
         predictions_np = predictions.cpu().numpy().flatten()
-        print(predictions_np)
+        # print(predictions_np)
         s_param_dict = {
             'S11_real': predictions_np[0],
             'S11_imag': predictions_np[1],

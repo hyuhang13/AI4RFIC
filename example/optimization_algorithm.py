@@ -1,4 +1,5 @@
 # optimization/genetic_algorithm.py
+import os
 import numpy as np
 import random
 from config import GA_CONFIG, DATA_CONFIG
@@ -8,16 +9,21 @@ from config import DEVICE,GA_CONFIG
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from s_param_visualizer import SParamVisualizer
+from collections import deque
 class GeneticAlgorithm:
     """
     遗传算法优化器：优化19×19二进制矩阵结构以获得目标S参数
     """
-    def __init__(self, model_manager, matrix_shape = (19,19),device = None):
+    def __init__(self, model_manager, matrix_shape = (19,19),
+                 target_real_csv=None, target_imag_csv=None,
+                 freq_sweep_bool = 1,device = None):
         self.model_manager = model_manager
         self.height, self.width = matrix_shape
         self.total_pixels = self.height * self.width
-        self.density = random.uniform(0.3, 0.7) #暂未使用该超参数
+        self.density = 0.15 #random.uniform(0.3, 0.7) #暂未使用该超参数
         self.device = DEVICE
+        self.target_real_csv = target_real_csv
+        self.target_imag_csv = target_imag_csv
         # S参数名称
         self.s_param_names = ['S11', 'S21', 'S12', 'S22']
         self.s_component_names = ['real', 'imag', 'mag', 'phase']
@@ -32,6 +38,7 @@ class GeneticAlgorithm:
         self.w1 = GA_CONFIG['fitness_weight']['w1']
         self.w2 = GA_CONFIG['fitness_weight']['w2']
         self.w3 = GA_CONFIG['fitness_weight']['w3']
+        self.freq_sweep_bool = freq_sweep_bool
         print(f"矩阵遗传算法初始化完成")
         print(f"矩阵形状: {matrix_shape}")
         print(f"总像素数: {self.total_pixels}")
@@ -43,31 +50,82 @@ class GeneticAlgorithm:
         matrix[9][0] = 1
         matrix[9][18] = 1
         return matrix
-    def create_random_matrix(self, method='random', density=0.5) -> np.ndarray:
-        """
-        创建随机二进制矩阵
+    # def create_random_matrix(self, method='random', density=0.5) -> np.ndarray:
+    #     """
+    #     创建随机二进制矩阵
         
-        Args:
-            method: 创建方法 ('random', 'sparse', 'dense', 'pattern')
-            density: 1的密度 (仅用于random方法)
+    #     Args:
+    #         method: 创建方法 ('random', 'sparse', 'dense', 'pattern')
+    #         density: 1的密度 (仅用于random方法)
         
-        Returns:
-            19×19的二进制矩阵
+    #     Returns:
+    #         19×19的二进制矩阵
+    #     """
+    #     if method == 'random':
+    #         # 完全随机
+    #         # matrix = np.random.rand(self.height, self.width)
+    #         # matrix = (matrix < density).astype(np.float32)
+    #         matrix = np.random.randint(
+    #             low=0,          
+    #             high=2,         
+    #             size=(self.height, self.width),  
+    #             dtype=np.int32
+    #         )
+    #     elif method == 'sparse':
+    #         pass
+    #     if not self.check_connectivity(matrix):
+    #         # 如果生成的矩阵不连通，递归重新生成
+    #         return self.create_random_matrix(method, density)
+    #     matrix = self.ensure_double_port(matrix)
+        
+    #     return np.ascontiguousarray(matrix)  # 确保返回连续数组
+    def create_random_matrix(self, method='random', density=0.15) -> np.ndarray:
         """
-        if method == 'random':
-            # 完全随机
-            # matrix = np.random.rand(self.height, self.width)
-            # matrix = (matrix < density).astype(np.float32)
-            matrix = np.random.randint(
-                low=0,          
-                high=2,         
-                size=(self.height, self.width),  
-                dtype=np.int32
-            )
-        elif method == 'sparse':
-            pass
-        matrix = self.ensure_double_port(matrix)
-        return np.ascontiguousarray(matrix)  # 确保返回连续数组
+        创建随机二进制矩阵（自带 4连通骨架保底，完美控制密度，防止递归爆栈）
+        """
+        # 放弃危险的递归，改用 for 循环。最多尝试 100 次
+        max_attempts = 100
+        
+        for attempt in range(max_attempts):
+            if method == 'random':
+                # 1. 【修复密度问题】
+                # 使用 np.random.rand 生成 0~1 的浮点数，然后与 density 比较
+                # 这样就能完美控制金属生成的初始概率（比如 density=0.15 就是 15% 面积是金属）
+                matrix = (np.random.rand(self.height, self.width) < density).astype(np.int32)
+                
+                # 2. 【核心保底】：强制铺设一条严格 4 连通的高速公路
+                current_r = 9
+                for c in range(self.width):
+                    matrix[current_r][c] = 1
+                    # 随机上下游走（增加结构的随机性，避免全是一条直线）
+                    if random.random() < 0.3 and current_r > 0:
+                        current_r -= 1
+                    elif random.random() < 0.3 and current_r < self.height - 1:
+                        current_r += 1
+                    # 确保垂直方向上也连通（满足4连通规则的拐角）
+                    matrix[current_r][c] = 1 
+                    
+                # 将尾端强制连接到右侧的标准输出端口 [9][18]
+                if current_r != 9:
+                    step = 1 if current_r < 9 else -1
+                    for r in range(current_r, 9, step):
+                        matrix[r][18] = 1
+                        
+            elif method == 'sparse':
+                matrix = np.zeros((self.height, self.width), dtype=np.int32)
+            
+            # 3. 【修复顺序 Bug】：必须在检查连通性前，给左右端口加上金属！
+            matrix = self.ensure_double_port(matrix)
+            
+            # 4. 检查连通性。由于有了上面的“铺路”操作，这一步几乎 100% 会瞬间返回 True
+            if self.check_connectivity(matrix):
+                return np.ascontiguousarray(matrix)
+                
+        # 5. 终极防崩溃保底
+        print("警告: 随机生成连通矩阵异常，返回保底直连结构")
+        matrix = np.zeros((self.height, self.width), dtype=np.int32)
+        matrix[9, :] = 1
+        return np.ascontiguousarray(matrix)
     def create_individual(self):
         """创建一个随机个体"""
         individual = self.create_random_matrix('random', self.density)
@@ -156,163 +214,120 @@ class GeneticAlgorithm:
             print(f"  标准差: {np.std(all_params[:500]):.8f}")
         else:
             print(f"模型参数少于10个: {len(all_params)}个")
-    def fitness_function(self, matrix: np.ndarray, frequency: float, 
-                        target_params: Dict[str, Dict]) -> Tuple[float, Dict]:
+    def check_connectivity(self, matrix: np.ndarray) -> bool:
         """
-        计算适应度
+        使用广度优先搜索(BFS)检查射频端口1 [9][0] 到 端口2 [9][18] 是否物理连通。
+        【修正】：严格遵循共边导通的物理规则，采用4连通检查（仅上下左右）。
+        """
+        start_node = (9, 0)
+        end_node = (9, 18)
         
-        Args:
-            matrix: 二进制矩阵
-            frequency: 频率 (GHz)
-            target_params: 目标参数字典，例如:
-                {
-                    'S11': {'magnitude_db': -20, 'weight': 1.0},  # 目标-20dB
-                    'S21': {'magnitude_db': -1, 'weight': 0.8},   # 目标-1dB
-                    'S22': {'magnitude_db': -20, 'weight': 0.7},  # 目标-20dB
-                    'symmetry': {'weight': 0.3}  # 对称性权重
-                }
+        # 如果起点或终点连金属都没有，直接判定断路
+        if matrix[start_node] != 1 or matrix[end_node] != 1:
+            return False
+            
+        visited = set()
+        from collections import deque
+        queue = deque([start_node])
+        visited.add(start_node)
         
-        Returns:
-            fitness: 适应度值 (0-1, 越高越好)
-            prediction_info: 预测信息字典
+        # 【关键修改】：严格4连通，去除了所有对角线方向
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                      
+        while queue:
+            current_r, current_c = queue.popleft()
+            
+            # 如果到达了目标端口，说明连通
+            if (current_r, current_c) == end_node:
+                return True
+                
+            for dr, dc in directions:
+                next_r, next_c = current_r + dr, current_c + dc
+                
+                # 检查边界
+                if 0 <= next_r < self.height and 0 <= next_c < self.width:
+                    # 如果下一个像素是金属(1) 且 尚未被访问过
+                    if matrix[next_r, next_c] == 1 and (next_r, next_c) not in visited:
+                        visited.add((next_r, next_c))
+                        queue.append((next_r, next_c))
+                        
+        return False
+    def fitness_function(self, matrix: np.ndarray, frequency, 
+                        target_params: Dict) -> Tuple[float, Dict]:
+        """
+        计算适应度，支持单频点和多频点。
+        多频点时，frequency应为列表，target_params中应包含'gamma_opt_list'（长度相同）。
         """
         # 预测S参数
-        
-        s_params = self.predict_s_params(matrix, frequency)
-        
-        # 计算幅度(dB)
-        s11_mag_db = self.calculate_magnitude_db(s_params['S11_real'], s_params['S11_imag'])
-        s21_mag_db = self.calculate_magnitude_db(s_params['S21_real'], s_params['S21_imag'])
-        s12_mag_db = self.calculate_magnitude_db(s_params['S12_real'], s_params['S12_imag'])
-        s22_mag_db = self.calculate_magnitude_db(s_params['S22_real'], s_params['S22_imag'])
-        
-        # 计算相位(度)
-        s11_phase = self.calculate_phase_degrees(s_params['S11_real'], s_params['S11_imag'])
-        s21_phase = self.calculate_phase_degrees(s_params['S21_real'], s_params['S21_imag'])
-        
-        total_fitness = 0.0
-        total_weight = 0.0
-        
-        # 计算各项指标的适应度
-        fitness_components = {}
-        
-        # S11幅度适应度 (希望反射小)
-        if 'S11' in target_params:
-            target_s11 = target_params['S11']
-            if 'magnitude_db' in target_s11:
-                target_db = target_s11['magnitude_db']
-                weight = target_s11.get('weight', 1.0)
-                
-                # 误差越小越好
-                error = abs(s11_mag_db - target_db)
-                # 转换为适应度：误差为0时适应度为1，误差越大适应度越小
-                s11_fitness = 1.0 / (1.0 + error)
-                
-                total_fitness += s11_fitness * weight
-                total_weight += weight
-                fitness_components['S11_mag'] = s11_fitness
-        
-        # S21幅度适应度 (希望传输损耗小)
-        if 'S21' in target_params:
-            target_s21 = target_params['S21']
-            if 'magnitude_db' in target_s21:
-                target_db = target_s21['magnitude_db']
-                weight = target_s21.get('weight', 1.0)
-                
-                error = abs(s21_mag_db - target_db)
-                s21_fitness = 1.0 / (1.0 + error)
-                
-                total_fitness += s21_fitness * weight
-                total_weight += weight
-                fitness_components['S21_mag'] = s21_fitness
-        
-        # S22幅度适应度
-        if 'S22' in target_params:
-            target_s22 = target_params['S22']
-            if 'magnitude_db' in target_s22:
-                target_db = target_s22['magnitude_db']
-                weight = target_s22.get('weight', 1.0)
-                
-                error = abs(s22_mag_db - target_db)
-                s22_fitness = 1.0 / (1.0 + error)
-                
-                total_fitness += s22_fitness * weight
-                total_weight += weight
-                fitness_components['S22_mag'] = s22_fitness
-        
-        # 对称性适应度 (S11 ≈ S22, S21 ≈ S12)
-        if 'symmetry' in target_params:
-            weight = target_params['symmetry'].get('weight', 0.3)
+        # 判断是否为多频点模式
+        multi_freq_mode = (isinstance(frequency, (list, tuple, np.ndarray)) and 
+                        'gamma_opt_list' in target_params and
+                        len(frequency) == len(target_params['gamma_opt_list']))
+        if multi_freq_mode and self.freq_sweep_bool:
+            freqs = frequency
+            gamma_opt_list = target_params['gamma_opt_list']
             
-            # S11和S22的对称性
-            s11_s22_diff = abs(s11_mag_db - s22_mag_db)
-            # S21和S12的对称性
-            s21_s12_diff = abs(s21_mag_db - s12_mag_db)
+            total_cost = 0.0
+            freq_predictions = []  # 保存每个频点的预测结果
             
-            symmetry_error = (s11_s22_diff + s21_s12_diff) / 2.0
-            symmetry_fitness = 1.0 / (1.0 + symmetry_error)
+            for f, gamma_opt in zip(freqs, gamma_opt_list):
+                # 预测该频率下的S参数
+                s_params = self.predict_s_params(matrix, f)
+                s21 = s_params['S21_real'] + 1j * s_params['S21_imag']
+                s22 = s_params['S22_real'] + 1j * s_params['S22_imag']
+                IL_passive = 1 - abs(s21)
+                cost = self.w1 * abs(s22 - gamma_opt) + self.w2 * IL_passive  # w3 暂为0
+                total_cost += cost
+                freq_predictions.append({
+                    'freq': f,
+                    's_params': s_params,
+                    'cost': cost
+                })
             
-            total_fitness += symmetry_fitness * weight
-            total_weight += weight
-            fitness_components['symmetry'] = symmetry_fitness
-        
-        # 结构复杂度惩罚（可选，避免过于复杂的结构）
-        if 'complexity' in target_params:
-            weight = target_params['complexity'].get('weight', 0.1)
+            avg_cost = total_cost / len(freqs)
+            fitness = -avg_cost
             
-            # 计算矩阵复杂度：1的比例
-            density = np.mean(matrix)
-            # 理想密度可能在0.3-0.7之间
-            if density < 0.1 or density > 0.9:
-                complexity_penalty = 0.5
-            elif density < 0.2 or density > 0.8:
-                complexity_penalty = 0.8
-            else:
-                complexity_penalty = 1.0
-                
-            total_fitness += complexity_penalty * weight
-            total_weight += weight
-            fitness_components['complexity'] = complexity_penalty
-        
-        # 归一化适应度
-        # if total_weight > 0:
-        #     normalized_fitness = total_fitness / total_weight
-        # else:
-        #     normalized_fitness = 0.0
-
-        # 计算代价值
-        s21_predict = s_params['S21_real']+1j*s_params['S21_imag']
-        s22_predict = s_params['S22_real']+1j*s_params['S22_imag']
-        IL_passive = 1-abs(s21_predict)
-        Loss_penalty = 0
-        # individual_cost = self.w1*abs(s22_predict-target_params['gamma_opt']['origin_value']) + self.w2*IL_passive + self.w3*Loss_penalty
-        individual_cost = abs(target_params['s11_real']-s_params['S11_real'])+\
-                          abs(target_params['s21_real']-s_params['S21_real'])+\
-                          abs(target_params['s12_real']-s_params['S12_real'])+\
-                          abs(target_params['s22_real']-s_params['S22_real'])+\
-                          abs(target_params['s11_imag']-s_params['S11_imag'])+\
-                          abs(target_params['s21_imag']-s_params['S21_imag'])+\
-                          abs(target_params['s12_imag']-s_params['S12_imag'])+\
-                          abs(target_params['s22_imag']-s_params['S22_imag'])
-        individual_fitness = -individual_cost
-        # 端口代价值
-        if(matrix[9][0]!=1)and(matrix[9][18]!=1):
-            individual_fitness -= 50
-        # 收集预测信息
-        prediction_info = {
-            's_params': s_params,
-            'S11_mag_db': s11_mag_db,
-            'S21_mag_db': s21_mag_db,
-            'S12_mag_db': s12_mag_db,
-            'S22_mag_db': s22_mag_db,
-            'S11_phase_deg': s11_phase,
-            'S21_phase_deg': s21_phase,
-            'S_params_raw': s_params,
-            'fitness_components': fitness_components,
-            'matrix_density': np.mean(matrix)
-        }
-        
-        return individual_fitness, prediction_info
+            # 端口惩罚（输入输出端口必须为金属）
+            if matrix[9][0] != 1 or matrix[9][18] != 1:
+                fitness -= 50
+            # 2. 【新增】物理连通性惩罚
+            if not self.check_connectivity(matrix):
+                fitness -= 1000  # 给予极大的惩罚，淘汰所有断路的矩阵
+            prediction_info = {
+                'matrix_density': np.mean(matrix),
+                'multi_freq_predictions': freq_predictions,  # 包含所有频点的详细信息
+                'avg_cost': avg_cost
+            }
+            return fitness, prediction_info
+        else:
+            # ---------- 原有单频点代码（保持不变） ----------
+            s_params = self.predict_s_params(matrix, frequency)
+            # 计算代价值（使用target_params中的gamma_opt）
+            gamma_opt = target_params.get('gamma_opt', {}).get('origin_value', None)
+            if gamma_opt is None:
+                # 兼容旧调用方式
+                gamma_opt = target_params.get('gamma_opt_list', [0])[0]
+            s21_predict = s_params['S21_real'] + 1j * s_params['S21_imag']
+            s22_predict = s_params['S22_real'] + 1j * s_params['S22_imag']
+            IL_passive = 1 - abs(s21_predict)
+            individual_cost = self.w1 * abs(s22_predict - gamma_opt) + self.w2 * IL_passive + self.w3 * 0
+            individual_fitness = -individual_cost
+            freq_predictions.append({
+                    'freq': frequency,
+                    's_params': s_params,
+                    'cost': individual_cost
+                })
+            if matrix[9][0] != 1 and matrix[9][18] != 1:
+                individual_fitness -= 50
+            # 2. 【新增】物理连通性惩罚
+            if not self.check_connectivity(matrix):
+                fitness -= 1000  # 给予极大的惩罚，淘汰所有断路的矩阵
+            prediction_info = {
+                'matrix_density': np.mean(matrix),
+                'multi_freq_predictions': freq_predictions,  # 包含所有频点的详细信息
+                'avg_cost': individual_cost
+            }
+            return individual_fitness, prediction_info
     def ensure_contiguous(self, matrix):
         """确保矩阵是连续数组"""
         if isinstance(matrix, np.ndarray):
@@ -442,8 +457,8 @@ class GeneticAlgorithm:
         tournament_fitness = [fitness_scores[i] for i in tournament_indices]
         winner_idx = tournament_indices[np.argmax(tournament_fitness)]
         return winner_idx
-    
-    def optimize(self, target_freq: float, target_params: Dict[str, Dict],
+  
+    def optimize(self, target_freq, target_params: Dict[str, Dict],
                 population_size: int = None, generations: int = None,
                 mutation_rate: float = None, elite_size: int = None,
                 verbose: bool = True) -> Tuple[np.ndarray, Dict, float]:
@@ -498,6 +513,7 @@ class GeneticAlgorithm:
         
         # 进化循环
         for generation in tqdm(range(generations), desc="遗传演进", disable=not verbose):
+            current_mutation_rate = self.mutation_rate * (1.0 - generation / generations)
             # 计算适应度
             fitness_scores = []
             predictions_info = []
@@ -510,14 +526,12 @@ class GeneticAlgorithm:
             # 更新最佳个体
             current_best_idx = np.argmax(fitness_scores)
             current_best_fitness = fitness_scores[current_best_idx]
-            
+            print(f"当前代数: {generation}, 当前最佳适应度: {current_best_fitness:.4f}")
             if current_best_fitness > best_fitness:
                 best_fitness = current_best_fitness
                 best_matrix = population[current_best_idx].copy()
                 best_info = predictions_info[current_best_idx]
-            # print("矩阵形状：")
-            # print(best_matrix.shape)
-            # print(best_matrix)
+
             # 记录历史
             avg_fitness = np.mean(fitness_scores)
             fitness_history.append(avg_fitness)
@@ -543,7 +557,7 @@ class GeneticAlgorithm:
                     child = random.choice([parent1, parent2]).copy()
                 
                 # 变异
-                child = self.mutate(child, mutation_rate)
+                child = self.mutate(child, mutation_rate=current_mutation_rate)
                 
                 new_population.append(child)
             
@@ -555,13 +569,13 @@ class GeneticAlgorithm:
                       f"平均适应度 = {avg_fitness:.4f}, "
                       f"最佳适应度 = {best_fitness:.4f}")
                 
-                if best_info is not None:
-                    print(f"      S11 = {best_info['S11_mag_db']:.2f} dB, "
-                          f"S21 = {best_info['S21_mag_db']:.2f} dB, "
-                          f"密度 = {best_info['matrix_density']:.3f}")
-                    # print(f"s_params ={best_info['s_params']:.6f}")
-                    print(f"s_params =\n")
-                    print(best_info['s_params'])
+                # if best_info is not None:
+                #     # print(f"      S11 = {best_info['S11_mag_db']:.2f} dB, "
+                #     #       f"S21 = {best_info['S21_mag_db']:.2f} dB, "
+                #     #       f"密度 = {best_info['matrix_density']:.3f}")
+                #     # print(f"s_params ={best_info['s_params']:.6f}")
+                #     print(f"s_params =\n")
+                #     # print(best_info['multi_freq_predictions'][]['s_params'])
         
         # 输出最终结果
         print(f"\n{'='*60}")
@@ -569,20 +583,25 @@ class GeneticAlgorithm:
         print(f"{'='*60}")
         print(f"最佳适应度: {best_fitness:.4f}")
         
-        if best_info is not None:
-            print(f"\n最佳个体的S参数 (在 {target_freq} GHz):")
-            print(f"  |S11| = {best_info['S11_mag_db']:.2f} dB")
-            print(f"  |S21| = {best_info['S21_mag_db']:.2f} dB")
-            print(f"  |S12| = {best_info['S12_mag_db']:.2f} dB")
-            print(f"  |S22| = {best_info['S22_mag_db']:.2f} dB")
-            print(f"  S11相位 = {best_info['S11_phase_deg']:.1f}°")
-            print(f"  S21相位 = {best_info['S21_phase_deg']:.1f}°")
-            print(f"  矩阵密度 = {best_info['matrix_density']:.3f}")
+        # if best_info is not None:
+        #     print(f"\n最佳个体的S参数 (在 {target_freq} GHz):")
+        #     print(f"  |S11| = {best_info['S11_mag_db']:.2f} dB")
+        #     print(f"  |S21| = {best_info['S21_mag_db']:.2f} dB")
+        #     print(f"  |S12| = {best_info['S12_mag_db']:.2f} dB")
+        #     print(f"  |S22| = {best_info['S22_mag_db']:.2f} dB")
+        #     print(f"  S11相位 = {best_info['S11_phase_deg']:.1f}°")
+        #     print(f"  S21相位 = {best_info['S21_phase_deg']:.1f}°")
+        #     print(f"  矩阵密度 = {best_info['matrix_density']:.3f}")
         
         return best_matrix, best_info, best_fitness, fitness_history, best_fitness_history
     def visualize_results(self, best_matrix: np.ndarray, 
+                          best_info,
                          fitness_history: List[float], 
-                         best_fitness_history: List[float]):
+                         best_fitness_history: List[float],
+                         port_for_impedance='s22',
+                         output_dir:str = '.'):
+        # 确保目录存在
+        os.makedirs(output_dir, exist_ok=True)
         """可视化结果"""
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))
         
@@ -618,7 +637,7 @@ class GeneticAlgorithm:
                         fontsize=12, verticalalignment='center')
         
         plt.tight_layout()
-        plt.savefig('genetic_optimization_results.png', dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(output_dir, 'genetic_optimization_results.png'), dpi=300, bbox_inches='tight')
         # plt.show()
         
         # 单独保存最佳矩阵图像
@@ -626,6 +645,146 @@ class GeneticAlgorithm:
         plt.imshow(best_matrix, cmap='binary', interpolation='nearest')
         plt.title(f'Optimized Binary Matrix (Frequency: {self.target_freq} GHz)')
         plt.colorbar(label='Value (0/1)')
-        plt.savefig('optimized_matrix.png', dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(output_dir, 'optimized_matrix.png'), dpi=300, bbox_inches='tight')
         # plt.show()
         plt.close()
+        # ---------- 阻抗对比图（如果提供了CSV文件） ----------
+        if self.target_real_csv and self.target_imag_csv:
+            self._plot_impedance_comparison(best_info, port_for_impedance, output_dir=output_dir)
+
+        # # ---------- S21幅度图 ----------
+        # self._plot_s21_magnitude(best_info)
+    def _plot_impedance_comparison(self, best_info, port='s22', output_dir=None):
+        """
+
+        绘制预测阻抗与目标阻抗的实部/虚部对比图
+        """
+        import pandas as pd
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from scipy import interpolate
+
+        # 读取目标阻抗
+        df_real = pd.read_csv(self.target_real_csv, delimiter=',', header=0)
+        df_imag = pd.read_csv(self.target_imag_csv, delimiter=',', header=0)
+        freq_target_hz = df_real.iloc[:, 0].values
+        z_real_target = df_real.iloc[:, 1].values
+        z_imag_target = df_imag.iloc[:, 1].values
+
+        # 提取优化频点的预测S参数
+        preds = best_info['multi_freq_predictions']
+        freqs_pred_hz = np.array([p['freq'] for p in preds])
+        # 按频率排序（确保插值正确）
+        sort_idx = np.argsort(freqs_pred_hz)
+        freqs_pred_hz = freqs_pred_hz[sort_idx]
+        preds_sorted = [preds[i] for i in sort_idx]
+
+        # 计算预测阻抗（从指定端口的反射系数）
+        Z0 = 50.0
+        z_real_pred = []
+        z_imag_pred = []
+        for p in preds_sorted:
+            s = p['s_params']
+            # 根据 port 参数选择 S 参数
+            if port == 's11':
+                s_re = s['S11_real']
+                s_im = s['S11_imag']
+            elif port == 's22':
+                s_re = s['S22_real']
+                s_im = s['S22_imag']
+            else:
+                raise ValueError("port must be 's11' or 's22'")
+            S = s_re + 1j * s_im
+            Z = Z0 * (1 + S) / (1 - S) if abs(1 - S) > 1e-12 else complex(1e6, 0)
+            z_real_pred.append(Z.real)
+            z_imag_pred.append(-Z.imag)
+
+        z_real_pred = np.array(z_real_pred)
+        z_imag_pred = np.array(z_imag_pred)
+
+        # 创建画布
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+        # 绘制目标阻抗（连续曲线）
+        freq_target_ghz = freq_target_hz / 1e9
+        ax1.plot(freq_target_ghz, z_real_target, 'b-', label='Target Real(Z)', linewidth=2)
+        ax2.plot(freq_target_ghz, z_imag_target, 'b-', label='Target Imag(Z)', linewidth=2)
+
+        # 绘制预测阻抗离散点
+        freq_pred_ghz = freqs_pred_hz / 1e9
+        ax1.scatter(freq_pred_ghz, z_real_pred, c='red', marker='o', label='Predicted (discrete)', zorder=5)
+        ax2.scatter(freq_pred_ghz, z_imag_pred, c='red', marker='o', label='Predicted (discrete)', zorder=5)
+
+        # 对预测点进行插值（如果点数足够）
+        if len(freq_pred_ghz) >= 3:
+            # 实部插值
+            f_real = interpolate.interp1d(freq_pred_ghz, z_real_pred, kind='cubic',
+                                          fill_value='extrapolate')
+            # 虚部插值
+            f_imag = interpolate.interp1d(freq_pred_ghz, z_imag_pred, kind='cubic',
+                                          fill_value='extrapolate')
+            # 生成密集频率用于绘制平滑曲线（在优化频点范围内）
+            dense_freq = np.linspace(freq_pred_ghz.min(), freq_pred_ghz.max(), 200)
+            ax1.plot(dense_freq, f_real(dense_freq), 'r--', label='Predicted (interpolated)', alpha=0.7)
+            ax2.plot(dense_freq, f_imag(dense_freq), 'r--', label='Predicted (interpolated)', alpha=0.7)
+        else:
+            # 点数少则直接连线
+            ax1.plot(freq_pred_ghz, z_real_pred, 'r--', label='Predicted (linear)', alpha=0.7)
+            ax2.plot(freq_pred_ghz, z_imag_pred, 'r--', label='Predicted (linear)', alpha=0.7)
+
+        # 设置标签和图例
+        ax2.set_xlabel('Frequency (GHz)')
+        ax1.set_ylabel('Real(Z) (Ω)')
+        ax2.set_ylabel('Imag(Z) (Ω)')
+        ax1.legend(loc='best')
+        ax2.legend(loc='best')
+        ax1.grid(True, alpha=0.3)
+        ax2.grid(True, alpha=0.3)
+        ax1.set_title(f'Impedance Comparison (using {port})')
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, 'impedance_comparison.png'), dpi=300, bbox_inches='tight')
+        plt.close()
+        print("阻抗对比图已保存至 impedance_comparison.png")
+    def _plot_s21_magnitude(self, best_info, output_dir=None):
+        """
+        绘制 S21 幅度 (dB) 曲线
+        """
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from scipy import interpolate
+
+        preds = best_info['multi_freq_predictions']
+        freqs_hz = np.array([p['freq'] for p in preds])
+        sort_idx = np.argsort(freqs_hz)
+        freqs_hz = freqs_hz[sort_idx]
+        preds_sorted = [preds[i] for i in sort_idx]
+
+        s21_mag_db = []
+        for p in preds_sorted:
+            s = p['s_params']
+            mag = np.sqrt(s['S21_real']**2 + s['S21_imag']**2)
+            mag_db = 20 * np.log10(mag + 1e-12)
+            s21_mag_db.append(mag_db)
+
+        freqs_ghz = freqs_hz / 1e9
+        plt.figure(figsize=(8, 5))
+        # 绘制离散点
+        plt.scatter(freqs_ghz, s21_mag_db, c='green', marker='s', label='Predicted (discrete)', zorder=5)
+        # 绘制插值曲线
+        if len(freqs_ghz) >= 3:
+            f = interpolate.interp1d(freqs_ghz, s21_mag_db, kind='cubic', fill_value='extrapolate')
+            dense_freq = np.linspace(freqs_ghz.min(), freqs_ghz.max(), 200)
+            plt.plot(dense_freq, f(dense_freq), 'g-', label='S21 (interpolated)')
+        else:
+            plt.plot(freqs_ghz, s21_mag_db, 'g-', label='S21 (linear)')
+
+        plt.xlabel('Frequency (GHz)')
+        plt.ylabel('|S21| (dB)')
+        plt.title('S21 Magnitude of Optimized Structure')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig('s21_magnitude.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        print("S21幅度图已保存至 s21_magnitude.png")
